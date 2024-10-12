@@ -1,3 +1,5 @@
+import 'package:asesmen_paud/api/base_response.dart';
+import 'package:asesmen_paud/api/login_payload.dart';
 import 'package:flutter/material.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
 
@@ -14,10 +16,17 @@ class LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService();
 
   String _message = '';
+  bool _passwordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordVisible = false;
+  }
 
   void _login() async {
     try {
-      final response = await _authService.login(
+      final BaseResponse<LoginPayload> response = await _authService.login(
           _emailController.text, _passwordController.text);
 
       if (response.status == 'success') {
@@ -48,17 +57,40 @@ class LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(
               height: 20,
             ),
-            ElevatedButton(onPressed: _login, child: const Text('Login')),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      },
+                      icon: Icon(_passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off))),
+              obscureText: _passwordVisible,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+              onPressed: _login,
+              style: ElevatedButton.styleFrom(
+                fixedSize: const Size(200, 40),
+              ),
+              child: const Text('Login'),
+            ),
             const SizedBox(
               height: 20,
             ),
