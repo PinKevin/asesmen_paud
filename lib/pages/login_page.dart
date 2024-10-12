@@ -1,4 +1,5 @@
-import 'package:asesmen_paud/api/base_response.dart';
+import 'package:asesmen_paud/api/exception.dart';
+import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/login_payload.dart';
 import 'package:flutter/material.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
@@ -26,21 +27,19 @@ class LoginPageState extends State<LoginPage> {
 
   void _login() async {
     try {
-      final BaseResponse<LoginPayload> response = await _authService.login(
+      final SuccessResponse<LoginPayload> response = await _authService.login(
           _emailController.text, _passwordController.text);
 
-      if (response.status == 'success') {
-        setState(() {
-          _message = 'Login success! Token: ${response.payload.token}';
-        });
-      } else {
-        setState(() {
-          _message = 'Login failed! ${response.message}';
-        });
-      }
+      setState(() {
+        _message = 'Login success! Token: ${response.payload.token}';
+      });
+    } on ValidationException catch (e) {
+      setState(() {
+        _message = 'Validaton error: $e';
+      });
     } catch (e) {
       setState(() {
-        _message = 'Error: $e';
+        _message = e.toString();
       });
     }
   }
@@ -77,9 +76,9 @@ class LoginPageState extends State<LoginPage> {
                         });
                       },
                       icon: Icon(_passwordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off))),
-              obscureText: _passwordVisible,
+                          ? Icons.visibility_off
+                          : Icons.visibility))),
+              obscureText: !_passwordVisible,
             ),
             const SizedBox(
               height: 20,
