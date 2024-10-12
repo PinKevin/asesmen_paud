@@ -24,10 +24,12 @@ class AuthService {
           jsonResponse, (json) => LoginPayload.fromJson(json));
     } else if (response.statusCode == 422) {
       final failResponse = FailResponse.fromJson(jsonResponse);
-      throw ValidationException(
-          failResponse.errors?.map((e) => e.message).join(", ") ??
-              failResponse.message);
+      throw ValidationException(failResponse.errors ?? {});
       // throw Exception('422 bang');
+    } else if (response.statusCode == 400) {
+      String message =
+          jsonResponse['message'] ?? 'Email atau password salah, tapi literal';
+      throw BadRequestException(message);
     } else {
       throw Exception(
           'Failed to login. Status code: ${response.statusCode}. Error: ${response.body}');

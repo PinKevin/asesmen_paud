@@ -43,18 +43,21 @@ class SuccessResponse<T> {
 class FailResponse {
   final String status;
   final String message;
-  final List<ValidationErrorResponse>? errors;
+  final Map<String, ValidationErrorResponse>? errors;
 
   FailResponse({required this.status, required this.message, this.errors});
 
   factory FailResponse.fromJson(Map<String, dynamic> json) {
     return FailResponse(
-      status: json['status'],
-      message: json['messaage'],
+      status: json['status'] ?? 'fail',
+      message: json['messaage'] ?? 'Unknown error',
       errors: json.containsKey('errors')
           ? (json['errors'] as List)
-              .map((error) => ValidationErrorResponse.fromJson(error))
-              .toList()
+              .fold<Map<String, ValidationErrorResponse>>({}, (acc, error) {
+              final validatonError = ValidationErrorResponse.fromJson(error);
+              acc[validatonError.field] = validatonError;
+              return acc;
+            })
           : null,
     );
   }
@@ -73,6 +76,8 @@ class ValidationErrorResponse {
 
   factory ValidationErrorResponse.fromJson(Map<String, dynamic> json) {
     return ValidationErrorResponse(
-        message: json['message'], rule: json['rule'], field: json['field']);
+        message: json['message'] ?? 'No message',
+        rule: json['rule'] ?? 'No rule',
+        field: json['field'] ?? 'No field');
   }
 }

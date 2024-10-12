@@ -19,6 +19,10 @@ class LoginPageState extends State<LoginPage> {
   String _message = '';
   bool _passwordVisible = false;
 
+  String _errorMessage = '';
+  String? _emailError;
+  String? _passwordError;
+
   @override
   void initState() {
     super.initState();
@@ -27,20 +31,42 @@ class LoginPageState extends State<LoginPage> {
 
   void _login() async {
     try {
+      setState(() {
+        _message = '';
+        _emailError = null;
+        _passwordError = null;
+        _errorMessage = '';
+      });
+
       final SuccessResponse<LoginPayload> response = await _authService.login(
           _emailController.text, _passwordController.text);
 
-      setState(() {
-        _message = 'Login success! Token: ${response.payload.token}';
-      });
-    } on ValidationException catch (e) {
-      setState(() {
-        _message = 'Validaton error: $e';
-      });
+      if (response.status == 'success') {
+        setState(() {
+          _message = 'Login success! Token: ${response.payload.token}';
+          _errorMessage = '';
+          _emailError = null;
+          _passwordError = null;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _message = e.toString();
-      });
+      if (e is ValidationException) {
+        setState(() {
+          _emailError = e.errors['email']?.message ?? '';
+          _passwordError = e.errors['password']?.message ?? '';
+          _message = '';
+        });
+      } else if (e is BadRequestException) {
+        setState(() {
+          _message = '';
+          _errorMessage = e.message;
+        });
+      } else {
+        setState(() {
+          _message = '';
+          _errorMessage = e.toString();
+        });
+      }
     }
   }
 
@@ -56,10 +82,12 @@ class LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
+              decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: const OutlineInputBorder(),
+                  errorText: _emailError,
+                  errorBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.red))),
             ),
             const SizedBox(
               height: 20,
@@ -69,6 +97,9 @@ class LoginPageState extends State<LoginPage> {
               decoration: InputDecoration(
                   labelText: 'Password',
                   border: const OutlineInputBorder(),
+                  errorText: _passwordError,
+                  errorBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.red)),
                   suffixIcon: IconButton(
                       onPressed: () {
                         setState(() {
@@ -81,19 +112,30 @@ class LoginPageState extends State<LoginPage> {
               obscureText: !_passwordVisible,
             ),
             const SizedBox(
-              height: 20,
+              height: 10,
+            ),
+            if (_errorMessage.isNotEmpty)
+              Text(_errorMessage, style: const TextStyle(color: Colors.red)),
+            Text(
+              _message,
+            ),
+            const SizedBox(
+              height: 10,
             ),
             ElevatedButton(
               onPressed: _login,
               style: ElevatedButton.styleFrom(
-                fixedSize: const Size(200, 40),
+                  fixedSize: const Size(200, 40),
+                  backgroundColor: Colors.deepPurple),
+              child: const Text(
+                'Login',
+                style: TextStyle(fontSize: 16, color: Colors.white),
               ),
-              child: const Text('Login'),
             ),
             const SizedBox(
               height: 20,
             ),
-            Text(_message),
+            // Text(_message),
           ],
         ),
       ),
