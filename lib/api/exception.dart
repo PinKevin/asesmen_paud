@@ -6,10 +6,10 @@ class ValidationException implements Exception {
   ValidationException(this.errors);
 }
 
-class BadRequestException implements Exception {
+class ErrorException implements Exception {
   final String message;
 
-  BadRequestException(this.message);
+  ErrorException(this.message);
 
   @override
   String toString() => message;

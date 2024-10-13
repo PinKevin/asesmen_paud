@@ -8,12 +8,13 @@ class ApiResponse<T> {
 
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,
-    T Function(dynamic) fromJsonT,
+    T Function(dynamic)? fromJsonT,
   ) {
     if (json['status'] == 'success') {
       return ApiResponse(
-        success: SuccessResponse.fromJson(json, fromJsonT),
-      );
+          success: fromJsonT != null
+              ? SuccessResponse.fromJson(json, fromJsonT)
+              : SuccessResponse.fromJsonWithoutPayload(json));
     } else {
       return ApiResponse(fail: FailResponse.fromJson(json));
     }
@@ -23,20 +24,29 @@ class ApiResponse<T> {
 class SuccessResponse<T> {
   final String status;
   final String message;
-  final T payload;
+  final T? payload;
 
   SuccessResponse({
     required this.status,
     required this.message,
-    required this.payload,
+    this.payload,
   });
 
   factory SuccessResponse.fromJson(
-      Map<String, dynamic> json, T Function(dynamic) fromJsonT) {
+      Map<String, dynamic> json, T Function(dynamic)? fromJsonT) {
     return SuccessResponse(
-        status: json['status'],
-        message: json['message'],
-        payload: fromJsonT(json['payload']));
+        status: json['status'] as String,
+        message: json['message'] as String,
+        payload: json.containsKey('payload') && fromJsonT != null
+            ? fromJsonT(json['payload'])
+            : null);
+  }
+
+  factory SuccessResponse.fromJsonWithoutPayload(Map<String, dynamic> json) {
+    return SuccessResponse(
+        status: json['status'] as String,
+        message: json['message'] as String,
+        payload: null);
   }
 }
 

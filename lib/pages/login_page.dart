@@ -19,6 +19,7 @@ class LoginPageState extends State<LoginPage> {
 
   bool _passwordVisible = false;
 
+  bool isLoading = false;
   String _errorMessage = '';
   String? _emailError;
   String? _passwordError;
@@ -31,6 +32,8 @@ class LoginPageState extends State<LoginPage> {
 
   void _login() async {
     try {
+      isLoading = true;
+
       setState(() {
         _emailError = null;
         _passwordError = null;
@@ -43,7 +46,7 @@ class LoginPageState extends State<LoginPage> {
       if (response.status == 'success') {
         if (!mounted) return;
 
-        AuthService.saveToken(response.payload.token);
+        AuthService.saveToken(response.payload!.token);
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => const DashboardPage()));
       }
@@ -53,7 +56,7 @@ class LoginPageState extends State<LoginPage> {
           _emailError = e.errors['email']?.message ?? '';
           _passwordError = e.errors['password']?.message ?? '';
         });
-      } else if (e is BadRequestException) {
+      } else if (e is ErrorException) {
         setState(() {
           _errorMessage = e.message;
         });
@@ -62,6 +65,8 @@ class LoginPageState extends State<LoginPage> {
           _errorMessage = e.toString();
         });
       }
+    } finally {
+      isLoading = false;
     }
   }
 
@@ -119,10 +124,21 @@ class LoginPageState extends State<LoginPage> {
               style: ElevatedButton.styleFrom(
                   fixedSize: const Size(200, 40),
                   backgroundColor: Colors.deepPurple),
-              child: const Text(
-                'Login',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
+              child: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    )
+                  : const Text(
+                      'Login',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
             ),
             const SizedBox(
               height: 20,

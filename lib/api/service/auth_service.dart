@@ -28,14 +28,36 @@ class AuthService {
     } else if (response.statusCode == 422) {
       final failResponse = FailResponse.fromJson(jsonResponse);
       throw ValidationException(failResponse.errors ?? {});
-      // throw Exception('422 bang');
     } else if (response.statusCode == 400) {
-      String message =
-          jsonResponse['message'] ?? 'Email atau password salah, tapi literal';
-      throw BadRequestException(message);
+      String message = jsonResponse['message'] ?? 'Terjadi error saat sign in';
+      throw ErrorException(message);
     } else {
       throw Exception(
           'Failed to login. Status code: ${response.statusCode}. Error: ${response.body}');
+    }
+  }
+
+  Future<SuccessResponse<ApiResponse>> logout() async {
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('Tidak ada token');
+    }
+
+    final url = Uri.parse('$baseUrl/sign-out');
+    final response = await http.post(url, headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json'
+    });
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      await clearToken();
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => ApiResponse.fromJson(json, null));
+    } else {
+      String message = jsonResponse['message'] ?? 'Terjadi error sign out';
+      throw ErrorException(message);
     }
   }
 
