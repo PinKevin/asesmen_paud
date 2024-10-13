@@ -1,6 +1,7 @@
 import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/login_payload.dart';
+import 'package:asesmen_paud/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
 
@@ -16,7 +17,6 @@ class LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
-  String _message = '';
   bool _passwordVisible = false;
 
   String _errorMessage = '';
@@ -32,7 +32,6 @@ class LoginPageState extends State<LoginPage> {
   void _login() async {
     try {
       setState(() {
-        _message = '';
         _emailError = null;
         _passwordError = null;
         _errorMessage = '';
@@ -42,28 +41,24 @@ class LoginPageState extends State<LoginPage> {
           _emailController.text, _passwordController.text);
 
       if (response.status == 'success') {
-        setState(() {
-          _message = 'Login success! Token: ${response.payload.token}';
-          _errorMessage = '';
-          _emailError = null;
-          _passwordError = null;
-        });
+        if (!mounted) return;
+
+        AuthService.saveToken(response.payload.token);
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const DashboardPage()));
       }
     } catch (e) {
       if (e is ValidationException) {
         setState(() {
           _emailError = e.errors['email']?.message ?? '';
           _passwordError = e.errors['password']?.message ?? '';
-          _message = '';
         });
       } else if (e is BadRequestException) {
         setState(() {
-          _message = '';
           _errorMessage = e.message;
         });
       } else {
         setState(() {
-          _message = '';
           _errorMessage = e.toString();
         });
       }
@@ -116,9 +111,6 @@ class LoginPageState extends State<LoginPage> {
             ),
             if (_errorMessage.isNotEmpty)
               Text(_errorMessage, style: const TextStyle(color: Colors.red)),
-            Text(
-              _message,
-            ),
             const SizedBox(
               height: 10,
             ),
@@ -135,7 +127,6 @@ class LoginPageState extends State<LoginPage> {
             const SizedBox(
               height: 20,
             ),
-            // Text(_message),
           ],
         ),
       ),
