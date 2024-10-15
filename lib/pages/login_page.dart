@@ -1,7 +1,6 @@
 import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/login_payload.dart';
-import 'package:asesmen_paud/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
 
@@ -47,8 +46,7 @@ class LoginPageState extends State<LoginPage> {
         if (!mounted) return;
 
         AuthService.saveToken(response.payload!.token);
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const DashboardPage()));
+        Navigator.pushReplacementNamed(context, '/dashboard');
       }
     } catch (e) {
       if (e is ValidationException) {

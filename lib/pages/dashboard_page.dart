@@ -1,5 +1,4 @@
 import 'package:asesmen_paud/api/service/auth_service.dart';
-import 'package:asesmen_paud/pages/login_page.dart';
 import 'package:flutter/material.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -23,10 +22,7 @@ class DashboardPageState extends State<DashboardPage> {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Anda berhasil sign out')));
 
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (route) => false);
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Failed to logout: $e')));
@@ -35,24 +31,56 @@ class DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  void _goToAnecdotsMenu() {
+    Navigator.pushNamed(context, '/anecdotals');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        actions: [
-          IconButton(
-              onPressed: _logout,
-              icon: isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : const Icon(Icons.logout))
-        ],
-      ),
-      body: const Center(
-        child: Text('Welcome'),
-      ),
-    );
+        appBar: AppBar(
+          title: const Text('Dashboard'),
+          actions: [
+            IconButton(
+                onPressed: _logout,
+                icon: isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : const Icon(Icons.logout))
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Column(
+                // mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    onPressed: _goToAnecdotsMenu,
+                    style: ElevatedButton.styleFrom(
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(20),
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  const Text(
+                    'Anekdot',
+                    style: TextStyle(fontSize: 16),
+                  )
+                ],
+              )
+            ],
+          ),
+        ));
   }
 }

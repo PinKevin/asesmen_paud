@@ -1,4 +1,5 @@
 import 'package:asesmen_paud/api/service/auth_service.dart';
+import 'package:asesmen_paud/pages/anecdotals_page.dart';
 import 'package:asesmen_paud/pages/dashboard_page.dart';
 import 'package:asesmen_paud/pages/login_page.dart';
 import 'package:flutter/material.dart';
@@ -27,63 +28,29 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: FutureBuilder<bool>(
-          future: _checkToken(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            }
+      initialRoute: '/',
+      routes: {
+        '/': (context) => FutureBuilder<bool>(
+            future: _checkToken(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
 
-            if (snapshot.hasData && snapshot.data == true) {
-              return const DashboardPage();
-            } else {
-              return const LoginPage();
-            }
-          }),
+              if (snapshot.hasData && snapshot.data == true) {
+                return const DashboardPage();
+              } else {
+                return const LoginPage();
+              }
+            }),
+        '/dashboard': (context) => const DashboardPage(),
+        '/login': (context) => const LoginPage(),
+        '/anecdotals': (context) => const AnecdotalsPage()
+      },
     );
   }
 }
-
-// class MyAppState extends State<MyApp> {
-//   @override
-//   void initState() {
-//     super.initState();
-//     _checkTokenAndNavigate();
-//   }
-
-//   Future<void> _checkTokenAndNavigate() async {
-//     final token = await AuthService.getToken();
-
-//     if (token != null) {
-//       final isValidToken = await AuthService.checkToken(token);
-//       if (isValidToken) {
-//         if (!mounted) return;
-//         Navigator.pushReplacement(context,
-//             MaterialPageRoute(builder: (context) => const DashboardPage()));
-//       } else {
-//         if (!mounted) return;
-//         Navigator.pushReplacement(context,
-//             MaterialPageRoute(builder: (context) => const LoginPage()));
-//       }
-//     } else {
-//       if (!mounted) return;
-//       Navigator.pushReplacement(
-//           context, MaterialPageRoute(builder: (context) => const LoginPage()));
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const MaterialApp(
-//       home: Scaffold(
-//         body: Center(
-//           child: Text('Ikan'),
-//         ),
-//       ),
-//     );
-//   }
-// }
