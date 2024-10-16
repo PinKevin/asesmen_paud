@@ -48,6 +48,18 @@ class StudentsPageState extends State<StudentsPage> {
                       return Center(
                         child: Text('Error: ${snapshot.error}'),
                       );
+                    } else if (snapshot.data!.payload!.data.isEmpty) {
+                      return const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Belum ada murid'),
+                            Text(
+                              'Coba hubungi admin',
+                            )
+                          ],
+                        ),
+                      );
                     } else if (snapshot.hasData && snapshot.data != null) {
                       final students = snapshot.data!.payload!.data;
                       return StudentsList(

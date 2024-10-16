@@ -43,13 +43,28 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
                     return Center(
                       child: Text('Error: ${snapshot.error}'),
                     );
+                  } else if (snapshot.data!.payload!.data.isEmpty) {
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('Belum ada penilaian anekdot'),
+                          Text(
+                            'Buat baru dengan menekan tombol kanan bawah',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.deepPurple),
+                          )
+                        ],
+                      ),
+                    );
                   } else if (snapshot.hasData && snapshot.data != null) {
                     final anecdotals = snapshot.data!.payload!.data;
                     return AnecdotalList(
                         anecdotals: anecdotals, onAnecdotalTap: (anecdot) {});
                   } else {
                     return const Center(
-                      child: Text('No anecdot'),
+                      child: Text('Belum ada penilaian anekdot. Buat baru'),
                     );
                   }
                 },
