@@ -1,4 +1,5 @@
 import 'package:asesmen_paud/widget/anecdotal/anecdotal_field.dart';
+import 'package:asesmen_paud/widget/learning_goals_section.dart';
 import 'package:flutter/material.dart';
 
 class CreateAnecdotalPage extends StatefulWidget {
@@ -11,6 +12,7 @@ class CreateAnecdotalPage extends StatefulWidget {
 class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
+  List<int> learningGoals = [];
 
   String? _descriptionError;
   String? _feedbackError;
@@ -41,6 +43,12 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
               const SizedBox(
                 height: 20,
               ),
+              // LearningGoalsSection(
+              //     learningGoals: learningGoals,
+              //     onAddLearningGoal: (selectedGoal) {
+              //       learningGoals.add(selectedGoal);
+              //     }),
+              ElevatedButton(onPressed: () {}, child: const Text('Tes')),
               Text('$studentId')
             ],
           ),

@@ -21,4 +21,6 @@ class LearningGoalPayload {
       updatedAt: json['updatedAt'],
     );
   }
+
+  String? get goalName => null;
 }
