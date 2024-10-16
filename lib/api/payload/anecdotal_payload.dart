@@ -1,14 +1,14 @@
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/payload/paginate_meta_payload.dart';
 
-class PaginateAnecdotalPayload {
+class PaginateAnecdotalsPayload {
   final PaginateMetaPayload meta;
   final List<AnecdotalPayload> data;
 
-  PaginateAnecdotalPayload({required this.meta, required this.data});
+  PaginateAnecdotalsPayload({required this.meta, required this.data});
 
-  factory PaginateAnecdotalPayload.fromJson(Map<String, dynamic> json) {
-    return PaginateAnecdotalPayload(
+  factory PaginateAnecdotalsPayload.fromJson(Map<String, dynamic> json) {
+    return PaginateAnecdotalsPayload(
         meta:
             PaginateMetaPayload.fromJson(json['meta'] as Map<String, dynamic>),
         data: (json['data'] as List)
@@ -46,6 +46,8 @@ class AnecdotalPayload {
         description: json['description'],
         feedback: json['feedback'],
         studentId: json['studentId'],
+        createdAt: json['createdAt'],
+        updatedAt: json['updatedAt'],
         learningGoals: (json['learningGoals'] as List)
             .map((learningGoal) => LearningGoalPayload.fromJson(
                 learningGoal as Map<String, dynamic>))

@@ -69,4 +69,10 @@ class StudentsPageState extends State<StudentsPage> {
           ),
         ));
   }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 }
