@@ -13,6 +13,7 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final int studentId = ModalRoute.of(context)!.settings.arguments as int;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Anekdot'),
@@ -20,7 +21,10 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          children: [SearchField(controller: _searchController)],
+          children: [
+            SearchField(controller: _searchController),
+            Text('Student ID: $studentId')
+          ],
         ),
       ),
     );

@@ -50,7 +50,13 @@ class StudentsPageState extends State<StudentsPage> {
                       );
                     } else if (snapshot.hasData && snapshot.data != null) {
                       final students = snapshot.data!.payload!.data;
-                      return StudentsList(students: students);
+                      return StudentsList(
+                        students: students,
+                        onStudentTap: (student) {
+                          Navigator.pushNamed(context, '/anecdotals',
+                              arguments: student.id);
+                        },
+                      );
                     } else {
                       return const Center(
                         child: Text('No student'),

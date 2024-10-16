@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 
 class StudentsList extends StatelessWidget {
   final List<StudentPayload> students;
+  final Function(StudentPayload) onStudentTap;
 
-  const StudentsList({super.key, required this.students});
+  const StudentsList(
+      {super.key, required this.students, required this.onStudentTap});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Flexible(
+        Expanded(
             child: ListView.builder(
                 itemCount: students.length,
                 itemBuilder: (context, index) {
@@ -24,7 +26,7 @@ class StudentsList extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             )),
-                        onPressed: () {},
+                        onPressed: () => onStudentTap(student),
                         child: Card(
                           margin: EdgeInsets.zero,
                           color: Colors.transparent,
