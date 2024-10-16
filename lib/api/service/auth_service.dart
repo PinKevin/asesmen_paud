@@ -4,7 +4,7 @@ import 'package:asesmen_paud/api/base_url.dart';
 import 'package:asesmen_paud/api/exception.dart';
 import 'package:http/http.dart' as http;
 import 'package:asesmen_paud/api/response.dart';
-import 'package:asesmen_paud/api/login_payload.dart';
+import 'package:asesmen_paud/api/payload/login_payload.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {

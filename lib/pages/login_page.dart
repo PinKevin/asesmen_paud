@@ -1,6 +1,6 @@
 import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/response.dart';
-import 'package:asesmen_paud/api/login_payload.dart';
+import 'package:asesmen_paud/api/payload/login_payload.dart';
 import 'package:flutter/material.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
 
