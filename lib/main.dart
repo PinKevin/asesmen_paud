@@ -2,6 +2,7 @@ import 'package:asesmen_paud/api/service/auth_service.dart';
 import 'package:asesmen_paud/pages/anecdotals_page.dart';
 import 'package:asesmen_paud/pages/dashboard_page.dart';
 import 'package:asesmen_paud/pages/login_page.dart';
+import 'package:asesmen_paud/pages/students_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
             }),
         '/dashboard': (context) => const DashboardPage(),
         '/login': (context) => const LoginPage(),
+        '/students': (context) => const StudentsPage(),
         '/anecdotals': (context) => const AnecdotalsPage()
       },
     );

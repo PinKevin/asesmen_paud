@@ -22,15 +22,15 @@ class PaginateMetaPayload {
 
   factory PaginateMetaPayload.fromJson(Map<String, dynamic> json) {
     return PaginateMetaPayload(
-      total: json['total'],
-      perPage: json['perPage'],
-      lastPage: json['lastPage'],
-      currentPage: json['currentPage'],
-      firstPage: json['firstPage'],
-      firstPageUrl: json['firstPageUrl'],
-      lastPageUrl: json['lastPageUrl'],
-      nextPageUrl: json['nextPageUrl'],
-      previousPageUrl: json['previousPageUrl'],
+      total: json['total'] as int,
+      perPage: json['perPage'] as int,
+      currentPage: json['currentPage'] as int,
+      lastPage: json['lastPage'] as int,
+      firstPage: json['firstPage'] as int,
+      firstPageUrl: json['firstPageUrl'] as String,
+      lastPageUrl: json['lastPageUrl'] as String,
+      nextPageUrl: json['nextPageUrl'] as String?,
+      previousPageUrl: json['previousPageUrl'] as String?,
     );
   }
 }

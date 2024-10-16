@@ -31,8 +31,8 @@ class DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  void _goToAnecdotsMenu() {
-    Navigator.pushNamed(context, '/anecdotals');
+  void _goToAnecdotStudentsMenu() {
+    Navigator.pushNamed(context, '/students');
   }
 
   @override
@@ -58,7 +58,7 @@ class DashboardPageState extends State<DashboardPage> {
                 // mainAxisSize: MainAxisSize.min,
                 children: [
                   ElevatedButton(
-                    onPressed: _goToAnecdotsMenu,
+                    onPressed: _goToAnecdotStudentsMenu,
                     style: ElevatedButton.styleFrom(
                       shape: const CircleBorder(),
                       padding: const EdgeInsets.all(20),
