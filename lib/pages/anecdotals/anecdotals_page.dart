@@ -1,7 +1,7 @@
 import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/anecdotal_service.dart';
-import 'package:asesmen_paud/widget/anecdotal_list.dart';
+import 'package:asesmen_paud/widget/anecdotal/anecdotal_list.dart';
 import 'package:asesmen_paud/widget/search_field.dart';
 import 'package:flutter/material.dart';
 
@@ -74,7 +74,10 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, '/create-anecdotal',
+              arguments: studentId);
+        },
         child: const Icon(Icons.add),
       ),
     );
