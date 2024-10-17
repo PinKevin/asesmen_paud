@@ -32,7 +32,7 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
               height: 20,
             ),
             Expanded(
-              child: FutureBuilder<SuccessResponse<PaginateAnecdotalsPayload>>(
+              child: FutureBuilder<SuccessResponse<AnecdotalsPaginated>>(
                 future: AnecdotalService().getAllStudentAnecdotals(studentId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {

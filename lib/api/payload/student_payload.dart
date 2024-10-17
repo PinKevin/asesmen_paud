@@ -1,15 +1,14 @@
 import 'package:asesmen_paud/api/payload/paginate_meta_payload.dart';
 
-class PaginateStudentsPayload {
-  final PaginateMetaPayload meta;
+class StudentsPaginated {
+  final PaginationMeta meta;
   final List<StudentPayload> data;
 
-  PaginateStudentsPayload({required this.meta, required this.data});
+  StudentsPaginated({required this.meta, required this.data});
 
-  factory PaginateStudentsPayload.fromJson(Map<String, dynamic> json) {
-    return PaginateStudentsPayload(
-        meta:
-            PaginateMetaPayload.fromJson(json['meta'] as Map<String, dynamic>),
+  factory StudentsPaginated.fromJson(Map<String, dynamic> json) {
+    return StudentsPaginated(
+        meta: PaginationMeta.fromJson(json['meta'] as Map<String, dynamic>),
         data: (json['data'] as List)
             .map((student) =>
                 StudentPayload.fromJson(student as Map<String, dynamic>))

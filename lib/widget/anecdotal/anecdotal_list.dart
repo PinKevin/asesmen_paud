@@ -3,8 +3,8 @@ import 'package:asesmen_paud/helper/datetime_converter.dart';
 import 'package:flutter/material.dart';
 
 class AnecdotalList extends StatelessWidget {
-  final List<AnecdotalPayload> anecdotals;
-  final Function(AnecdotalPayload) onAnecdotalTap;
+  final List<Anecdotal> anecdotals;
+  final Function(Anecdotal) onAnecdotalTap;
 
   const AnecdotalList(
       {super.key, required this.anecdotals, required this.onAnecdotalTap});

@@ -15,15 +15,15 @@ class LearningGoalsPage extends StatefulWidget {
 }
 
 class LearningGoalsPageState extends State<LearningGoalsPage> {
-  CompetencyPayload? selectedCompetency;
-  LearningScopePayload? selectedLearningScope;
-  SubLearningScopePayload? selectedSubLearningScope;
-  LearningGoalPayload? selectedLearningGoal;
+  Competency? selectedCompetency;
+  LearningScope? selectedLearningScope;
+  SubLearningScope? selectedSubLearningScope;
+  LearningGoal? selectedLearningGoal;
 
-  List<CompetencyPayload> competencies = [];
-  List<LearningScopePayload> learningScopes = [];
-  List<SubLearningScopePayload> subLearningScopes = [];
-  List<LearningGoalPayload> learningGoals = [];
+  List<Competency> competencies = [];
+  List<LearningScope> learningScopes = [];
+  List<SubLearningScope> subLearningScopes = [];
+  List<LearningGoal> learningGoals = [];
 
   @override
   void initState() {

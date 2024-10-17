@@ -14,7 +14,7 @@ class StudentsPage extends StatefulWidget {
 
 class StudentsPageState extends State<StudentsPage> {
   final TextEditingController _searchController = TextEditingController();
-  late Future<SuccessResponse<PaginateStudentsPayload>> _studentsFuture;
+  late Future<SuccessResponse<StudentsPaginated>> _studentsFuture;
 
   @override
   void initState() {
@@ -37,7 +37,7 @@ class StudentsPageState extends State<StudentsPage> {
                 height: 20,
               ),
               Expanded(
-                child: FutureBuilder<SuccessResponse<PaginateStudentsPayload>>(
+                child: FutureBuilder<SuccessResponse<StudentsPaginated>>(
                   future: _studentsFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {

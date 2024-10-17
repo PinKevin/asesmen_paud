@@ -1,19 +1,19 @@
-class SubLearningScopePayload {
+class SubLearningScope {
   final int id;
   final String subLearningScopeName;
   final int learningScopeId;
   final String? createdAt;
   final String? updatedAt;
 
-  SubLearningScopePayload(
+  SubLearningScope(
       {required this.id,
       required this.subLearningScopeName,
       required this.learningScopeId,
       this.createdAt,
       this.updatedAt});
 
-  factory SubLearningScopePayload.fromJson(Map<String, dynamic> json) {
-    return SubLearningScopePayload(
+  factory SubLearningScope.fromJson(Map<String, dynamic> json) {
+    return SubLearningScope(
       id: json['id'],
       subLearningScopeName: json['subLearningScopeName'],
       learningScopeId: json['learningScopeId'],

@@ -10,8 +10,7 @@ import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
 
 class LearningService {
-  static Future<SuccessResponse<List<CompetencyPayload>>>
-      getAllCompetencies() async {
+  static Future<SuccessResponse<List<Competency>>> getAllCompetencies() async {
     final url = Uri.parse('$baseUrl/competencies');
     final authToken = await AuthService.getToken();
     final response = await http.get(url, headers: {
@@ -22,12 +21,11 @@ class LearningService {
 
     if (response.statusCode == 200) {
       if (jsonResponse['payload'] is List) {
-        final List<CompetencyPayload> competencies =
-            (jsonResponse['payload'] as List)
-                .map((item) => CompetencyPayload.fromJson(item))
-                .toList();
+        final List<Competency> competencies = (jsonResponse['payload'] as List)
+            .map((item) => Competency.fromJson(item))
+            .toList();
 
-        return SuccessResponse<List<CompetencyPayload>>(
+        return SuccessResponse<List<Competency>>(
           status: jsonResponse['status'],
           message: jsonResponse['message'],
           payload: competencies,
@@ -40,8 +38,8 @@ class LearningService {
     }
   }
 
-  static Future<SuccessResponse<List<LearningScopePayload>>>
-      getAllLearningScopes(int competencyId) async {
+  static Future<SuccessResponse<List<LearningScope>>> getAllLearningScopes(
+      int competencyId) async {
     final url = Uri.parse('$baseUrl/learning-scopes/$competencyId');
     final authToken = await AuthService.getToken();
     final response = await http.get(url, headers: {
@@ -52,12 +50,12 @@ class LearningService {
 
     if (response.statusCode == 200) {
       if (jsonResponse['payload'] is List) {
-        final List<LearningScopePayload> competencies =
+        final List<LearningScope> competencies =
             (jsonResponse['payload'] as List)
-                .map((item) => LearningScopePayload.fromJson(item))
+                .map((item) => LearningScope.fromJson(item))
                 .toList();
 
-        return SuccessResponse<List<LearningScopePayload>>(
+        return SuccessResponse<List<LearningScope>>(
           status: jsonResponse['status'],
           message: jsonResponse['message'],
           payload: competencies,
@@ -70,7 +68,7 @@ class LearningService {
     }
   }
 
-  static Future<SuccessResponse<List<SubLearningScopePayload>>>
+  static Future<SuccessResponse<List<SubLearningScope>>>
       getAllSubLearningScopes(int learningScopeId) async {
     final url = Uri.parse('$baseUrl/sub-learning-scopes/$learningScopeId');
     final authToken = await AuthService.getToken();
@@ -82,12 +80,12 @@ class LearningService {
 
     if (response.statusCode == 200) {
       if (jsonResponse['payload'] is List) {
-        final List<SubLearningScopePayload> competencies =
+        final List<SubLearningScope> competencies =
             (jsonResponse['payload'] as List)
-                .map((item) => SubLearningScopePayload.fromJson(item))
+                .map((item) => SubLearningScope.fromJson(item))
                 .toList();
 
-        return SuccessResponse<List<SubLearningScopePayload>>(
+        return SuccessResponse<List<SubLearningScope>>(
           status: jsonResponse['status'],
           message: jsonResponse['message'],
           payload: competencies,
@@ -100,7 +98,7 @@ class LearningService {
     }
   }
 
-  static Future<SuccessResponse<List<LearningGoalPayload>>> getAllLearningGoals(
+  static Future<SuccessResponse<List<LearningGoal>>> getAllLearningGoals(
       int subLearningScopeId) async {
     final url = Uri.parse('$baseUrl/learning-goals/$subLearningScopeId');
     final authToken = await AuthService.getToken();
@@ -112,12 +110,12 @@ class LearningService {
 
     if (response.statusCode == 200) {
       if (jsonResponse['payload'] is List) {
-        final List<LearningGoalPayload> competencies =
+        final List<LearningGoal> competencies =
             (jsonResponse['payload'] as List)
-                .map((item) => LearningGoalPayload.fromJson(item))
+                .map((item) => LearningGoal.fromJson(item))
                 .toList();
 
-        return SuccessResponse<List<LearningGoalPayload>>(
+        return SuccessResponse<List<LearningGoal>>(
           status: jsonResponse['status'],
           message: jsonResponse['message'],
           payload: competencies,

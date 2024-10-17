@@ -1,4 +1,4 @@
-class PaginateMetaPayload {
+class PaginationMeta {
   final int total;
   final int perPage;
   final int currentPage;
@@ -9,7 +9,7 @@ class PaginateMetaPayload {
   final String? nextPageUrl;
   final String? previousPageUrl;
 
-  PaginateMetaPayload(
+  PaginationMeta(
       {required this.total,
       required this.perPage,
       required this.currentPage,
@@ -20,8 +20,8 @@ class PaginateMetaPayload {
       this.nextPageUrl,
       this.previousPageUrl});
 
-  factory PaginateMetaPayload.fromJson(Map<String, dynamic> json) {
-    return PaginateMetaPayload(
+  factory PaginationMeta.fromJson(Map<String, dynamic> json) {
+    return PaginationMeta(
       total: json['total'] as int,
       perPage: json['perPage'] as int,
       currentPage: json['currentPage'] as int,

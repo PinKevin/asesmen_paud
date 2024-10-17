@@ -1,24 +1,23 @@
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/payload/paginate_meta_payload.dart';
 
-class PaginateAnecdotalsPayload {
-  final PaginateMetaPayload meta;
-  final List<AnecdotalPayload> data;
+class AnecdotalsPaginated {
+  final PaginationMeta meta;
+  final List<Anecdotal> data;
 
-  PaginateAnecdotalsPayload({required this.meta, required this.data});
+  AnecdotalsPaginated({required this.meta, required this.data});
 
-  factory PaginateAnecdotalsPayload.fromJson(Map<String, dynamic> json) {
-    return PaginateAnecdotalsPayload(
-        meta:
-            PaginateMetaPayload.fromJson(json['meta'] as Map<String, dynamic>),
+  factory AnecdotalsPaginated.fromJson(Map<String, dynamic> json) {
+    return AnecdotalsPaginated(
+        meta: PaginationMeta.fromJson(json['meta'] as Map<String, dynamic>),
         data: (json['data'] as List)
             .map((student) =>
-                AnecdotalPayload.fromJson(student as Map<String, dynamic>))
+                Anecdotal.fromJson(student as Map<String, dynamic>))
             .toList());
   }
 }
 
-class AnecdotalPayload {
+class Anecdotal {
   final int id;
   final String photoLink;
   final String description;
@@ -26,9 +25,9 @@ class AnecdotalPayload {
   final int studentId;
   final String? createdAt;
   final String? updatedAt;
-  final List<LearningGoalPayload> learningGoals;
+  final List<LearningGoal> learningGoals;
 
-  AnecdotalPayload({
+  Anecdotal({
     required this.id,
     required this.photoLink,
     required this.description,
@@ -39,8 +38,8 @@ class AnecdotalPayload {
     required this.learningGoals,
   });
 
-  factory AnecdotalPayload.fromJson(Map<String, dynamic> json) {
-    return AnecdotalPayload(
+  factory Anecdotal.fromJson(Map<String, dynamic> json) {
+    return Anecdotal(
         id: json['id'],
         photoLink: json['photoLink'],
         description: json['description'],
@@ -49,8 +48,8 @@ class AnecdotalPayload {
         createdAt: json['createdAt'],
         updatedAt: json['updatedAt'],
         learningGoals: (json['learningGoals'] as List)
-            .map((learningGoal) => LearningGoalPayload.fromJson(
-                learningGoal as Map<String, dynamic>))
+            .map((learningGoal) =>
+                LearningGoal.fromJson(learningGoal as Map<String, dynamic>))
             .toList());
   }
 }

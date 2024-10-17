@@ -1,19 +1,19 @@
-class LearningGoalPayload {
+class LearningGoal {
   final int id;
   final String learningGoalName;
   final String learningGoalCode;
   final String? createdAt;
   final String? updatedAt;
 
-  LearningGoalPayload(
+  LearningGoal(
       {required this.id,
       required this.learningGoalName,
       required this.learningGoalCode,
       this.createdAt,
       this.updatedAt});
 
-  factory LearningGoalPayload.fromJson(Map<String, dynamic> json) {
-    return LearningGoalPayload(
+  factory LearningGoal.fromJson(Map<String, dynamic> json) {
+    return LearningGoal(
       id: json['id'],
       learningGoalName: json['learningGoalName'],
       learningGoalCode: json['learningGoalCode'],

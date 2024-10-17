@@ -7,7 +7,7 @@ import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
 
 class StudentService {
-  Future<SuccessResponse<PaginateStudentsPayload>> getAllStudents() async {
+  Future<SuccessResponse<StudentsPaginated>> getAllStudents() async {
     final url = Uri.parse('$baseUrl/students');
     final authToken = await AuthService.getToken();
 
@@ -19,7 +19,7 @@ class StudentService {
 
     if (response.statusCode == 200) {
       return SuccessResponse.fromJson(
-          jsonResponse, (json) => PaginateStudentsPayload.fromJson(json));
+          jsonResponse, (json) => StudentsPaginated.fromJson(json));
     } else {
       throw Exception('Terjadi error. ${response.body}');
     }
