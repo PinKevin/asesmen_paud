@@ -102,7 +102,7 @@ class LearningService {
 
   static Future<SuccessResponse<List<LearningGoalPayload>>> getAllLearningGoals(
       int subLearningScopeId) async {
-    final url = Uri.parse('$baseUrl/sub-learning-scopes/$subLearningScopeId');
+    final url = Uri.parse('$baseUrl/learning-goals/$subLearningScopeId');
     final authToken = await AuthService.getToken();
     final response = await http.get(url, headers: {
       'Authorization': 'Bearer $authToken',

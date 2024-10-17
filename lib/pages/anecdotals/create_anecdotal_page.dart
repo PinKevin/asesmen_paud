@@ -1,5 +1,5 @@
 import 'package:asesmen_paud/widget/anecdotal/anecdotal_field.dart';
-import 'package:asesmen_paud/widget/learning_goals_section.dart';
+import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:flutter/material.dart';
 
 class CreateAnecdotalPage extends StatefulWidget {
@@ -12,10 +12,19 @@ class CreateAnecdotalPage extends StatefulWidget {
 class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
-  List<int> learningGoals = [];
+  List<dynamic> learningGoals = [];
 
   String? _descriptionError;
   String? _feedbackError;
+
+  Future<void> _goToLearningGoalSelection() async {
+    final result = await Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const LearningGoalsPage()));
+    setState(() {
+      learningGoals.add(result);
+    });
+    // learningGoals.add(result);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +57,11 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
               //     onAddLearningGoal: (selectedGoal) {
               //       learningGoals.add(selectedGoal);
               //     }),
-              ElevatedButton(onPressed: () {}, child: const Text('Tes')),
-              Text('$studentId')
+              ElevatedButton(
+                  onPressed: _goToLearningGoalSelection,
+                  child: const Text('Tes')),
+              Text('$studentId'),
+              Text('$learningGoals')
             ],
           ),
         ));
