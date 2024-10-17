@@ -20,10 +20,38 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
   Future<void> _goToLearningGoalSelection() async {
     final result = await Navigator.push(context,
         MaterialPageRoute(builder: (context) => const LearningGoalsPage()));
-    setState(() {
-      learningGoals.add(result);
-    });
-    // learningGoals.add(result);
+    if (result != null) {
+      setState(() {
+        learningGoals.add(result);
+      });
+    }
+  }
+
+  _showDeleteLearningGoalDialog(learningGoal) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Peringatan'),
+            content: const Text('Yakin ingin hapus capaian pembelajaran?'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Kembali')),
+              TextButton(
+                  onPressed: () {
+                    learningGoals.remove(learningGoal);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Hapus',
+                    style: TextStyle(color: Colors.red),
+                  )),
+            ],
+          );
+        });
   }
 
   @override
@@ -52,14 +80,57 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
               const SizedBox(
                 height: 20,
               ),
-              // LearningGoalsSection(
-              //     learningGoals: learningGoals,
-              //     onAddLearningGoal: (selectedGoal) {
-              //       learningGoals.add(selectedGoal);
-              //     }),
+              Flexible(
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: learningGoals.length,
+                      itemBuilder: (context, index) {
+                        final learningGoal = learningGoals[index];
+                        return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.all(0),
+                                  backgroundColor: Colors.deepPurple[100],
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  )),
+                              onPressed: () {},
+                              child: Card(
+                                margin: EdgeInsets.zero,
+                                color: Colors.transparent,
+                                elevation: 0,
+                                child: ListTile(
+                                  title: Text(
+                                    learningGoal.learningGoalName,
+                                    textAlign: TextAlign.justify,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    '${learningGoal.learningGoalCode}',
+                                    textAlign: TextAlign.justify,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  trailing: IconButton(
+                                      onPressed: () {
+                                        _showDeleteLearningGoalDialog(
+                                            learningGoal);
+                                      },
+                                      icon: const Icon(Icons.delete)),
+                                ),
+                              ),
+                            ));
+                      })),
+              const SizedBox(
+                height: 20,
+              ),
               ElevatedButton(
                   onPressed: _goToLearningGoalSelection,
-                  child: const Text('Tes')),
+                  child: const Text('Tambah Capaian Pembelajaran')),
               Text('$studentId'),
               Text('$learningGoals')
             ],

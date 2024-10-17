@@ -2,7 +2,7 @@ import 'package:asesmen_paud/api/payload/paginate_meta_payload.dart';
 
 class StudentsPaginated {
   final PaginationMeta meta;
-  final List<StudentPayload> data;
+  final List<Student> data;
 
   StudentsPaginated({required this.meta, required this.data});
 
@@ -10,13 +10,12 @@ class StudentsPaginated {
     return StudentsPaginated(
         meta: PaginationMeta.fromJson(json['meta'] as Map<String, dynamic>),
         data: (json['data'] as List)
-            .map((student) =>
-                StudentPayload.fromJson(student as Map<String, dynamic>))
+            .map((student) => Student.fromJson(student as Map<String, dynamic>))
             .toList());
   }
 }
 
-class StudentPayload {
+class Student {
   final int id;
   final String name;
   final String nisn;
@@ -29,7 +28,7 @@ class StudentPayload {
   final String? createdAt;
   final String? updatedAt;
 
-  StudentPayload(
+  Student(
       {required this.id,
       required this.name,
       required this.nisn,
@@ -42,8 +41,8 @@ class StudentPayload {
       this.createdAt,
       this.updatedAt});
 
-  factory StudentPayload.fromJson(Map<String, dynamic> json) {
-    return StudentPayload(
+  factory Student.fromJson(Map<String, dynamic> json) {
+    return Student(
       id: json['id'] as int,
       name: json['name'] as String,
       nisn: json['nisn'] as String,

@@ -2,8 +2,8 @@ import 'package:asesmen_paud/api/payload/student_payload.dart';
 import 'package:flutter/material.dart';
 
 class StudentsList extends StatelessWidget {
-  final List<StudentPayload> students;
-  final Function(StudentPayload) onStudentTap;
+  final List<Student> students;
+  final Function(Student) onStudentTap;
 
   const StudentsList(
       {super.key, required this.students, required this.onStudentTap});
