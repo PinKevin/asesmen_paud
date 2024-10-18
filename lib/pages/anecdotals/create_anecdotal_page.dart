@@ -1,6 +1,9 @@
+import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/widget/anecdotal/anecdotal_field.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
+import 'package:asesmen_paud/widget/photo_field.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreateAnecdotalPage extends StatefulWidget {
   const CreateAnecdotalPage({super.key});
@@ -13,6 +16,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
   List<dynamic> learningGoals = [];
+  XFile? _image;
 
   String? _descriptionError;
   String? _feedbackError;
@@ -27,7 +31,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
     }
   }
 
-  _showDeleteLearningGoalDialog(learningGoal) {
+  Future<void> _showDeleteLearningGoalDialog(LearningGoal learningGoal) {
     return showDialog(
         context: context,
         builder: (context) {
@@ -62,27 +66,36 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
         appBar: AppBar(
           title: const Text('Buat penilaian anekdot'),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              AnecdotalField(
-                  controller: _descriptionController,
-                  labelText: 'Deskripsi',
-                  errorText: _descriptionError),
-              const SizedBox(
-                height: 20,
-              ),
-              AnecdotalField(
-                  controller: _feedbackController,
-                  labelText: 'Umpan Balik',
-                  errorText: _feedbackError),
-              const SizedBox(
-                height: 20,
-              ),
-              Flexible(
-                  child: ListView.builder(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                AnecdotalField(
+                    controller: _descriptionController,
+                    labelText: 'Deskripsi',
+                    errorText: _descriptionError),
+                const SizedBox(
+                  height: 20,
+                ),
+                AnecdotalField(
+                    controller: _feedbackController,
+                    labelText: 'Umpan Balik',
+                    errorText: _feedbackError),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Capaian Pembelajaran',
+                  ),
+                ),
+                if (learningGoals.isNotEmpty)
+                  ListView.builder(
                       shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: learningGoals.length,
                       itemBuilder: (context, index) {
                         final learningGoal = learningGoals[index];
@@ -124,16 +137,37 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                                 ),
                               ),
                             ));
-                      })),
-              const SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                  onPressed: _goToLearningGoalSelection,
-                  child: const Text('Tambah Capaian Pembelajaran')),
-              Text('$studentId'),
-              Text('$learningGoals')
-            ],
+                      }),
+                const SizedBox(
+                  height: 5,
+                ),
+                ElevatedButton(
+                    onPressed: _goToLearningGoalSelection,
+                    child: const Text('Tambah Capaian Pembelajaran')),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Foto Anekdot',
+                  ),
+                ),
+                const SizedBox(
+                  height: 5,
+                ),
+                PhotoField(
+                    image: _image,
+                    onImageSelected: (image) {
+                      setState(() {
+                        _image = image;
+                      });
+                    }),
+                Text('$studentId'),
+                Text('$_image'),
+                Text('$learningGoals')
+              ],
+            ),
           ),
         ));
   }
