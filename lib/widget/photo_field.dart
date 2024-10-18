@@ -10,13 +10,41 @@ class PhotoField extends StatelessWidget {
   const PhotoField(
       {super.key, required this.image, required this.onImageSelected});
 
-  Future<void> _pickImage(BuildContext context) async {
+  Future<void> _pickImage(BuildContext context, ImageSource source) async {
     final ImagePicker picker = ImagePicker();
-    final XFile? selectedImage =
-        await picker.pickImage(source: ImageSource.gallery);
+    final XFile? selectedImage = await picker.pickImage(source: source);
     if (selectedImage != null) {
       onImageSelected(selectedImage);
     }
+  }
+
+  void _showImageSourceDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Pilih sumber gambar'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    _pickImage(context, ImageSource.camera);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Kamera')),
+              TextButton(
+                  onPressed: () {
+                    _pickImage(context, ImageSource.gallery);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Galeri')),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Batal')),
+            ],
+          );
+        });
   }
 
   @override
@@ -26,7 +54,7 @@ class PhotoField extends StatelessWidget {
         if (image == null)
           ElevatedButton(
               onPressed: () {
-                _pickImage(context);
+                _showImageSourceDialog(context);
               },
               child: const Text('Tambah foto')),
         if (image != null)
@@ -60,7 +88,7 @@ class PhotoField extends StatelessWidget {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    _pickImage(context);
+                    _showImageSourceDialog(context);
                   },
                   child: const Text('Ubah foto')),
               ElevatedButton.icon(
