@@ -25,7 +25,7 @@ class Anecdotal {
   final int studentId;
   final String? createdAt;
   final String? updatedAt;
-  final List<LearningGoal> learningGoals;
+  final List<LearningGoal>? learningGoals;
 
   Anecdotal({
     required this.id,
@@ -35,21 +35,23 @@ class Anecdotal {
     required this.studentId,
     this.createdAt,
     this.updatedAt,
-    required this.learningGoals,
+    this.learningGoals,
   });
 
   factory Anecdotal.fromJson(Map<String, dynamic> json) {
     return Anecdotal(
-        id: json['id'],
-        photoLink: json['photoLink'],
-        description: json['description'],
-        feedback: json['feedback'],
-        studentId: json['studentId'],
-        createdAt: json['createdAt'],
-        updatedAt: json['updatedAt'],
-        learningGoals: (json['learningGoals'] as List)
-            .map((learningGoal) =>
-                LearningGoal.fromJson(learningGoal as Map<String, dynamic>))
-            .toList());
+        id: json['id'] as int,
+        photoLink: json['photoLink'] as String,
+        description: json['description'] as String,
+        feedback: json['feedback'] as String,
+        studentId: json['studentId'] as int,
+        createdAt: json['createdAt'] as String?,
+        updatedAt: json['updatedAt'] as String?,
+        learningGoals: json.containsKey('learningGoals')
+            ? (json['learningGoals'] as List)
+                .map((learningGoal) =>
+                    LearningGoal.fromJson(learningGoal as Map<String, dynamic>))
+                .toList()
+            : null);
   }
 }

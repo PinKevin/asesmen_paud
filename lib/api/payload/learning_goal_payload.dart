@@ -23,4 +23,8 @@ class LearningGoal {
   }
 
   String? get goalName => null;
+
+  List<int> idToJson() {
+    return [id];
+  }
 }

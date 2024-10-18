@@ -1,4 +1,9 @@
+import 'package:asesmen_paud/api/dto/anecdotal_dto.dart';
+import 'package:asesmen_paud/api/exception.dart';
+import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
+import 'package:asesmen_paud/api/response.dart';
+import 'package:asesmen_paud/api/service/anecdotal_service.dart';
 import 'package:asesmen_paud/widget/anecdotal/anecdotal_field.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/photo_field.dart';
@@ -18,8 +23,12 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
   List<dynamic> learningGoals = [];
   XFile? _image;
 
+  bool isLoading = false;
   String? _descriptionError;
   String? _feedbackError;
+  String? _learningGoalsError;
+  String? _imageError;
+  String _errorMessage = '';
 
   Future<void> _goToLearningGoalSelection() async {
     final result = await Navigator.push(context,
@@ -56,6 +65,54 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
             ],
           );
         });
+  }
+
+  Future<void> _submit(int studentId) async {
+    setState(() {
+      isLoading = true;
+      _descriptionError = null;
+      _feedbackError = null;
+      _learningGoalsError = null;
+      _imageError = null;
+      _errorMessage = '';
+    });
+
+    final dto = CreateAnecdotalDto(
+        description: _descriptionController.text,
+        feedback: _feedbackController.text,
+        learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
+        photo: _image);
+
+    try {
+      final SuccessResponse<Anecdotal> response =
+          await AnecdotalService().createAnecdotal(studentId, dto);
+
+      if (response.status == 'success') {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(response.message)));
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (e is ValidationException) {
+        setState(() {
+          _descriptionError = e.errors['description']?.message ?? '';
+          _feedbackError = e.errors['feedback']?.message ?? '';
+          _learningGoalsError = e.errors['learningGoals']?.message ?? '';
+          _imageError = e.errors['photo']?.message ?? '';
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Error pada pemanggilan _submit: $e';
+        });
+        print(e);
+      }
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -141,6 +198,16 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                 const SizedBox(
                   height: 5,
                 ),
+                if (_learningGoalsError != null)
+                  Text(
+                    _learningGoalsError ??
+                        'Terjadi error pada capaian pembelajaran',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                if (_learningGoalsError != null)
+                  const SizedBox(
+                    height: 5,
+                  ),
                 ElevatedButton(
                     onPressed: _goToLearningGoalSelection,
                     child: const Text('Tambah Capaian Pembelajaran')),
@@ -163,6 +230,44 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                         _image = image;
                       });
                     }),
+                if (_imageError != null)
+                  const SizedBox(
+                    height: 5,
+                  ),
+                if (_imageError != null)
+                  Text(
+                    _imageError ?? 'Terjadi error pada gambar',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                const SizedBox(
+                  height: 10,
+                ),
+                if (_errorMessage.isNotEmpty)
+                  Text(_errorMessage,
+                      style: const TextStyle(color: Colors.red)),
+                ElevatedButton(
+                  onPressed: () {
+                    _submit(studentId);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: const Size(200, 40),
+                      backgroundColor: Colors.deepPurple),
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        )
+                      : const Text(
+                          'Tambah Anekdot',
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                ),
                 Text('$studentId'),
                 Text('$_image'),
                 Text('$learningGoals')
