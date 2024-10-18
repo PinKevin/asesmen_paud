@@ -66,4 +66,24 @@ class AnecdotalService {
       throw Exception('Tidak bisa menambahkan anekdot.');
     }
   }
+
+  Future<SuccessResponse<Anecdotal>> showAnecdotal(
+      int studentId, int anecdotalId) async {
+    final url =
+        Uri.parse('$baseUrl/students/$studentId/anecdotals/$anecdotalId');
+    final authToken = await AuthService.getToken();
+
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => Anecdotal.fromJson(json));
+    } else {
+      throw Exception('Terjadi error. ${response.body}');
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/anecdotal_service.dart';
+import 'package:asesmen_paud/pages/anecdotals/show_anecdotal_page.dart';
 import 'package:asesmen_paud/widget/anecdotal/anecdotal_list.dart';
 import 'package:asesmen_paud/widget/search_field.dart';
 import 'package:flutter/material.dart';
@@ -61,7 +62,15 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
                   } else if (snapshot.hasData && snapshot.data != null) {
                     final anecdotals = snapshot.data!.payload!.data;
                     return AnecdotalList(
-                        anecdotals: anecdotals, onAnecdotalTap: (anecdot) {});
+                        anecdotals: anecdotals,
+                        onAnecdotalTap: (anecdot) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ShowAnecdotalPage(
+                                        anecdotal: anecdot,
+                                      )));
+                        });
                   } else {
                     return const Center(
                       child: Text('Belum ada penilaian anekdot. Buat baru'),
