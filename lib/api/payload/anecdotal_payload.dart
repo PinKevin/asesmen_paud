@@ -40,11 +40,11 @@ class Anecdotal {
 
   factory Anecdotal.fromJson(Map<String, dynamic> json) {
     return Anecdotal(
-        id: json['id'] as int,
+        id: int.tryParse(json['id'].toString()) ?? 0,
         photoLink: json['photoLink'] as String,
         description: json['description'] as String,
         feedback: json['feedback'] as String,
-        studentId: json['studentId'] as int,
+        studentId: int.tryParse(json['studentId'].toString()) ?? 0,
         createdAt: json['createdAt'] as String?,
         updatedAt: json['updatedAt'] as String?,
         learningGoals: json.containsKey('learningGoals')

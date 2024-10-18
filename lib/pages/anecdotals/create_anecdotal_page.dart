@@ -104,9 +104,8 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
         });
       } else {
         setState(() {
-          _errorMessage = 'Error pada pemanggilan _submit: $e';
+          _errorMessage = '$e';
         });
-        print(e);
       }
     } finally {
       setState(() {
@@ -127,7 +126,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AnecdotalField(
                     controller: _descriptionController,
@@ -268,9 +267,6 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                           style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
                 ),
-                Text('$studentId'),
-                Text('$_image'),
-                Text('$learningGoals')
               ],
             ),
           ),
