@@ -9,12 +9,14 @@ class DashboardPage extends StatefulWidget {
 }
 
 class DashboardPageState extends State<DashboardPage> {
-  bool isLoading = false;
+  bool _isLoading = false;
   final AuthService authService = AuthService();
 
   void _logout() async {
     try {
-      isLoading = true;
+      setState(() {
+        _isLoading = true;
+      });
 
       await authService.logout();
 
@@ -27,7 +29,9 @@ class DashboardPageState extends State<DashboardPage> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Failed to logout: $e')));
     } finally {
-      isLoading = false;
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -43,7 +47,7 @@ class DashboardPageState extends State<DashboardPage> {
           actions: [
             IconButton(
                 onPressed: _logout,
-                icon: isLoading
+                icon: _isLoading
                     ? const Center(
                         child: CircularProgressIndicator(),
                       )
@@ -55,7 +59,6 @@ class DashboardPageState extends State<DashboardPage> {
           child: Column(
             children: [
               Column(
-                // mainAxisSize: MainAxisSize.min,
                 children: [
                   ElevatedButton(
                     onPressed: _goToAnecdotStudentsMenu,

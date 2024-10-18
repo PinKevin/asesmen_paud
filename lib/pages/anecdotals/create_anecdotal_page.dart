@@ -23,7 +23,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
   List<dynamic> learningGoals = [];
   XFile? _image;
 
-  bool isLoading = false;
+  bool _isLoading = false;
   String? _descriptionError;
   String? _feedbackError;
   String? _learningGoalsError;
@@ -69,7 +69,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
 
   Future<void> _submit(int studentId) async {
     setState(() {
-      isLoading = true;
+      _isLoading = true;
       _descriptionError = null;
       _feedbackError = null;
       _learningGoalsError = null;
@@ -109,7 +109,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
       }
     } finally {
       setState(() {
-        isLoading = false;
+        _isLoading = false;
       });
     }
   }
@@ -251,7 +251,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                   style: ElevatedButton.styleFrom(
                       fixedSize: const Size(200, 40),
                       backgroundColor: Colors.deepPurple),
-                  child: isLoading
+                  child: _isLoading
                       ? const SizedBox(
                           width: 20,
                           height: 20,

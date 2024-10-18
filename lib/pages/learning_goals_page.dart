@@ -15,15 +15,20 @@ class LearningGoalsPage extends StatefulWidget {
 }
 
 class LearningGoalsPageState extends State<LearningGoalsPage> {
-  Competency? selectedCompetency;
-  LearningScope? selectedLearningScope;
-  SubLearningScope? selectedSubLearningScope;
+  Competency? _selectedCompetency;
+  LearningScope? _selectedLearningScope;
+  SubLearningScope? _selectedSubLearningScope;
   LearningGoal? selectedLearningGoal;
 
-  List<Competency> competencies = [];
-  List<LearningScope> learningScopes = [];
-  List<SubLearningScope> subLearningScopes = [];
-  List<LearningGoal> learningGoals = [];
+  List<Competency> _competencies = [];
+  List<LearningScope> _learningScopes = [];
+  List<SubLearningScope> _subLearningScopes = [];
+  List<LearningGoal> _learningGoals = [];
+
+  String? _competencyError;
+  String? _learningScopeError;
+  String? _subLearningScopeError;
+  String? _learningGoalError;
 
   @override
   void initState() {
@@ -35,10 +40,12 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
     try {
       final response = await LearningService.getAllCompetencies();
       setState(() {
-        competencies = response.payload!;
+        _competencies = response.payload!;
       });
     } catch (e) {
-      print('Error fetching competencies: $e');
+      setState(() {
+        _competencyError = 'Gagal mengambil kompetensi: $e';
+      });
     }
   }
 
@@ -46,13 +53,15 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
     try {
       final response = await LearningService.getAllLearningScopes(competencyId);
       setState(() {
-        learningScopes = response.payload!;
-        selectedLearningScope = null;
-        selectedSubLearningScope = null;
+        _learningScopes = response.payload!;
+        _selectedLearningScope = null;
+        _selectedSubLearningScope = null;
         selectedLearningGoal = null;
       });
     } catch (e) {
-      print('Error fetching learning scopes: $e');
+      setState(() {
+        _learningScopeError = 'Gagal mengambil lingkup pembelajaran: $e';
+      });
     }
   }
 
@@ -61,12 +70,14 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
       final response =
           await LearningService.getAllSubLearningScopes(learningScopeId);
       setState(() {
-        subLearningScopes = response.payload!;
-        selectedSubLearningScope = null;
+        _subLearningScopes = response.payload!;
+        _selectedSubLearningScope = null;
         selectedLearningGoal = null;
       });
     } catch (e) {
-      print('Error fetching sub-learning scopes: $e');
+      setState(() {
+        _subLearningScopeError = 'Gagal mengambil sub lingkup pembelajaran: $e';
+      });
     }
   }
 
@@ -74,13 +85,14 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
     try {
       final response =
           await LearningService.getAllLearningGoals(subLearningScopeId);
-      print('Fetched lg: ${response.payload}');
       setState(() {
-        learningGoals = response.payload ?? [];
+        _learningGoals = response.payload ?? [];
         selectedLearningGoal = null;
       });
     } catch (e) {
-      print('Error fetching learning goals: $e');
+      setState(() {
+        _learningGoalError = 'Gagal mengambil capaian pembelajaran: $e';
+      });
     }
   }
 
@@ -94,6 +106,7 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
+              if (_competencyError != null) Text(_competencyError!),
               DropdownButtonFormField(
                   isExpanded: true,
                   isDense: false,
@@ -101,8 +114,8 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
                     labelText: 'Pilih kompetensi',
                     border: OutlineInputBorder(),
                   ),
-                  value: selectedCompetency,
-                  items: competencies.map((competency) {
+                  value: _selectedCompetency,
+                  items: _competencies.map((competency) {
                     return DropdownMenuItem(
                       value: competency,
                       child: Text(
@@ -117,9 +130,9 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      selectedCompetency = value;
-                      selectedLearningScope = null;
-                      selectedSubLearningScope = null;
+                      _selectedCompetency = value;
+                      _selectedLearningScope = null;
+                      _selectedSubLearningScope = null;
                       selectedLearningGoal = null;
                       if (value != null) _fetchLearningScopes(value.id);
                     });
@@ -127,6 +140,7 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
               const SizedBox(
                 height: 20,
               ),
+              if (_learningScopeError != null) Text(_learningScopeError!),
               DropdownButtonFormField(
                   isExpanded: true,
                   isDense: false,
@@ -134,8 +148,8 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
                     labelText: 'Pilih lingkup pembelajaran',
                     border: OutlineInputBorder(),
                   ),
-                  value: selectedLearningScope,
-                  items: learningScopes.map((learningScope) {
+                  value: _selectedLearningScope,
+                  items: _learningScopes.map((learningScope) {
                     return DropdownMenuItem(
                       value: learningScope,
                       child: Text(
@@ -150,8 +164,8 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      selectedLearningScope = value;
-                      selectedSubLearningScope = null;
+                      _selectedLearningScope = value;
+                      _selectedSubLearningScope = null;
                       selectedLearningGoal = null;
                       if (value != null) _fetchSubLearningScopes(value.id);
                     });
@@ -159,6 +173,7 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
               const SizedBox(
                 height: 20,
               ),
+              if (_subLearningScopeError != null) Text(_subLearningScopeError!),
               DropdownButtonFormField(
                   isExpanded: true,
                   isDense: false,
@@ -166,8 +181,8 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
                     labelText: 'Pilih sub lingkup pembelajaran',
                     border: OutlineInputBorder(),
                   ),
-                  value: selectedSubLearningScope,
-                  items: subLearningScopes.map((subLearningScope) {
+                  value: _selectedSubLearningScope,
+                  items: _subLearningScopes.map((subLearningScope) {
                     return DropdownMenuItem(
                       value: subLearningScope,
                       child: Text(
@@ -182,7 +197,7 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      selectedSubLearningScope = value;
+                      _selectedSubLearningScope = value;
                       selectedLearningGoal = null;
 
                       if (value != null) _fetchLearningGoals(value.id);
@@ -199,7 +214,7 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
                     border: OutlineInputBorder(),
                   ),
                   value: selectedLearningGoal,
-                  items: learningGoals.map((learningGoal) {
+                  items: _learningGoals.map((learningGoal) {
                     return DropdownMenuItem(
                         value: learningGoal,
                         child: Column(
@@ -230,6 +245,7 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
               const SizedBox(
                 height: 20,
               ),
+              if (_learningGoalError != null) Text(_learningGoalError!),
               ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context, selectedLearningGoal);

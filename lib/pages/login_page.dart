@@ -18,7 +18,7 @@ class LoginPageState extends State<LoginPage> {
 
   bool _passwordVisible = false;
 
-  bool isLoading = false;
+  bool _isLoading = false;
   String _errorMessage = '';
   String? _emailError;
   String? _passwordError;
@@ -31,9 +31,8 @@ class LoginPageState extends State<LoginPage> {
 
   void _login() async {
     try {
-      isLoading = true;
-
       setState(() {
+        _isLoading = true;
         _emailError = null;
         _passwordError = null;
         _errorMessage = '';
@@ -64,7 +63,9 @@ class LoginPageState extends State<LoginPage> {
         });
       }
     } finally {
-      isLoading = false;
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -122,7 +123,7 @@ class LoginPageState extends State<LoginPage> {
               style: ElevatedButton.styleFrom(
                   fixedSize: const Size(200, 40),
                   backgroundColor: Colors.deepPurple),
-              child: isLoading
+              child: _isLoading
                   ? const SizedBox(
                       width: 20,
                       height: 20,
