@@ -1,12 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:asesmen_paud/api/dto/anecdotal_dto.dart';
 import 'package:asesmen_paud/api/exception.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
 import 'package:asesmen_paud/api/base_url.dart';
 import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AnecdotalService {
   Future<SuccessResponse<AnecdotalsPaginated>> getAllStudentAnecdotals(
@@ -37,6 +41,8 @@ class AnecdotalService {
       throw Exception('Foto harus diisi');
     }
 
+    final compressedImage = await _compressImage(File(dto.photo!.path));
+
     var request = http.MultipartRequest('POST', url);
     request.fields['description'] = dto.description;
     request.fields['feedback'] = dto.feedback;
@@ -45,7 +51,7 @@ class AnecdotalService {
     }
 
     request.files
-        .add(await http.MultipartFile.fromPath('photo', dto.photo!.path));
+        .add(await http.MultipartFile.fromPath('photo', compressedImage.path));
 
     request.headers.addAll({
       'Authorization': 'Bearer $authToken',
@@ -85,5 +91,19 @@ class AnecdotalService {
     } else {
       throw Exception('Terjadi error. ${response.body}');
     }
+  }
+
+  Future<File> _compressImage(File file) async {
+    final compressedBytes = await FlutterImageCompress.compressWithFile(
+        file.absolute.path,
+        quality: 85);
+
+    final tempDir = await getTemporaryDirectory();
+    final tempPath =
+        path.join(tempDir.path, 'compressed_${path.basename(file.path)}');
+    final compressedFile = File(tempPath);
+
+    await compressedFile.writeAsBytes(compressedBytes!);
+    return compressedFile;
   }
 }
