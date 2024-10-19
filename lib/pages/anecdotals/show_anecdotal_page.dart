@@ -46,8 +46,7 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
     }
   }
 
-  void _goToEditPage(BuildContext context) async {
-    final anecdotal = widget.anecdotal;
+  void _goToEditPage(BuildContext context, Anecdotal anecdotal) async {
     final result = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -258,7 +257,7 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
                           ),
                           ElevatedButton.icon(
                             onPressed: () {
-                              _goToEditPage(context);
+                              _goToEditPage(context, updatedAnecdotal);
                             },
                             label: const Text(
                               'Ubah anekdot',
