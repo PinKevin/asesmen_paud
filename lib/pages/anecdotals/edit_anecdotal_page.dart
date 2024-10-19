@@ -95,7 +95,7 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
 
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(response.message)));
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (e is ValidationException) {
