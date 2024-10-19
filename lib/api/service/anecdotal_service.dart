@@ -99,6 +99,51 @@ class AnecdotalService {
     }
   }
 
+  Future<SuccessResponse<Anecdotal>> editAnecdotal(
+      int studentId, int anecdotalId, EditAnecdotalDto dto) async {
+    final url =
+        Uri.parse('$baseUrl/students/$studentId/anecdotals/$anecdotalId');
+    final authToken = await AuthService.getToken();
+
+    var request = http.MultipartRequest('PUT', url);
+    request.fields['description'] = dto.description!;
+    request.fields['feedback'] = dto.feedback!;
+    for (int i = 0; i < dto.learningGoals!.length; i++) {
+      request.fields['learningGoals[$i]'] = dto.learningGoals![i].toString();
+    }
+
+    if (dto.photo != null) {
+      final compressedImage = await _compressImage(File(dto.photo!.path));
+      request.files.add(
+          await http.MultipartFile.fromPath('photo', compressedImage.path));
+    }
+
+    request.headers.addAll({
+      'Authorization': 'Bearer $authToken',
+      'Content-Type': 'multipart/form-data'
+    });
+
+    final response = await request.send();
+    final responseBody = await http.Response.fromStream(response);
+    final jsonResponse = json.decode(responseBody.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => Anecdotal.fromJson(json));
+    } else if (response.statusCode == 404) {
+      String message =
+          jsonResponse['message'] ?? 'Anekdot tidak dapat ditemukan';
+      throw ErrorException(message);
+    } else if (response.statusCode == 422) {
+      final failResponse = FailResponse.fromJson(jsonResponse);
+      throw ValidationException(failResponse.errors ?? {});
+    } else {
+      String message =
+          jsonResponse['message'] ?? 'Terjadi error saat mengambil anekdot';
+      throw ErrorException(message);
+    }
+  }
+
   Future<SuccessResponse<ApiResponse>> deleteAnecdotal(
       int studentId, int anecdotalId) async {
     final url =

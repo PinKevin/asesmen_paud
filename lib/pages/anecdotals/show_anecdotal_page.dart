@@ -1,6 +1,7 @@
 import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/service/anecdotal_service.dart';
 import 'package:asesmen_paud/api/service/photo_service.dart';
+import 'package:asesmen_paud/pages/anecdotals/edit_anecdotal_page.dart';
 import 'package:flutter/material.dart';
 
 class ShowAnecdotalPage extends StatelessWidget {
@@ -21,6 +22,15 @@ class ShowAnecdotalPage extends StatelessWidget {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
     }
+  }
+
+  void _goToEditPage(BuildContext context) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => EditAnecdotalPage(
+                  anecdotal: anecdotal,
+                )));
   }
 
   Future<void> _showDeleteDialog(
@@ -195,7 +205,9 @@ class ShowAnecdotalPage extends StatelessWidget {
                           backgroundColor: Colors.white),
                     ),
                     ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        _goToEditPage(context);
+                      },
                       label: const Text(
                         'Ubah anekdot',
                         style: TextStyle(color: Colors.blue),
