@@ -88,8 +88,40 @@ class AnecdotalService {
     if (response.statusCode == 200) {
       return SuccessResponse.fromJson(
           jsonResponse, (json) => Anecdotal.fromJson(json));
+    } else if (response.statusCode == 404) {
+      String message =
+          jsonResponse['message'] ?? 'Anekdot tidak dapat ditemukan';
+      throw ErrorException(message);
     } else {
-      throw Exception('Terjadi error. ${response.body}');
+      String message =
+          jsonResponse['message'] ?? 'Terjadi error saat mengambil anekdot';
+      throw ErrorException(message);
+    }
+  }
+
+  Future<SuccessResponse<ApiResponse>> deleteAnecdotal(
+      int studentId, int anecdotalId) async {
+    final url =
+        Uri.parse('$baseUrl/students/$studentId/anecdotals/$anecdotalId');
+    final authToken = await AuthService.getToken();
+
+    final response = await http.delete(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => ApiResponse.fromJson(json, null));
+    } else if (response.statusCode == 404) {
+      String message =
+          jsonResponse['message'] ?? 'Anekdot tidak dapat ditemukan';
+      throw ErrorException(message);
+    } else {
+      String message =
+          jsonResponse['message'] ?? 'Terjadi error saat menghapus anekdot';
+      throw ErrorException(message);
     }
   }
 
