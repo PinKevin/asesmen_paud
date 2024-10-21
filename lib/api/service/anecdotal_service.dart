@@ -14,8 +14,8 @@ import 'package:path_provider/path_provider.dart';
 
 class AnecdotalService {
   Future<SuccessResponse<AnecdotalsPaginated>> getAllStudentAnecdotals(
-      int studentId) async {
-    final url = Uri.parse('$baseUrl/students/$studentId/anecdotals');
+      int studentId, int page) async {
+    final url = Uri.parse('$baseUrl/students/$studentId/anecdotals?page=$page');
     final authToken = await AuthService.getToken();
 
     final response = await http.get(url, headers: {
