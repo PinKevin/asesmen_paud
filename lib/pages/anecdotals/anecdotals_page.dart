@@ -2,7 +2,6 @@ import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/service/anecdotal_service.dart';
 import 'package:asesmen_paud/pages/anecdotals/show_anecdotal_page.dart';
 import 'package:asesmen_paud/widget/anecdotal/anecdotal_list_tile.dart';
-import 'package:asesmen_paud/widget/search_field.dart';
 import 'package:flutter/material.dart';
 
 class AnecdotalsPage extends StatefulWidget {
@@ -22,6 +21,10 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
   bool _hasMoreData = true;
   late int studentId;
 
+  DateTimeRange? _selectedDateRange;
+  String? _formattedStartDate;
+  String? _formattedEndDate;
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +38,27 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
     _fetchAnecdotals();
   }
 
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+        context: context,
+        firstDate: DateTime(2024, 7),
+        lastDate: DateTime.now());
+
+    if (picked != null && picked != _selectedDateRange) {
+      setState(() {
+        _selectedDateRange = picked;
+        _formattedStartDate =
+            _selectedDateRange?.start.toIso8601String().substring(0, 10);
+        _formattedEndDate =
+            _selectedDateRange?.end.toIso8601String().substring(0, 10);
+        _anecdotals.clear();
+        _currentPage = 1;
+        _hasMoreData = true;
+      });
+      _fetchAnecdotals();
+    }
+  }
+
   Future<void> _fetchAnecdotals({int page = 1}) async {
     if (_isLoading || !_hasMoreData) return;
 
@@ -43,8 +67,9 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
     });
 
     try {
-      final anecdotalsResponse =
-          await AnecdotalService().getAllStudentAnecdotals(studentId, page);
+      final anecdotalsResponse = await AnecdotalService()
+          .getAllStudentAnecdotals(
+              studentId, page, _formattedStartDate, _formattedEndDate);
 
       final newAnecdotals = anecdotalsResponse.payload!.data;
 
@@ -90,7 +115,11 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            SearchField(controller: _searchController),
+            ElevatedButton(
+                onPressed: () => _selectDateRange(context),
+                child: Text(_selectedDateRange == null
+                    ? 'Pilih rentang tanggal'
+                    : 'Rentang: $_formattedStartDate hingga $_formattedEndDate')),
             const SizedBox(
               height: 20,
             ),
