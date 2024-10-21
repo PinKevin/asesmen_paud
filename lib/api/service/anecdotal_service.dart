@@ -14,15 +14,23 @@ import 'package:path_provider/path_provider.dart';
 
 class AnecdotalService {
   Future<SuccessResponse<AnecdotalsPaginated>> getAllStudentAnecdotals(
-      int studentId, int page, String? from, String? until) async {
-    Uri url;
+      int studentId,
+      int page,
+      String? from,
+      String? until,
+      String? sortBy) async {
+    String stringUrl = '$baseUrl/students/$studentId/anecdotals?page=$page';
 
-    if (from == null || until == null) {
-      url = Uri.parse('$baseUrl/students/$studentId/anecdotals?page=$page');
-    } else {
-      url = Uri.parse(
-          '$baseUrl/students/$studentId/anecdotals?page=$page&from=$from&until=$until');
+    if (from != null && until != null) {
+      stringUrl += '&from=$from&until=$until';
     }
+
+    if (sortBy != null) {
+      stringUrl += '&sort-by=$sortBy';
+    }
+
+    final Uri url = Uri.parse(stringUrl);
+
     final authToken = await AuthService.getToken();
 
     final response = await http.get(url, headers: {

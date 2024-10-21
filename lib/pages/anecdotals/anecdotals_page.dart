@@ -25,6 +25,8 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
   String? _formattedStartDate;
   String? _formattedEndDate;
 
+  String _sortOrder = 'desc';
+
   @override
   void initState() {
     super.initState();
@@ -59,7 +61,17 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
     }
   }
 
-  Future<void> _fetchAnecdotals({int page = 1}) async {
+  void _onSortSelected(String order) {
+    setState(() {
+      _sortOrder = order;
+      _anecdotals.clear();
+      _currentPage = 1;
+      _hasMoreData = true;
+    });
+    _fetchAnecdotals(sortBy: order);
+  }
+
+  Future<void> _fetchAnecdotals({int page = 1, String sortBy = 'desc'}) async {
     if (_isLoading || !_hasMoreData) return;
 
     setState(() {
@@ -69,7 +81,7 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
     try {
       final anecdotalsResponse = await AnecdotalService()
           .getAllStudentAnecdotals(
-              studentId, page, _formattedStartDate, _formattedEndDate);
+              studentId, page, _formattedStartDate, _formattedEndDate, sortBy);
 
       final newAnecdotals = anecdotalsResponse.payload!.data;
 
@@ -120,6 +132,28 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
                 child: Text(_selectedDateRange == null
                     ? 'Pilih rentang tanggal'
                     : 'Rentang: $_formattedStartDate hingga $_formattedEndDate')),
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                InkWell(
+                  onTap: () {
+                    _sortOrder = _sortOrder == 'asc' ? 'desc' : 'asc';
+                    _onSortSelected(_sortOrder);
+                  },
+                  child: Row(
+                    children: [
+                      const Text('Tanggal dibuat'),
+                      Icon(_sortOrder == 'asc'
+                          ? Icons.arrow_drop_up
+                          : Icons.arrow_drop_down)
+                    ],
+                  ),
+                )
+              ],
+            ),
             const SizedBox(
               height: 20,
             ),
