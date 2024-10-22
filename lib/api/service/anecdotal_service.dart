@@ -18,15 +18,15 @@ class AnecdotalService {
       int page,
       String? from,
       String? until,
-      String? sortBy) async {
+      String? sortOrder) async {
     String stringUrl = '$baseUrl/students/$studentId/anecdotals?page=$page';
 
     if (from != null && until != null) {
       stringUrl += '&from=$from&until=$until';
     }
 
-    if (sortBy != null) {
-      stringUrl += '&sort-by=$sortBy';
+    if (sortOrder != null) {
+      stringUrl += '&sort-order=$sortOrder';
     }
 
     final Uri url = Uri.parse(stringUrl);

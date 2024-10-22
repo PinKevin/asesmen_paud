@@ -15,6 +15,27 @@ class StudentsPaginated {
   }
 }
 
+class Class {
+  final int id;
+  final String name;
+  final String? createdAt;
+  final String? updatedAt;
+
+  Class(
+      {required this.id,
+      required this.name,
+      required this.createdAt,
+      required this.updatedAt});
+
+  factory Class.fromJson(Map<String, dynamic> json) {
+    return Class(
+        id: json['id'],
+        name: json['name'],
+        createdAt: json['createdAt'],
+        updatedAt: json['updatedAt']);
+  }
+}
+
 class Student {
   final int id;
   final String name;
@@ -24,7 +45,6 @@ class Student {
   final String? gender;
   final String? religion;
   final String? acceptanceDate;
-  final int classId;
   final String? createdAt;
   final String? updatedAt;
 
@@ -37,7 +57,6 @@ class Student {
       this.gender,
       this.religion,
       this.acceptanceDate,
-      required this.classId,
       this.createdAt,
       this.updatedAt});
 
@@ -51,7 +70,6 @@ class Student {
       gender: json['gender'] as String?,
       religion: json['religion'] as String?,
       acceptanceDate: json['acceptance_date'] as String?,
-      classId: json['class_id'] as int,
       createdAt: json['created_at'] as String?,
       updatedAt: json['updated_at'] as String?,
     );

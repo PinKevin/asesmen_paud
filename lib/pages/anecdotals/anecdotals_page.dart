@@ -12,7 +12,6 @@ class AnecdotalsPage extends StatefulWidget {
 }
 
 class AnecdotalsPageState extends State<AnecdotalsPage> {
-  final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   final List<Anecdotal> _anecdotals = [];
@@ -113,7 +112,7 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent &&
         !_isLoading) {
-      _fetchAnecdotals(page: _currentPage + 1);
+      _fetchAnecdotals(page: _currentPage + 1, sortBy: _sortOrder);
     }
   }
 
@@ -220,7 +219,6 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 }
