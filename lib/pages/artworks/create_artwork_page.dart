@@ -1,23 +1,23 @@
-import 'package:asesmen_paud/api/dto/anecdotal_dto.dart';
+import 'package:asesmen_paud/api/dto/artwork_dto.dart';
 import 'package:asesmen_paud/api/exception.dart';
-import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
+import 'package:asesmen_paud/api/payload/artwork_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
-import 'package:asesmen_paud/api/service/anecdotal_service.dart';
-import 'package:asesmen_paud/widget/anecdotal/anecdotal_field.dart';
+import 'package:asesmen_paud/api/service/artwork_service.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
+import 'package:asesmen_paud/widget/artwork/artwork_field.dart';
 import 'package:asesmen_paud/widget/photo_field.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class CreateAnecdotalPage extends StatefulWidget {
-  const CreateAnecdotalPage({super.key});
+class CreateArtworkPage extends StatefulWidget {
+  const CreateArtworkPage({super.key});
 
   @override
-  State<CreateAnecdotalPage> createState() => CreateAnecdotalPageState();
+  State<CreateArtworkPage> createState() => CreateArtworkPageState();
 }
 
-class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
+class CreateArtworkPageState extends State<CreateArtworkPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
   List<dynamic> learningGoals = [];
@@ -77,15 +77,15 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
       _errorMessage = '';
     });
 
-    final dto = CreateAnecdotalDto(
+    final dto = CreateArtworkDto(
         description: _descriptionController.text,
         feedback: _feedbackController.text,
         learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
         photo: _image);
 
     try {
-      final SuccessResponse<Anecdotal> response =
-          await AnecdotalService().createAnecdotal(studentId, dto);
+      final SuccessResponse<Artwork> response =
+          await ArtworkService().createArtwork(studentId, dto);
 
       if (response.status == 'success') {
         if (!mounted) return;
@@ -120,7 +120,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Buat penilaian anekdot'),
+          title: const Text('Buat penilaian hasil karya'),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -128,14 +128,14 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AnecdotalField(
+                ArtworkField(
                     controller: _descriptionController,
                     labelText: 'Deskripsi',
                     errorText: _descriptionError),
                 const SizedBox(
                   height: 20,
                 ),
-                AnecdotalField(
+                ArtworkField(
                     controller: _feedbackController,
                     labelText: 'Umpan Balik',
                     errorText: _feedbackError),
@@ -216,7 +216,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Foto Anekdot',
+                    'Foto Hasil Karya',
                   ),
                 ),
                 const SizedBox(
@@ -249,7 +249,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                     _submit(studentId);
                   },
                   style: ElevatedButton.styleFrom(
-                      fixedSize: const Size(200, 40),
+                      fixedSize: const Size(240, 40),
                       backgroundColor: Colors.deepPurple),
                   child: _isLoading
                       ? const SizedBox(
@@ -263,7 +263,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                           ),
                         )
                       : const Text(
-                          'Tambah Anekdot',
+                          'Tambah Hasil Karya',
                           style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
                 ),

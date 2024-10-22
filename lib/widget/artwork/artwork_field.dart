@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class AnecdotalField extends StatelessWidget {
+class ArtworkField extends StatelessWidget {
   final TextEditingController controller;
   final String labelText;
   final String? errorText;
 
-  const AnecdotalField(
+  const ArtworkField(
       {super.key,
       required this.controller,
       required this.labelText,

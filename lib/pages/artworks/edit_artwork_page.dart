@@ -1,26 +1,27 @@
-import 'package:asesmen_paud/api/dto/anecdotal_dto.dart';
+import 'package:asesmen_paud/api/dto/artwork_dto.dart';
 import 'package:asesmen_paud/api/exception.dart';
-import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
+import 'package:asesmen_paud/api/payload/artwork_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
-import 'package:asesmen_paud/api/service/anecdotal_service.dart';
+import 'package:asesmen_paud/api/service/artwork_service.dart';
 import 'package:asesmen_paud/api/service/photo_service.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
-import 'package:asesmen_paud/widget/anecdotal/anecdotal_field.dart';
+import 'package:asesmen_paud/widget/artwork/artwork_field.dart';
+
 import 'package:asesmen_paud/widget/photo_field.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class EditAnecdotalPage extends StatefulWidget {
-  final Anecdotal anecdotal;
+class EditArtworkPage extends StatefulWidget {
+  final Artwork artwork;
 
-  const EditAnecdotalPage({super.key, required this.anecdotal});
+  const EditArtworkPage({super.key, required this.artwork});
 
   @override
-  State<EditAnecdotalPage> createState() => _EditAnecdotalPageState();
+  State<EditArtworkPage> createState() => _EditArtworkPageState();
 }
 
-class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
+class _EditArtworkPageState extends State<EditArtworkPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
   List<dynamic> learningGoals = [];
@@ -71,7 +72,7 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
         });
   }
 
-  Future<void> _submit(int studentId, int anecdotalId) async {
+  Future<void> _submit(int studentId, int artworkId) async {
     setState(() {
       _isLoading = true;
       _descriptionError = null;
@@ -81,15 +82,15 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
       _errorMessage = '';
     });
 
-    final dto = EditAnecdotalDto(
+    final dto = EditArtworkDto(
         description: _descriptionController.text,
         feedback: _feedbackController.text,
         learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
         photo: _image);
 
     try {
-      final SuccessResponse<Anecdotal> response =
-          await AnecdotalService().editAnecdotal(studentId, anecdotalId, dto);
+      final SuccessResponse<Artwork> response =
+          await ArtworkService().editArtwork(studentId, artworkId, dto);
       if (response.status == 'success') {
         if (!mounted) return;
 
@@ -120,18 +121,18 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
   @override
   void initState() {
     super.initState();
-    _descriptionController.text = widget.anecdotal.description;
-    _feedbackController.text = widget.anecdotal.feedback;
-    learningGoals = widget.anecdotal.learningGoals ?? [];
+    _descriptionController.text = widget.artwork.description;
+    _feedbackController.text = widget.artwork.feedback;
+    learningGoals = widget.artwork.learningGoals ?? [];
   }
 
   @override
   Widget build(BuildContext context) {
-    final anecdotal = widget.anecdotal;
+    final artwork = widget.artwork;
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Ubah penilaian anekdot'),
+          title: const Text('Ubah penilaian hasil karya'),
         ),
         body: SingleChildScrollView(
             child: Padding(
@@ -139,14 +140,14 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      AnecdotalField(
+                      ArtworkField(
                           controller: _descriptionController,
                           labelText: 'Deskripsi',
                           errorText: _descriptionError),
                       const SizedBox(
                         height: 20,
                       ),
-                      AnecdotalField(
+                      ArtworkField(
                           controller: _feedbackController,
                           labelText: 'Umpan Balik',
                           errorText: _feedbackError),
@@ -229,7 +230,7 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
                       const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Foto Anekdot',
+                          'Foto Hasil Karya',
                         ),
                       ),
                       const SizedBox(
@@ -245,8 +246,7 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
                             }),
                       if (onChangedImage == false)
                         FutureBuilder(
-                            future:
-                                PhotoService().getPhoto(anecdotal.photoLink),
+                            future: PhotoService().getPhoto(artwork.photoLink),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
@@ -305,7 +305,7 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
                             style: const TextStyle(color: Colors.red)),
                       ElevatedButton(
                         onPressed: () {
-                          _submit(anecdotal.studentId, anecdotal.id);
+                          _submit(artwork.studentId, artwork.id);
                         },
                         style: ElevatedButton.styleFrom(
                             fixedSize: const Size(200, 40),
@@ -322,7 +322,7 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
                                 ),
                               )
                             : const Text(
-                                'Ubah Anekdot',
+                                'Ubah Hasil Karya',
                                 style: TextStyle(
                                     fontSize: 16, color: Colors.white),
                               ),

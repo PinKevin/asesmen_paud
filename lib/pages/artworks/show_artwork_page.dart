@@ -1,29 +1,29 @@
-import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
-import 'package:asesmen_paud/api/service/anecdotal_service.dart';
+import 'package:asesmen_paud/api/payload/artwork_payload.dart';
+import 'package:asesmen_paud/api/service/artwork_service.dart';
 import 'package:asesmen_paud/api/service/photo_service.dart';
-import 'package:asesmen_paud/pages/anecdotals/edit_anecdotal_page.dart';
+import 'package:asesmen_paud/pages/artworks/edit_artwork_page.dart';
 import 'package:flutter/material.dart';
 
-class ShowAnecdotalPage extends StatefulWidget {
-  final Anecdotal anecdotal;
+class ShowArtworkPage extends StatefulWidget {
+  final Artwork artwork;
 
-  const ShowAnecdotalPage({super.key, required this.anecdotal});
+  const ShowArtworkPage({super.key, required this.artwork});
 
   @override
-  State<ShowAnecdotalPage> createState() => _ShowAnecdotalPageState();
+  State<ShowArtworkPage> createState() => _ShowArtworkPageState();
 }
 
-class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
+class _ShowArtworkPageState extends State<ShowArtworkPage> {
   String? errorMessage;
 
   Future<void> _delete(
-      BuildContext context, int studentId, int anecdotalId) async {
+      BuildContext context, int studentId, int artworkId) async {
     try {
       final response =
-          await AnecdotalService().deleteAnecdotal(studentId, anecdotalId);
+          await ArtworkService().deleteArtwork(studentId, artworkId);
 
       if (!context.mounted) return;
-      Navigator.popUntil(context, ModalRoute.withName('/anecdotals'));
+      Navigator.popUntil(context, ModalRoute.withName('/artworks'));
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(response.message)));
     } catch (e) {
@@ -31,13 +31,13 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
     }
   }
 
-  Future<void> _fetchAnecdotalData() async {
-    Anecdotal? anecdotal = widget.anecdotal;
+  Future<void> _fetchArtworkData() async {
+    Artwork? artwork = widget.artwork;
     try {
-      final updatedAnecdotal = await AnecdotalService()
-          .showAnecdotal(anecdotal.studentId, anecdotal.id);
+      final updatedArtwork =
+          await ArtworkService().showArtwork(artwork.studentId, artwork.id);
       setState(() {
-        anecdotal = updatedAnecdotal.payload;
+        artwork = updatedArtwork.payload;
       });
     } catch (e) {
       setState(() {
@@ -46,30 +46,30 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
     }
   }
 
-  void _goToEditPage(BuildContext context, Anecdotal anecdotal) async {
+  void _goToEditPage(BuildContext context, Artwork artwork) async {
     final result = await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditAnecdotalPage(
-                  anecdotal: anecdotal,
+            builder: (context) => EditArtworkPage(
+                  artwork: artwork,
                 )));
 
     if (result) {
-      await _fetchAnecdotalData();
+      await _fetchArtworkData();
     }
   }
 
   Future<void> _showDeleteDialog(
-      BuildContext context, int studentId, int anecdotalId) async {
+      BuildContext context, int studentId, int artworkId) async {
     await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-                title: const Text('Hapus anekdot'),
-                content: const Text('Yakin ingin hapus anekdot?'),
+                title: const Text('Hapus hasil karya'),
+                content: const Text('Yakin ingin hapus hasil karya?'),
                 actions: [
                   TextButton(
                       onPressed: () {
-                        _delete(context, studentId, anecdotalId);
+                        _delete(context, studentId, artworkId);
                       },
                       child: const Text(
                         'Hapus',
@@ -85,15 +85,14 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
 
   @override
   Widget build(BuildContext context) {
-    final anecdotal = widget.anecdotal;
+    final artwork = widget.artwork;
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Detail anekdot'),
+          title: const Text('Detail hasil karya'),
         ),
         body: FutureBuilder(
-            future: AnecdotalService()
-                .showAnecdotal(anecdotal.studentId, anecdotal.id),
+            future: ArtworkService().showArtwork(artwork.studentId, artwork.id),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -103,7 +102,7 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
                 return const Center(child: Text('Data tidak ditemukan'));
               }
 
-              final updatedAnecdotal = snapshot.data!.payload!;
+              final updatedArtwork = snapshot.data!.payload!;
               return SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -119,7 +118,7 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
                         ),
                       ),
                       Text(
-                        updatedAnecdotal.description,
+                        updatedArtwork.description,
                         textAlign: TextAlign.justify,
                       ),
                       const SizedBox(
@@ -134,7 +133,7 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
                         ),
                       ),
                       Text(
-                        updatedAnecdotal.feedback,
+                        updatedArtwork.feedback,
                         textAlign: TextAlign.justify,
                       ),
                       const SizedBox(
@@ -148,14 +147,14 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      if (updatedAnecdotal.learningGoals!.isNotEmpty)
+                      if (updatedArtwork.learningGoals!.isNotEmpty)
                         ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: updatedAnecdotal.learningGoals!.length,
+                            itemCount: updatedArtwork.learningGoals!.length,
                             itemBuilder: (BuildContext context, int index) {
                               final learningGoal =
-                                  updatedAnecdotal.learningGoals?[index];
+                                  updatedArtwork.learningGoals?[index];
                               return Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 4.0),
@@ -203,8 +202,8 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
                         ),
                       ),
                       FutureBuilder(
-                          future: PhotoService()
-                              .getPhoto(updatedAnecdotal.photoLink),
+                          future:
+                              PhotoService().getPhoto(updatedArtwork.photoLink),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -242,10 +241,10 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
                           ElevatedButton.icon(
                             onPressed: () {
                               _showDeleteDialog(
-                                  context, anecdotal.studentId, anecdotal.id);
+                                  context, artwork.studentId, artwork.id);
                             },
                             label: const Text(
-                              'Hapus anekdot',
+                              'Hapus hasil karya',
                               style: TextStyle(color: Colors.red),
                             ),
                             icon: const Icon(
@@ -257,10 +256,10 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
                           ),
                           ElevatedButton.icon(
                             onPressed: () {
-                              _goToEditPage(context, updatedAnecdotal);
+                              _goToEditPage(context, updatedArtwork);
                             },
                             label: const Text(
-                              'Ubah anekdot',
+                              'Ubah hasil karya',
                               style: TextStyle(color: Colors.blue),
                             ),
                             icon: const Icon(

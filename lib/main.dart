@@ -2,6 +2,7 @@ import 'package:asesmen_paud/api/service/auth_service.dart';
 import 'package:asesmen_paud/pages/anecdotals/anecdotals_page.dart';
 import 'package:asesmen_paud/pages/anecdotals/create_anecdotal_page.dart';
 import 'package:asesmen_paud/pages/artworks/artworks_page.dart';
+import 'package:asesmen_paud/pages/artworks/create_artwork_page.dart';
 import 'package:asesmen_paud/pages/dashboard_page.dart';
 import 'package:asesmen_paud/pages/login_page.dart';
 import 'package:asesmen_paud/pages/students_page.dart';
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
         '/anecdotals': (context) => const AnecdotalsPage(),
         '/create-anecdotal': (context) => const CreateAnecdotalPage(),
         '/artworks': (context) => const ArtworksPage(),
+        '/create-artwork': (context) => const CreateArtworkPage(),
       },
     );
   }

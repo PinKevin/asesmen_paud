@@ -1,5 +1,6 @@
 import 'package:asesmen_paud/api/payload/artwork_payload.dart';
 import 'package:asesmen_paud/api/service/artwork_service.dart';
+import 'package:asesmen_paud/pages/artworks/show_artwork_page.dart';
 import 'package:asesmen_paud/widget/artwork/artwork_list_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -168,12 +169,11 @@ class ArtworksPageState extends State<ArtworksPage> {
                             return ArtworkListTile(
                                 artwork: artwork,
                                 onArtworkTap: (artwork) {
-                                  // Navigator.push(
-                                  //     context,
-                                  //     MaterialPageRoute(
-                                  //         builder: (context) =>
-                                  //             ShowAnecdotalPage(
-                                  //                 anecdotal: artwork)));
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ShowArtworkPage(
+                                              artwork: artwork)));
                                 });
                           } else {
                             return _hasMoreData
@@ -206,8 +206,7 @@ class ArtworksPageState extends State<ArtworksPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/create-anecdotal',
-              arguments: studentId);
+          Navigator.pushNamed(context, '/create-artwork', arguments: studentId);
         },
         child: const Icon(Icons.add),
       ),
