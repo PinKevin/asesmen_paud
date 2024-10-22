@@ -36,7 +36,11 @@ class DashboardPageState extends State<DashboardPage> {
   }
 
   void _goToAnecdotStudentsMenu() {
-    Navigator.pushNamed(context, '/students');
+    Navigator.pushNamed(context, '/students', arguments: {'mode': 'anecdotal'});
+  }
+
+  void _goToArtworkStudentsMenu() {
+    Navigator.pushNamed(context, '/students', arguments: {'mode': 'artwork'});
   }
 
   @override
@@ -78,6 +82,30 @@ class DashboardPageState extends State<DashboardPage> {
                   ),
                   const Text(
                     'Anekdot',
+                    style: TextStyle(fontSize: 16),
+                  )
+                ],
+              ),
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: _goToArtworkStudentsMenu,
+                    style: ElevatedButton.styleFrom(
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(20),
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  const Text(
+                    'Hasil Karya',
                     style: TextStyle(fontSize: 16),
                   )
                 ],

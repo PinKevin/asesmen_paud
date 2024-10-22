@@ -13,6 +13,7 @@ class StudentsPage extends StatefulWidget {
 }
 
 class StudentsPageState extends State<StudentsPage> {
+  String _mode = 'anecdotal';
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -34,6 +35,10 @@ class StudentsPageState extends State<StudentsPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map?;
+    _mode = routeArgs != null && routeArgs.containsKey('mode')
+        ? routeArgs['mode']
+        : 'anecdotal';
     _fetchStudents();
   }
 
@@ -129,7 +134,6 @@ class StudentsPageState extends State<StudentsPage> {
                     onTap: () {
                       _sortOrder = _sortOrder == 'asc' ? 'desc' : 'asc';
                       _onSortSelected(_sortOrder);
-                      print(_sortOrder);
                     },
                     child: Row(
                       children: [
@@ -159,8 +163,14 @@ class StudentsPageState extends State<StudentsPage> {
                               return StudentListTile(
                                   student: student,
                                   onStudentTap: (anecdot) {
-                                    Navigator.pushNamed(context, '/anecdotals',
-                                        arguments: student.id);
+                                    if (_mode == 'anecdotal') {
+                                      Navigator.pushNamed(
+                                          context, '/anecdotals',
+                                          arguments: student.id);
+                                    } else if (_mode == 'artwork') {
+                                      Navigator.pushNamed(context, '/artworks',
+                                          arguments: student.id);
+                                    }
                                   });
                             } else {
                               return _hasMoreData

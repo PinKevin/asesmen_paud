@@ -47,8 +47,6 @@ class StudentService {
       stringUrl += '&q=$query';
     }
 
-    print(stringUrl);
-
     final Uri url = Uri.parse(stringUrl);
     final authToken = await AuthService.getToken();
 
