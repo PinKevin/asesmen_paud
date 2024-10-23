@@ -1,26 +1,28 @@
 import 'package:asesmen_paud/api/dto/artwork_dto.dart';
 import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/payload/artwork_payload.dart';
+import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/artwork_service.dart';
+import 'package:asesmen_paud/pages/checklists/checklist_point_page.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/artwork/artwork_field.dart';
 import 'package:asesmen_paud/widget/photo_field.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class CreateArtworkPage extends StatefulWidget {
-  const CreateArtworkPage({super.key});
+class CreateChecklistPage extends StatefulWidget {
+  const CreateChecklistPage({super.key});
 
   @override
-  State<CreateArtworkPage> createState() => CreateArtworkPageState();
+  State<CreateChecklistPage> createState() => CreateChecklistPageState();
 }
 
-class CreateArtworkPageState extends State<CreateArtworkPage> {
+class CreateChecklistPageState extends State<CreateChecklistPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
-  List<dynamic> learningGoals = [];
+  List<dynamic> checklistPoints = [];
   XFile? _image;
 
   bool _isLoading = false;
@@ -30,17 +32,17 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
   String? _imageError;
   String _errorMessage = '';
 
-  Future<void> _goToLearningGoalSelection() async {
+  Future<void> _goToAddChecklistPointPage() async {
     final result = await Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const LearningGoalsPage()));
+        MaterialPageRoute(builder: (context) => const ChecklistPointPage()));
     if (result != null) {
       setState(() {
-        learningGoals.add(result);
+        checklistPoints.add(result);
       });
     }
   }
 
-  Future<void> _showDeleteLearningGoalDialog(LearningGoal learningGoal) {
+  Future<void> _showDeleteLearningGoalDialog(ChecklistPoint checklistPoint) {
     return showDialog(
         context: context,
         builder: (context) {
@@ -55,7 +57,7 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
                   child: const Text('Kembali')),
               TextButton(
                   onPressed: () {
-                    learningGoals.remove(learningGoal);
+                    checklistPoints.remove(checklistPoint);
                     Navigator.of(context).pop();
                   },
                   child: const Text(
@@ -67,52 +69,52 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
         });
   }
 
-  Future<void> _submit(int studentId) async {
-    setState(() {
-      _isLoading = true;
-      _descriptionError = null;
-      _feedbackError = null;
-      _learningGoalsError = null;
-      _imageError = null;
-      _errorMessage = '';
-    });
+  // Future<void> _submit(int studentId) async {
+  //   setState(() {
+  //     _isLoading = true;
+  //     _descriptionError = null;
+  //     _feedbackError = null;
+  //     _learningGoalsError = null;
+  //     _imageError = null;
+  //     _errorMessage = '';
+  //   });
 
-    final dto = CreateArtworkDto(
-        description: _descriptionController.text,
-        feedback: _feedbackController.text,
-        learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
-        photo: _image);
+  //   // final dto = CreateChecklistDto(
+  //   //     description: _descriptionController.text,
+  //   //     feedback: _feedbackController.text,
+  //   //     learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
+  //   //     photo: _image);
 
-    try {
-      final SuccessResponse<Artwork> response =
-          await ArtworkService().createArtwork(studentId, dto);
+  //   try {
+  //     final SuccessResponse<Checklist> response =
+  //         await ChecklistService().createChecklist(studentId, dto);
 
-      if (response.status == 'success') {
-        if (!mounted) return;
+  //     if (response.status == 'success') {
+  //       if (!mounted) return;
 
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(response.message)));
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (e is ValidationException) {
-        setState(() {
-          _descriptionError = e.errors['description']?.message ?? '';
-          _feedbackError = e.errors['feedback']?.message ?? '';
-          _learningGoalsError = e.errors['learningGoals']?.message ?? '';
-          _imageError = e.errors['photo']?.message ?? '';
-        });
-      } else {
-        setState(() {
-          _errorMessage = '$e';
-        });
-      }
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
+  //       ScaffoldMessenger.of(context)
+  //           .showSnackBar(SnackBar(content: Text(response.message)));
+  //       Navigator.pop(context);
+  //     }
+  //   } catch (e) {
+  //     if (e is ValidationException) {
+  //       setState(() {
+  //         _descriptionError = e.errors['description']?.message ?? '';
+  //         _feedbackError = e.errors['feedback']?.message ?? '';
+  //         _learningGoalsError = e.errors['learningGoals']?.message ?? '';
+  //         _imageError = e.errors['photo']?.message ?? '';
+  //       });
+  //     } else {
+  //       setState(() {
+  //         _errorMessage = '$e';
+  //       });
+  //     }
+  //   } finally {
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +122,7 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Buat penilaian hasil karya'),
+          title: const Text('Buat penilaian ceklis'),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -128,33 +130,19 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ArtworkField(
-                    controller: _descriptionController,
-                    labelText: 'Deskripsi',
-                    errorText: _descriptionError),
-                const SizedBox(
-                  height: 20,
-                ),
-                ArtworkField(
-                    controller: _feedbackController,
-                    labelText: 'Umpan Balik',
-                    errorText: _feedbackError),
-                const SizedBox(
-                  height: 20,
-                ),
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Capaian Pembelajaran',
+                    'Poin Ceklis',
                   ),
                 ),
-                if (learningGoals.isNotEmpty)
+                if (checklistPoints.isNotEmpty)
                   ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: learningGoals.length,
+                      itemCount: checklistPoints.length,
                       itemBuilder: (context, index) {
-                        final learningGoal = learningGoals[index];
+                        final learningGoal = checklistPoints[index];
                         return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                             child: ElevatedButton(
@@ -199,8 +187,7 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
                 ),
                 if (_learningGoalsError != null)
                   Text(
-                    _learningGoalsError ??
-                        'Terjadi error pada capaian pembelajaran',
+                    _learningGoalsError ?? 'Terjadi error pada poin ceklis',
                     style: const TextStyle(color: Colors.red),
                   ),
                 if (_learningGoalsError != null)
@@ -208,36 +195,8 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
                     height: 5,
                   ),
                 ElevatedButton(
-                    onPressed: _goToLearningGoalSelection,
-                    child: const Text('Tambah Capaian Pembelajaran')),
-                const SizedBox(
-                  height: 20,
-                ),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Foto Hasil Karya',
-                  ),
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                PhotoField(
-                    image: _image,
-                    onImageSelected: (image) {
-                      setState(() {
-                        _image = image;
-                      });
-                    }),
-                if (_imageError != null)
-                  const SizedBox(
-                    height: 5,
-                  ),
-                if (_imageError != null)
-                  Text(
-                    _imageError ?? 'Terjadi error pada gambar',
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                    onPressed: _goToAddChecklistPointPage,
+                    child: const Text('Tambah Poin Ceklis')),
                 const SizedBox(
                   height: 10,
                 ),
@@ -246,10 +205,10 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
                       style: const TextStyle(color: Colors.red)),
                 ElevatedButton(
                   onPressed: () {
-                    _submit(studentId);
+                    // _submit(studentId);
                   },
                   style: ElevatedButton.styleFrom(
-                      fixedSize: const Size(240, 40),
+                      fixedSize: const Size(280, 40),
                       backgroundColor: Colors.deepPurple),
                   child: _isLoading
                       ? const SizedBox(
@@ -263,7 +222,7 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
                           ),
                         )
                       : const Text(
-                          'Tambah Hasil Karya',
+                          'Tambah Penilaian Ceklis',
                           style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
                 ),
