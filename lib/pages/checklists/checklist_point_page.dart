@@ -1,3 +1,4 @@
+import 'package:asesmen_paud/api/dto/checklist_dto.dart';
 import 'package:asesmen_paud/api/payload/competency_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_scope_payload.dart';
@@ -107,49 +108,68 @@ class ChecklistPointPageState extends State<ChecklistPointPage> {
   }
 
   void _validateFieldAndBack() {
+    bool isValid = true;
     setState(() {
       if (_contextController.text.isEmpty) {
         _contextError = 'Konteks harus diisi';
+        isValid = false;
       } else {
         _contextError = null;
       }
 
       if (_observedEventController.text.isEmpty) {
         _observedEventError = 'Konteks harus diisi';
+        isValid = false;
       } else {
         _observedEventError = null;
       }
 
       if (_hasAppearedSelectedOption == null) {
         _hasAppearedError = 'Kemunculan perilaku anak harus diisi';
+        isValid = false;
       } else {
         _hasAppearedError = null;
       }
 
       if (_selectedCompetency == null) {
         _competencyError = 'Kompetensi pembelajaran harus diisi';
+        isValid = false;
       } else {
         _competencyError = null;
       }
 
       if (_selectedLearningScope == null) {
         _learningScopeError = 'Lingkup pembelajaran harus diisi';
+        isValid = false;
       } else {
         _learningScopeError = null;
       }
 
       if (_selectedSubLearningScope == null) {
         _subLearningScopeError = 'Sub lingkup pembelajaran harus diisi';
+        isValid = false;
       } else {
         _subLearningScopeError = null;
       }
 
       if (selectedLearningGoal == null) {
         _learningGoalError = 'Capaian pembelajaran harus diisi';
+        isValid = false;
       } else {
         _learningGoalError = null;
       }
     });
+
+    if (isValid) {
+      ChecklistPointDto dto = ChecklistPointDto(
+          learningGoalId: selectedLearningGoal!.id,
+          context: _contextController.text,
+          observedEvent: _observedEventController.text,
+          hasAppeared: _hasAppearedSelectedOption!);
+      Navigator.pop(context, dto);
+    } else {
+      return;
+    }
   }
 
   @override
@@ -386,7 +406,6 @@ class ChecklistPointPageState extends State<ChecklistPointPage> {
               ElevatedButton(
                   onPressed: () {
                     _validateFieldAndBack();
-                    // Navigator.pop(context, selectedLearningGoal);
                   },
                   child: const Text('Pilih'))
             ],

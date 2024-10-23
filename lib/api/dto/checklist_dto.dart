@@ -23,7 +23,7 @@ class ChecklistPointDto {
 }
 
 class CreateChecklistDto {
-  final List<ChecklistPointDto> checklistPoints;
+  final List<dynamic> checklistPoints;
 
   CreateChecklistDto(this.checklistPoints);
 

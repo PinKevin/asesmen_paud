@@ -1,16 +1,10 @@
-import 'package:asesmen_paud/api/dto/artwork_dto.dart';
+import 'package:asesmen_paud/api/dto/checklist_dto.dart';
 import 'package:asesmen_paud/api/exception.dart';
-import 'package:asesmen_paud/api/payload/artwork_payload.dart';
 import 'package:asesmen_paud/api/payload/checklist_payload.dart';
-import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
-import 'package:asesmen_paud/api/service/artwork_service.dart';
+import 'package:asesmen_paud/api/service/checklist_service.dart';
 import 'package:asesmen_paud/pages/checklists/checklist_point_page.dart';
-import 'package:asesmen_paud/pages/learning_goals_page.dart';
-import 'package:asesmen_paud/widget/artwork/artwork_field.dart';
-import 'package:asesmen_paud/widget/photo_field.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 class CreateChecklistPage extends StatefulWidget {
   const CreateChecklistPage({super.key});
@@ -20,35 +14,28 @@ class CreateChecklistPage extends StatefulWidget {
 }
 
 class CreateChecklistPageState extends State<CreateChecklistPage> {
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _feedbackController = TextEditingController();
   List<dynamic> checklistPoints = [];
-  XFile? _image;
 
   bool _isLoading = false;
-  String? _descriptionError;
-  String? _feedbackError;
-  String? _learningGoalsError;
-  String? _imageError;
   String _errorMessage = '';
 
   Future<void> _goToAddChecklistPointPage() async {
     final result = await Navigator.push(context,
         MaterialPageRoute(builder: (context) => const ChecklistPointPage()));
-    if (result != null) {
+    if (result != null && result is ChecklistPointDto) {
       setState(() {
         checklistPoints.add(result);
       });
     }
   }
 
-  Future<void> _showDeleteLearningGoalDialog(ChecklistPoint checklistPoint) {
+  Future<void> _showDeleteChecklistDialog(ChecklistPointDto checklistPoint) {
     return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
             title: const Text('Peringatan'),
-            content: const Text('Yakin ingin hapus capaian pembelajaran?'),
+            content: const Text('Yakin ingin hapus poin ceklis?'),
             actions: [
               TextButton(
                   onPressed: () {
@@ -69,52 +56,48 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
         });
   }
 
-  // Future<void> _submit(int studentId) async {
-  //   setState(() {
-  //     _isLoading = true;
-  //     _descriptionError = null;
-  //     _feedbackError = null;
-  //     _learningGoalsError = null;
-  //     _imageError = null;
-  //     _errorMessage = '';
-  //   });
+  Future<void> _submit(int studentId) async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
 
-  //   // final dto = CreateChecklistDto(
-  //   //     description: _descriptionController.text,
-  //   //     feedback: _feedbackController.text,
-  //   //     learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
-  //   //     photo: _image);
+    final dto = CreateChecklistDto(checklistPoints);
 
-  //   try {
-  //     final SuccessResponse<Checklist> response =
-  //         await ChecklistService().createChecklist(studentId, dto);
+    try {
+      if (checklistPoints.isEmpty) {
+        _errorMessage = 'Isi poin ceklis terlebih dahulu';
+        return;
+      }
+      final SuccessResponse<Checklist> response =
+          await ChecklistService().createChecklist(studentId, dto);
 
-  //     if (response.status == 'success') {
-  //       if (!mounted) return;
+      if (response.status == 'success') {
+        if (!mounted) return;
 
-  //       ScaffoldMessenger.of(context)
-  //           .showSnackBar(SnackBar(content: Text(response.message)));
-  //       Navigator.pop(context);
-  //     }
-  //   } catch (e) {
-  //     if (e is ValidationException) {
-  //       setState(() {
-  //         _descriptionError = e.errors['description']?.message ?? '';
-  //         _feedbackError = e.errors['feedback']?.message ?? '';
-  //         _learningGoalsError = e.errors['learningGoals']?.message ?? '';
-  //         _imageError = e.errors['photo']?.message ?? '';
-  //       });
-  //     } else {
-  //       setState(() {
-  //         _errorMessage = '$e';
-  //       });
-  //     }
-  //   } finally {
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //   }
-  // }
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(response.message)));
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (e is ValidationException) {
+        setState(() {
+          // _descriptionError = e.errors['description']?.message ?? '';
+          // _feedbackError = e.errors['feedback']?.message ?? '';
+          // _learningGoalsError = e.errors['learningGoals']?.message ?? '';
+          // _imageError = e.errors['photo']?.message ?? '';
+        });
+      } else {
+        setState(() {
+          _errorMessage = '$e';
+        });
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +125,7 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: checklistPoints.length,
                       itemBuilder: (context, index) {
-                        final learningGoal = checklistPoints[index];
+                        final checklistPoint = checklistPoints[index];
                         return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                             child: ElevatedButton(
@@ -159,14 +142,16 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
                                 elevation: 0,
                                 child: ListTile(
                                   title: Text(
-                                    learningGoal.learningGoalName,
+                                    checklistPoint.context,
                                     textAlign: TextAlign.justify,
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
                                   ),
                                   subtitle: Text(
-                                    '${learningGoal.learningGoalCode}',
+                                    checklistPoint.hasAppeared == true
+                                        ? 'Sudah muncul'
+                                        : 'Belum muncul',
                                     textAlign: TextAlign.justify,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -174,8 +159,8 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
                                   ),
                                   trailing: IconButton(
                                       onPressed: () {
-                                        _showDeleteLearningGoalDialog(
-                                            learningGoal);
+                                        _showDeleteChecklistDialog(
+                                            checklistPoint);
                                       },
                                       icon: const Icon(Icons.delete)),
                                 ),
@@ -185,15 +170,6 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
                 const SizedBox(
                   height: 5,
                 ),
-                if (_learningGoalsError != null)
-                  Text(
-                    _learningGoalsError ?? 'Terjadi error pada poin ceklis',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                if (_learningGoalsError != null)
-                  const SizedBox(
-                    height: 5,
-                  ),
                 ElevatedButton(
                     onPressed: _goToAddChecklistPointPage,
                     child: const Text('Tambah Poin Ceklis')),
@@ -205,7 +181,7 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
                       style: const TextStyle(color: Colors.red)),
                 ElevatedButton(
                   onPressed: () {
-                    // _submit(studentId);
+                    _submit(studentId);
                   },
                   style: ElevatedButton.styleFrom(
                       fixedSize: const Size(280, 40),

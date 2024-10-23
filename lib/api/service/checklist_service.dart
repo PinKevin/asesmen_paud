@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:asesmen_paud/api/dto/artwork_dto.dart';
+import 'package:asesmen_paud/api/dto/checklist_dto.dart';
 import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/payload/artwork_payload.dart';
 import 'package:asesmen_paud/api/payload/checklist_payload.dart';
@@ -48,44 +49,28 @@ class ChecklistService {
     }
   }
 
-  Future<SuccessResponse<Artwork>> createArtwork(
-      int studentId, CreateArtworkDto dto) async {
-    final Uri url = Uri.parse('$baseUrl/students/$studentId/artworks');
+  Future<SuccessResponse<Checklist>> createChecklist(
+      int studentId, CreateChecklistDto dto) async {
+    final Uri url = Uri.parse('$baseUrl/students/$studentId/checklists');
     final authToken = await AuthService.getToken();
 
-    if (dto.photo == null) {
-      throw Exception('Foto harus diisi');
-    }
+    final response = await http.post(url,
+        headers: {
+          'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json'
+        },
+        body: jsonEncode(dto.toJson()));
 
-    final compressedImage = await _compressImage(File(dto.photo!.path));
-
-    var request = http.MultipartRequest('POST', url);
-    request.fields['description'] = dto.description;
-    request.fields['feedback'] = dto.feedback;
-    for (int i = 0; i < dto.learningGoals.length; i++) {
-      request.fields['learningGoals[$i]'] = dto.learningGoals[i].toString();
-    }
-
-    request.files
-        .add(await http.MultipartFile.fromPath('photo', compressedImage.path));
-
-    request.headers.addAll({
-      'Authorization': 'Bearer $authToken',
-      'Content-Type': 'multipart/form-data'
-    });
-
-    final response = await request.send();
-    final responseBody = await http.Response.fromStream(response);
-    final jsonResponse = json.decode(responseBody.body);
+    final jsonResponse = json.decode(response.body);
 
     if (response.statusCode == 201) {
       return SuccessResponse.fromJson(
-          jsonResponse, (data) => Artwork.fromJson(data));
+          jsonResponse, (data) => Checklist.fromJson(data));
     } else if (response.statusCode == 422) {
       final failResponse = FailResponse.fromJson(jsonResponse);
       throw ValidationException(failResponse.errors ?? {});
     } else {
-      throw Exception('Tidak bisa menambahkan hasil karya.');
+      throw Exception('Tidak bisa menambahkan ceklis. ${response.body}');
     }
   }
 
