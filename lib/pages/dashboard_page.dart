@@ -43,6 +43,10 @@ class DashboardPageState extends State<DashboardPage> {
     Navigator.pushNamed(context, '/students', arguments: {'mode': 'artwork'});
   }
 
+  void _goToChecklistStudentsMenu() {
+    Navigator.pushNamed(context, '/students', arguments: {'mode': 'checklist'});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,6 +110,30 @@ class DashboardPageState extends State<DashboardPage> {
                   ),
                   const Text(
                     'Hasil Karya',
+                    style: TextStyle(fontSize: 16),
+                  )
+                ],
+              ),
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: _goToChecklistStudentsMenu,
+                    style: ElevatedButton.styleFrom(
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(20),
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  const Text(
+                    'Ceklis',
                     style: TextStyle(fontSize: 16),
                   )
                 ],

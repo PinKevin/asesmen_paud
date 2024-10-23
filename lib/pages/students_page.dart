@@ -170,6 +170,10 @@ class StudentsPageState extends State<StudentsPage> {
                                     } else if (_mode == 'artwork') {
                                       Navigator.pushNamed(context, '/artworks',
                                           arguments: student.id);
+                                    } else if (_mode == 'checklist') {
+                                      Navigator.pushNamed(
+                                          context, '/checklists',
+                                          arguments: student.id);
                                     }
                                   });
                             } else {
