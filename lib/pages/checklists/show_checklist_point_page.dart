@@ -1,18 +1,23 @@
+import 'package:asesmen_paud/api/dto/checklist_dto.dart';
 import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/service/learning_service.dart';
 import 'package:flutter/material.dart';
 
-class ViewChecklistPointPage extends StatefulWidget {
-  final ChecklistPoint checklistPoint;
+class ShowChecklistPointPage extends StatefulWidget {
+  final ChecklistPoint? checklistPoint;
+  final ChecklistPointDto? checklistPointDto;
 
-  const ViewChecklistPointPage({super.key, required this.checklistPoint});
+  const ShowChecklistPointPage(
+      {super.key, this.checklistPoint, this.checklistPointDto})
+      : assert(checklistPoint != null || checklistPointDto != null,
+            'Salah satu harus diisi');
 
   @override
-  State<ViewChecklistPointPage> createState() => _ViewChecklistPointPageState();
+  State<ShowChecklistPointPage> createState() => _ShowChecklistPointPageState();
 }
 
-class _ViewChecklistPointPageState extends State<ViewChecklistPointPage> {
+class _ShowChecklistPointPageState extends State<ShowChecklistPointPage> {
   LearningGoal? _learningGoal;
 
   @override
@@ -23,26 +28,41 @@ class _ViewChecklistPointPageState extends State<ViewChecklistPointPage> {
 
   void _getLearningGoal() async {
     try {
-      final checklistPoint = widget.checklistPoint;
-      final response = await LearningService.getLearningGoalById(
-          checklistPoint.learningGoalId);
-      setState(() {
-        _learningGoal = response.payload;
-      });
+      final learningGoalId = widget.checklistPoint?.learningGoalId ??
+          widget.checklistPointDto?.learningGoalId;
+      if (learningGoalId != null) {
+        final response =
+            await LearningService.getLearningGoalById(learningGoalId);
+        if (mounted) {
+          setState(() {
+            _learningGoal = response.payload;
+          });
+        }
+      }
     } catch (e) {
-      setState(() {
-        _learningGoal = null;
-      });
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching learning goal: $e')),
-      );
+      if (mounted) {
+        setState(() {
+          _learningGoal = null;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal mengambil learning goal: $e')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final checklistPoint = widget.checklistPoint;
+    final checklistPointDto = widget.checklistPointDto;
+
+    final contextText =
+        checklistPoint?.context ?? checklistPointDto?.context ?? '';
+    final observedEventText =
+        checklistPoint?.observedEvent ?? checklistPointDto?.observedEvent ?? '';
+    final hasAppeared =
+        checklistPoint?.hasAppeared ?? checklistPointDto?.hasAppeared ?? '';
 
     return Scaffold(
         appBar: AppBar(
@@ -62,7 +82,7 @@ class _ViewChecklistPointPageState extends State<ViewChecklistPointPage> {
                   ),
                 ),
                 Text(
-                  checklistPoint.context,
+                  contextText,
                   textAlign: TextAlign.justify,
                 ),
                 const SizedBox(
@@ -76,7 +96,7 @@ class _ViewChecklistPointPageState extends State<ViewChecklistPointPage> {
                   ),
                 ),
                 Text(
-                  checklistPoint.observedEvent,
+                  observedEventText,
                   textAlign: TextAlign.justify,
                 ),
                 const SizedBox(
@@ -90,7 +110,7 @@ class _ViewChecklistPointPageState extends State<ViewChecklistPointPage> {
                   ),
                 ),
                 Text(
-                  checklistPoint.hasAppeared == 1 ? 'Sudah' : 'Belum',
+                  hasAppeared == 1 ? 'Sudah' : 'Belum',
                   textAlign: TextAlign.justify,
                 ),
                 const SizedBox(
@@ -113,7 +133,7 @@ class _ViewChecklistPointPageState extends State<ViewChecklistPointPage> {
                   )
                 else
                   Text(
-                    '${_learningGoal?.learningGoalCode} - ${_learningGoal?.learningGoalName}',
+                    '${_learningGoal?.learningGoalCode}-${_learningGoal?.learningGoalName}',
                     textAlign: TextAlign.justify,
                   ),
               ],

@@ -4,6 +4,7 @@ import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/checklist_service.dart';
 import 'package:asesmen_paud/pages/checklists/create_checklist_point_page.dart';
+import 'package:asesmen_paud/pages/checklists/show_checklist_point_page.dart';
 import 'package:flutter/material.dart';
 
 class CreateChecklistPage extends StatefulWidget {
@@ -56,6 +57,14 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
         });
   }
 
+  void _viewMoreChecklistPoint(ChecklistPointDto checklistPoint) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                ShowChecklistPointPage(checklistPointDto: checklistPoint)));
+  }
+
   Future<void> _submit(int studentId) async {
     setState(() {
       _isLoading = true;
@@ -82,10 +91,7 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
     } catch (e) {
       if (e is ValidationException) {
         setState(() {
-          // _descriptionError = e.errors['description']?.message ?? '';
-          // _feedbackError = e.errors['feedback']?.message ?? '';
-          // _learningGoalsError = e.errors['learningGoals']?.message ?? '';
-          // _imageError = e.errors['photo']?.message ?? '';
+          _errorMessage = '$e';
         });
       } else {
         setState(() {
@@ -135,35 +141,36 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   )),
-                              onPressed: () {},
+                              onPressed: () {
+                                _viewMoreChecklistPoint(checklistPoint);
+                              },
                               child: Card(
                                 margin: EdgeInsets.zero,
                                 color: Colors.transparent,
                                 elevation: 0,
                                 child: ListTile(
-                                  title: Text(
-                                    checklistPoint.context,
-                                    textAlign: TextAlign.justify,
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    title: Text(
+                                      checklistPoint.context,
+                                      textAlign: TextAlign.justify,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                      ),
                                     ),
-                                  ),
-                                  subtitle: Text(
-                                    checklistPoint.hasAppeared == true
-                                        ? 'Sudah muncul'
-                                        : 'Belum muncul',
-                                    textAlign: TextAlign.justify,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                    subtitle: Text(
+                                      checklistPoint.hasAppeared == true
+                                          ? 'Sudah muncul'
+                                          : 'Belum muncul',
+                                      textAlign: TextAlign.justify,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  trailing: IconButton(
-                                      onPressed: () {
-                                        _showDeleteChecklistDialog(
-                                            checklistPoint);
-                                      },
-                                      icon: const Icon(Icons.delete)),
-                                ),
+                                    trailing: IconButton(
+                                        onPressed: () {
+                                          _showDeleteChecklistDialog(
+                                              checklistPoint);
+                                        },
+                                        icon: const Icon(Icons.delete))),
                               ),
                             ));
                       }),

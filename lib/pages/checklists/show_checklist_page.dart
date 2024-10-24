@@ -1,7 +1,7 @@
 import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/service/checklist_service.dart';
 import 'package:asesmen_paud/pages/checklists/edit_checklist_page.dart';
-import 'package:asesmen_paud/pages/checklists/view_checklist_point_page.dart';
+import 'package:asesmen_paud/pages/checklists/show_checklist_point_page.dart';
 import 'package:flutter/material.dart';
 
 class ShowChecklistPage extends StatefulWidget {
@@ -88,7 +88,7 @@ class _ShowChecklistPageState extends State<ShowChecklistPage> {
         context,
         MaterialPageRoute(
             builder: (context) =>
-                ViewChecklistPointPage(checklistPoint: checklistPoint)));
+                ShowChecklistPointPage(checklistPoint: checklistPoint)));
   }
 
   @override
