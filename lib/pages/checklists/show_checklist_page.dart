@@ -1,6 +1,7 @@
 import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/service/checklist_service.dart';
 import 'package:asesmen_paud/pages/checklists/edit_checklist_page.dart';
+import 'package:asesmen_paud/pages/checklists/view_checklist_point_page.dart';
 import 'package:flutter/material.dart';
 
 class ShowChecklistPage extends StatefulWidget {
@@ -82,6 +83,14 @@ class _ShowChecklistPageState extends State<ShowChecklistPage> {
                 ]));
   }
 
+  void _viewMoreChecklistPoint(ChecklistPoint checklistPoint) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                ViewChecklistPointPage(checklistPoint: checklistPoint)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final checklist = widget.checklist;
@@ -136,7 +145,9 @@ class _ShowChecklistPageState extends State<ShowChecklistPage> {
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         )),
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      _viewMoreChecklistPoint(checklistPoint);
+                                    },
                                     child: Card(
                                       margin: EdgeInsets.zero,
                                       color: Colors.transparent,

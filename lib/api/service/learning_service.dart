@@ -127,4 +127,22 @@ class LearningService {
       throw Exception('Terjadi error. ${response.body}');
     }
   }
+
+  static Future<SuccessResponse<LearningGoal>> getLearningGoalById(
+      int learningGoalId) async {
+    final url = Uri.parse('$baseUrl/learning-goal-by-id/$learningGoalId');
+    final authToken = await AuthService.getToken();
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => LearningGoal.fromJson(json));
+    } else {
+      throw Exception('Terjadi error. ${response.body}');
+    }
+  }
 }

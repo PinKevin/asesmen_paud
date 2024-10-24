@@ -3,7 +3,7 @@ import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/checklist_service.dart';
-import 'package:asesmen_paud/pages/checklists/checklist_point_page.dart';
+import 'package:asesmen_paud/pages/checklists/create_checklist_point_page.dart';
 import 'package:flutter/material.dart';
 
 class EditChecklistPage extends StatefulWidget {
