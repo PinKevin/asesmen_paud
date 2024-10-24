@@ -1,5 +1,6 @@
 import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/service/checklist_service.dart';
+import 'package:asesmen_paud/pages/checklists/show_checklist_page.dart';
 import 'package:asesmen_paud/widget/checklist/checklist_list_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -169,12 +170,12 @@ class ChecklistsPageState extends State<ChecklistsPage> {
                             return ChecklistListTile(
                                 checklist: checklist,
                                 onChecklistTap: (checklist) {
-                                  // Navigator.push(
-                                  //     context,
-                                  //     MaterialPageRoute(
-                                  //         builder: (context) =>
-                                  //             ShowChecklistPage(
-                                  //                 checklist: checklist)));
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              ShowChecklistPage(
+                                                  checklist: checklist)));
                                 });
                           } else {
                             return _hasMoreData

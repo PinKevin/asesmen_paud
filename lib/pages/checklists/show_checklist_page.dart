@@ -1,29 +1,28 @@
-import 'package:asesmen_paud/api/payload/artwork_payload.dart';
-import 'package:asesmen_paud/api/service/artwork_service.dart';
-import 'package:asesmen_paud/api/service/photo_service.dart';
-import 'package:asesmen_paud/pages/artworks/edit_artwork_page.dart';
+import 'package:asesmen_paud/api/payload/checklist_payload.dart';
+import 'package:asesmen_paud/api/service/checklist_service.dart';
+import 'package:asesmen_paud/pages/checklists/edit_checklist_page.dart';
 import 'package:flutter/material.dart';
 
-class ShowArtworkPage extends StatefulWidget {
-  final Artwork artwork;
+class ShowChecklistPage extends StatefulWidget {
+  final Checklist checklist;
 
-  const ShowArtworkPage({super.key, required this.artwork});
+  const ShowChecklistPage({super.key, required this.checklist});
 
   @override
-  State<ShowArtworkPage> createState() => _ShowArtworkPageState();
+  State<ShowChecklistPage> createState() => _ShowChecklistPageState();
 }
 
-class _ShowArtworkPageState extends State<ShowArtworkPage> {
+class _ShowChecklistPageState extends State<ShowChecklistPage> {
   String? errorMessage;
 
   Future<void> _delete(
-      BuildContext context, int studentId, int artworkId) async {
+      BuildContext context, int studentId, int checklistId) async {
     try {
       final response =
-          await ArtworkService().deleteArtwork(studentId, artworkId);
+          await ChecklistService().deleteChecklist(studentId, checklistId);
 
       if (!context.mounted) return;
-      Navigator.popUntil(context, ModalRoute.withName('/artworks'));
+      Navigator.popUntil(context, ModalRoute.withName('/checklists'));
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(response.message)));
     } catch (e) {
@@ -31,13 +30,13 @@ class _ShowArtworkPageState extends State<ShowArtworkPage> {
     }
   }
 
-  Future<void> _fetchArtworkData() async {
-    Artwork? artwork = widget.artwork;
+  Future<void> _fetchChecklistData() async {
+    Checklist? checklist = widget.checklist;
     try {
-      final updatedArtwork =
-          await ArtworkService().showArtwork(artwork.studentId, artwork.id);
+      final updatedChecklist = await ChecklistService()
+          .showChecklist(checklist.studentId, checklist.id);
       setState(() {
-        artwork = updatedArtwork.payload;
+        checklist = updatedChecklist.payload;
       });
     } catch (e) {
       setState(() {
@@ -46,30 +45,30 @@ class _ShowArtworkPageState extends State<ShowArtworkPage> {
     }
   }
 
-  void _goToEditPage(BuildContext context, Artwork artwork) async {
+  void _goToEditPage(BuildContext context, Checklist checklist) async {
     final result = await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EditArtworkPage(
-                  artwork: artwork,
+            builder: (context) => EditChecklistPage(
+                  checklist: checklist,
                 )));
 
     if (result) {
-      await _fetchArtworkData();
+      await _fetchChecklistData();
     }
   }
 
   Future<void> _showDeleteDialog(
-      BuildContext context, int studentId, int artworkId) async {
+      BuildContext context, int studentId, int checklistId) async {
     await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-                title: const Text('Hapus hasil karya'),
-                content: const Text('Yakin ingin hapus hasil karya?'),
+                title: const Text('Hapus ceklis'),
+                content: const Text('Yakin ingin hapus ceklis?'),
                 actions: [
                   TextButton(
                       onPressed: () {
-                        _delete(context, studentId, artworkId);
+                        _delete(context, studentId, checklistId);
                       },
                       child: const Text(
                         'Hapus',
@@ -85,14 +84,15 @@ class _ShowArtworkPageState extends State<ShowArtworkPage> {
 
   @override
   Widget build(BuildContext context) {
-    final artwork = widget.artwork;
+    final checklist = widget.checklist;
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Detail hasil karya'),
+          title: const Text('Detail ceklis'),
         ),
         body: FutureBuilder(
-            future: ArtworkService().showArtwork(artwork.studentId, artwork.id),
+            future: ChecklistService()
+                .showChecklist(checklist.studentId, checklist.id),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -102,7 +102,7 @@ class _ShowArtworkPageState extends State<ShowArtworkPage> {
                 return const Center(child: Text('Data tidak ditemukan'));
               }
 
-              final updatedArtwork = snapshot.data!.payload!;
+              final updatedChecklist = snapshot.data!.payload!;
               return SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -112,49 +112,19 @@ class _ShowArtworkPageState extends State<ShowArtworkPage> {
                       const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Deskripsi',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Text(
-                        updatedArtwork.description,
-                        textAlign: TextAlign.justify,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Umpan Balik',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Text(
-                        updatedArtwork.feedback,
-                        textAlign: TextAlign.justify,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
                           'Capaian Pembelajaran',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      if (updatedArtwork.learningGoals!.isNotEmpty)
+                      if (updatedChecklist.checklistPoints!.isNotEmpty)
                         ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: updatedArtwork.learningGoals!.length,
+                            itemCount: updatedChecklist.checklistPoints!.length,
                             itemBuilder: (BuildContext context, int index) {
-                              final learningGoal =
-                                  updatedArtwork.learningGoals?[index];
+                              final checklistPoint =
+                                  updatedChecklist.checklistPoints?[index];
                               return Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 4.0),
@@ -173,14 +143,16 @@ class _ShowArtworkPageState extends State<ShowArtworkPage> {
                                       elevation: 0,
                                       child: ListTile(
                                         title: Text(
-                                          learningGoal!.learningGoalName,
+                                          checklistPoint!.context,
                                           textAlign: TextAlign.justify,
                                           style: const TextStyle(
                                             fontSize: 14,
                                           ),
                                         ),
                                         subtitle: Text(
-                                          learningGoal.learningGoalCode,
+                                          checklistPoint.hasAppeared == 1
+                                              ? 'Sudah muncul'
+                                              : 'Belum muncul',
                                           textAlign: TextAlign.justify,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
@@ -193,58 +165,16 @@ class _ShowArtworkPageState extends State<ShowArtworkPage> {
                       const SizedBox(
                         height: 10,
                       ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Foto',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      FutureBuilder(
-                          future:
-                              PhotoService().getPhoto(updatedArtwork.photoLink),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Padding(
-                                padding: EdgeInsets.only(top: 40),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            } else if (snapshot.hasError) {
-                              return const Center(
-                                child: Text('Gagal memuat foto'),
-                              );
-                            } else if (snapshot.hasData &&
-                                snapshot.data != null) {
-                              return ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.memory(
-                                  snapshot.data!,
-                                  fit: BoxFit.cover,
-                                ),
-                              );
-                            } else {
-                              return const Center(
-                                child: Text('Tidak ada foto'),
-                              );
-                            }
-                          }),
-                      const SizedBox(
-                        height: 10,
-                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           ElevatedButton.icon(
                             onPressed: () {
                               _showDeleteDialog(
-                                  context, artwork.studentId, artwork.id);
+                                  context, checklist.studentId, checklist.id);
                             },
                             label: const Text(
-                              'Hapus hasil karya',
+                              'Hapus ceklis',
                               style: TextStyle(color: Colors.red),
                             ),
                             icon: const Icon(
@@ -256,10 +186,10 @@ class _ShowArtworkPageState extends State<ShowArtworkPage> {
                           ),
                           ElevatedButton.icon(
                             onPressed: () {
-                              _goToEditPage(context, updatedArtwork);
+                              _goToEditPage(context, updatedChecklist);
                             },
                             label: const Text(
-                              'Ubah hasil karya',
+                              'Ubah ceklis',
                               style: TextStyle(color: Colors.blue),
                             ),
                             icon: const Icon(

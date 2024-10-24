@@ -1,4 +1,4 @@
-import 'package:image_picker/image_picker.dart';
+import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 
 class ChecklistPointDto {
   final int learningGoalId;
@@ -20,6 +20,14 @@ class ChecklistPointDto {
       'hasAppeared': hasAppeared,
     };
   }
+
+  factory ChecklistPointDto.fromChecklistPoint(ChecklistPoint checklistPoint) {
+    return ChecklistPointDto(
+        learningGoalId: checklistPoint.learningGoalId,
+        context: checklistPoint.context,
+        observedEvent: checklistPoint.observedEvent,
+        hasAppeared: checklistPoint.hasAppeared == 1 ? true : false);
+  }
 }
 
 class CreateChecklistDto {
@@ -35,22 +43,13 @@ class CreateChecklistDto {
 }
 
 class EditChecklistDto {
-  final String? description;
-  final String? feedback;
-  final List<int>? learningGoals;
-  final XFile? photo;
+  final List<dynamic> checklistPoints;
 
-  EditChecklistDto(
-      {required this.description,
-      required this.feedback,
-      required this.learningGoals,
-      required this.photo});
+  EditChecklistDto(this.checklistPoints);
 
   Map<String, dynamic> toJson() {
     return {
-      'description': description,
-      'feedback': feedback,
-      'learningGoals': learningGoals?.map((goal) => goal.toString()).toList()
+      'checklistPoints': checklistPoints.map((point) => point.toJson()).toList()
     };
   }
 }
