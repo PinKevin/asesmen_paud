@@ -2,6 +2,7 @@ class LearningGoal {
   final int id;
   final String learningGoalName;
   final String learningGoalCode;
+  final int subLearningScopeId;
   final String? createdAt;
   final String? updatedAt;
 
@@ -9,6 +10,7 @@ class LearningGoal {
       {required this.id,
       required this.learningGoalName,
       required this.learningGoalCode,
+      required this.subLearningScopeId,
       this.createdAt,
       this.updatedAt});
 
@@ -17,6 +19,7 @@ class LearningGoal {
       id: json['id'],
       learningGoalName: json['learningGoalName'],
       learningGoalCode: json['learningGoalCode'],
+      subLearningScopeId: json['subLearningScopeId'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
     );

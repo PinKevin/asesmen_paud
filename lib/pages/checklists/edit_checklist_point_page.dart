@@ -1,4 +1,5 @@
 import 'package:asesmen_paud/api/dto/checklist_dto.dart';
+import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/payload/competency_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_scope_payload.dart';
@@ -7,17 +8,22 @@ import 'package:asesmen_paud/api/service/learning_service.dart';
 import 'package:asesmen_paud/widget/checklist/checklist_field.dart';
 import 'package:flutter/material.dart';
 
-class CreateChecklistPointPage extends StatefulWidget {
-  const CreateChecklistPointPage({
+class EditChecklistPointPage extends StatefulWidget {
+  final ChecklistPoint? checklistPoint;
+  final ChecklistPointDto? checklistPointDto;
+
+  const EditChecklistPointPage({
     super.key,
-  });
+    this.checklistPoint,
+    this.checklistPointDto,
+  }) : assert(checklistPoint != null || checklistPointDto != null,
+            'Salah satu harus diisi');
 
   @override
-  CreateChecklistPointPageState createState() =>
-      CreateChecklistPointPageState();
+  EditChecklistPointPageState createState() => EditChecklistPointPageState();
 }
 
-class CreateChecklistPointPageState extends State<CreateChecklistPointPage> {
+class EditChecklistPointPageState extends State<EditChecklistPointPage> {
   final TextEditingController _contextController = TextEditingController();
   final TextEditingController _observedEventController =
       TextEditingController();
@@ -45,7 +51,56 @@ class CreateChecklistPointPageState extends State<CreateChecklistPointPage> {
   @override
   void initState() {
     super.initState();
+
+    ChecklistPoint? checklistPoint;
+    ChecklistPointDto? checklistPointDto;
+
+    if (widget.checklistPoint != null) {
+      checklistPoint = widget.checklistPoint;
+
+      _contextController.text = checklistPoint!.context;
+      _observedEventController.text = checklistPoint.observedEvent;
+      _hasAppearedSelectedOption =
+          checklistPoint.hasAppeared == 1 ? true : false;
+    } else {
+      checklistPointDto = widget.checklistPointDto;
+
+      _contextController.text = checklistPointDto!.context;
+      _observedEventController.text = checklistPointDto.observedEvent;
+      _hasAppearedSelectedOption = checklistPointDto.hasAppeared;
+    }
+
     _fetchCompetencies();
+    _initializeDropdowns();
+  }
+
+  Future<void> _initializeDropdowns() async {
+    try {
+      final learningGoalId = widget.checklistPoint?.learningGoalId ??
+          widget.checklistPointDto?.learningGoalId;
+
+      if (learningGoalId != null) {
+        final learningGoalResponse =
+            await LearningService.getLearningGoalById(learningGoalId);
+        selectedLearningGoal = learningGoalResponse.payload;
+
+        final subLearningScopeResponse =
+            await LearningService.getSubLearningScopeById(
+                selectedLearningGoal!.subLearningScopeId);
+        _selectedSubLearningScope = subLearningScopeResponse.payload;
+
+        final learningScopeResponse =
+            await LearningService.getLearningScopeById(
+                _selectedSubLearningScope!.learningScopeId);
+        _selectedLearningScope = learningScopeResponse.payload;
+
+        final competencyResponse = await LearningService.getCompetencyById(
+            _selectedLearningScope!.competencyId);
+        _selectedCompetency = competencyResponse.payload;
+      }
+    } catch (e) {
+      _learningGoalError = '$e';
+    }
   }
 
   Future<void> _fetchCompetencies() async {

@@ -128,6 +128,61 @@ class LearningService {
     }
   }
 
+  static Future<SuccessResponse<Competency>> getCompetencyById(
+      int competencyId) async {
+    final url = Uri.parse('$baseUrl/competency-by-id/$competencyId');
+    final authToken = await AuthService.getToken();
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => Competency.fromJson(json));
+    } else {
+      throw Exception('Terjadi error. ${response.body}');
+    }
+  }
+
+  static Future<SuccessResponse<LearningScope>> getLearningScopeById(
+      int learningScopeId) async {
+    final url = Uri.parse('$baseUrl/learning-scope-by-id/$learningScopeId');
+    final authToken = await AuthService.getToken();
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => LearningScope.fromJson(json));
+    } else {
+      throw Exception('Terjadi error. ${response.body}');
+    }
+  }
+
+  static Future<SuccessResponse<SubLearningScope>> getSubLearningScopeById(
+      int subLearningScopeId) async {
+    final url =
+        Uri.parse('$baseUrl/sub-learning-scope-by-id/$subLearningScopeId');
+    final authToken = await AuthService.getToken();
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => SubLearningScope.fromJson(json));
+    } else {
+      throw Exception('Terjadi error. ${response.body}');
+    }
+  }
+
   static Future<SuccessResponse<LearningGoal>> getLearningGoalById(
       int learningGoalId) async {
     final url = Uri.parse('$baseUrl/learning-goal-by-id/$learningGoalId');

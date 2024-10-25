@@ -4,6 +4,7 @@ import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/checklist_service.dart';
 import 'package:asesmen_paud/pages/checklists/create_checklist_point_page.dart';
+import 'package:asesmen_paud/pages/checklists/edit_checklist_point_page.dart';
 import 'package:asesmen_paud/pages/checklists/show_checklist_point_page.dart';
 import 'package:flutter/material.dart';
 
@@ -21,13 +22,23 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
   String _errorMessage = '';
 
   Future<void> _goToAddChecklistPointPage() async {
-    final result = await Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const ChecklistPointPage()));
+    final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const CreateChecklistPointPage()));
     if (result != null && result is ChecklistPointDto) {
       setState(() {
         checklistPoints.add(result);
       });
     }
+  }
+
+  void _goToEditChecklistPoint(ChecklistPointDto checklistPoint) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                EditChecklistPointPage(checklistPointDto: checklistPoint)));
   }
 
   Future<void> _showDeleteChecklistDialog(ChecklistPointDto checklistPoint) {
@@ -165,12 +176,34 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    trailing: IconButton(
-                                        onPressed: () {
-                                          _showDeleteChecklistDialog(
-                                              checklistPoint);
-                                        },
-                                        icon: const Icon(Icons.delete))),
+                                    trailing: PopupMenuButton(
+                                      icon: const Icon(Icons.more_vert),
+                                      onSelected: (value) {
+                                        switch (value) {
+                                          case 'edit':
+                                            _goToEditChecklistPoint(
+                                                checklistPoint);
+                                            break;
+                                          case 'delete':
+                                            _showDeleteChecklistDialog(
+                                                checklistPoint);
+                                            break;
+                                          default:
+                                        }
+                                      },
+                                      itemBuilder: (BuildContext context) {
+                                        return [
+                                          // const PopupMenuItem<String>(
+                                          //   value: 'edit',
+                                          //   child: Text('Edit'),
+                                          // ),
+                                          const PopupMenuItem<String>(
+                                            value: 'delete',
+                                            child: Text('Hapus'),
+                                          ),
+                                        ];
+                                      },
+                                    )),
                               ),
                             ));
                       }),

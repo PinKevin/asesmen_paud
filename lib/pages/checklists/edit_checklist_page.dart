@@ -23,8 +23,10 @@ class EditChecklistPageState extends State<EditChecklistPage> {
   String _errorMessage = '';
 
   Future<void> _goToAddChecklistPointPage() async {
-    final result = await Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const ChecklistPointPage()));
+    final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const CreateChecklistPointPage()));
     if (result != null && result is ChecklistPointDto) {
       setState(() {
         checklistPoints.add(result);
