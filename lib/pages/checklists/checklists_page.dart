@@ -120,7 +120,7 @@ class ChecklistsPageState extends State<ChecklistsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hasil karya'),
+        title: const Text('Ceklis'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
