@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:asesmen_paud/api/dto/artwork_dto.dart';
 import 'package:asesmen_paud/api/dto/series_photo_dto.dart';
 import 'package:asesmen_paud/api/exception.dart';
-import 'package:asesmen_paud/api/payload/artwork_payload.dart';
 import 'package:asesmen_paud/api/payload/series_photo_payload.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:http/http.dart' as http;
@@ -15,7 +13,7 @@ import 'package:asesmen_paud/api/service/auth_service.dart';
 import 'package:path_provider/path_provider.dart';
 
 class SeriesPhotoService {
-  Future<SuccessResponse<SeriesPhotoPaginated>> getAllStudentSeriesPhoto(
+  Future<SuccessResponse<SeriesPhotoPaginated>> getAllStudentSeriesPhotos(
       int studentId,
       int page,
       String? from,
@@ -61,10 +59,10 @@ class SeriesPhotoService {
       request.fields['learningGoals[$i]'] = dto.learningGoals[i].toString();
     }
 
-    for (var photo in dto.photos) {
-      File compressedImage = await _compressImage(File(photo.path));
-      request.files.add(
-          await http.MultipartFile.fromPath('photo[]', compressedImage.path));
+    for (int i = 0; i < dto.photos.length; i++) {
+      File compressedImage = await _compressImage(File(dto.photos[i].path));
+      request.files.add(await http.MultipartFile.fromPath(
+          'photos[$i]', compressedImage.path));
     }
 
     request.headers.addAll({

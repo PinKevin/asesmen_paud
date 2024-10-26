@@ -174,6 +174,10 @@ class StudentsPageState extends State<StudentsPage> {
                                       Navigator.pushNamed(
                                           context, '/checklists',
                                           arguments: student.id);
+                                    } else if (_mode == 'series-photo') {
+                                      Navigator.pushNamed(
+                                          context, '/series-photos',
+                                          arguments: student.id);
                                     }
                                   });
                             } else {

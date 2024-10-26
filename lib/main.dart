@@ -7,6 +7,8 @@ import 'package:asesmen_paud/pages/checklists/checklists_page.dart';
 import 'package:asesmen_paud/pages/checklists/create_checklist_page.dart';
 import 'package:asesmen_paud/pages/dashboard_page.dart';
 import 'package:asesmen_paud/pages/login_page.dart';
+import 'package:asesmen_paud/pages/series_photos/create_series_photo_page.dart';
+import 'package:asesmen_paud/pages/series_photos/series_photo_page.dart';
 import 'package:asesmen_paud/pages/students_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -65,6 +67,8 @@ class MyApp extends StatelessWidget {
         '/create-artwork': (context) => const CreateArtworkPage(),
         '/checklists': (context) => const ChecklistsPage(),
         '/create-checklist': (context) => const CreateChecklistPage(),
+        '/series-photos': (context) => const SeriesPhotosPage(),
+        '/create-series-photo': (context) => const CreateSeriesPhotoPage(),
       },
     );
   }
