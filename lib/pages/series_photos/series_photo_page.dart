@@ -1,6 +1,7 @@
 import 'package:asesmen_paud/api/payload/series_photo_payload.dart';
 
 import 'package:asesmen_paud/api/service/series_photo_service.dart';
+import 'package:asesmen_paud/pages/series_photos/show_series_photo_page.dart';
 import 'package:asesmen_paud/widget/series_photo/series_photo_list_tile.dart';
 
 import 'package:flutter/material.dart';
@@ -172,12 +173,12 @@ class SeriesPhotosPageState extends State<SeriesPhotosPage> {
                             return SeriesPhotoListTile(
                                 seriesPhoto: seriesPhoto,
                                 onSeriesPhotoTap: (seriesPhoto) {
-                                  // Navigator.push(
-                                  //     context,
-                                  //     MaterialPageRoute(
-                                  //         builder: (context) =>
-                                  //             ShowSeriesPhotoPage(
-                                  //                 seriesPhoto: seriesPhoto)));
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              ShowSeriesPhotoPage(
+                                                  seriesPhoto: seriesPhoto)));
                                 });
                           } else {
                             return _hasMoreData

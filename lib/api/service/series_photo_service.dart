@@ -86,34 +86,35 @@ class SeriesPhotoService {
     }
   }
 
-  // Future<SuccessResponse<Artwork>> showArtwork(
-  //     int studentId, int artworkId) async {
-  //   final url = Uri.parse('$baseUrl/students/$studentId/artworks/$artworkId');
-  //   final authToken = await AuthService.getToken();
+  Future<SuccessResponse<SeriesPhoto>> showSeriesPhoto(
+      int studentId, int seriesPhotoId) async {
+    final url =
+        Uri.parse('$baseUrl/students/$studentId/series-photos/$seriesPhotoId');
+    final authToken = await AuthService.getToken();
 
-  //   final response = await http.get(url, headers: {
-  //     'Authorization': 'Bearer $authToken',
-  //   });
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
 
-  //   final jsonResponse = json.decode(response.body);
+    final jsonResponse = json.decode(response.body);
 
-  //   if (response.statusCode == 200) {
-  //     return SuccessResponse.fromJson(
-  //         jsonResponse, (json) => Artwork.fromJson(json));
-  //   } else if (response.statusCode == 404) {
-  //     String message =
-  //         jsonResponse['message'] ?? 'Hasil karya tidak dapat ditemukan';
-  //     throw ErrorException(message);
-  //   } else {
-  //     String message =
-  //         jsonResponse['message'] ?? 'Terjadi error saat mengambil hasil karya';
-  //     throw ErrorException(message);
-  //   }
-  // }
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => SeriesPhoto.fromJson(json));
+    } else if (response.statusCode == 404) {
+      String message =
+          jsonResponse['message'] ?? 'Foto berseri tidak dapat ditemukan';
+      throw ErrorException(message);
+    } else {
+      String message = jsonResponse['message'] ??
+          'Terjadi error saat mengambil foto berseri';
+      throw ErrorException(message);
+    }
+  }
 
-  // Future<SuccessResponse<Artwork>> editArtwork(
-  //     int studentId, int artworkId, EditArtworkDto dto) async {
-  //   final url = Uri.parse('$baseUrl/students/$studentId/artworks/$artworkId');
+  // Future<SuccessResponse<SeriesPhoto>> editSeriesPhoto(
+  //     int studentId, int seriesPhotoId, EditSeriesPhotoDto dto) async {
+  //   final url = Uri.parse('$baseUrl/students/$studentId/series-photos/$seriesPhotoId');
   //   final authToken = await AuthService.getToken();
 
   //   var request = http.MultipartRequest('PUT', url);
@@ -140,45 +141,46 @@ class SeriesPhotoService {
 
   //   if (response.statusCode == 200) {
   //     return SuccessResponse.fromJson(
-  //         jsonResponse, (json) => Artwork.fromJson(json));
+  //         jsonResponse, (json) => SeriesPhoto.fromJson(json));
   //   } else if (response.statusCode == 404) {
   //     String message =
-  //         jsonResponse['message'] ?? 'Hasil karya tidak dapat ditemukan';
+  //         jsonResponse['message'] ?? 'Foto berseri tidak dapat ditemukan';
   //     throw ErrorException(message);
   //   } else if (response.statusCode == 422) {
   //     final failResponse = FailResponse.fromJson(jsonResponse);
   //     throw ValidationException(failResponse.errors ?? {});
   //   } else {
   //     String message =
-  //         jsonResponse['message'] ?? 'Terjadi error saat mengambil hasil karya';
+  //         jsonResponse['message'] ?? 'Terjadi error saat mengambil foto berseri';
   //     throw ErrorException(message);
   //   }
   // }
 
-  // Future<SuccessResponse<ApiResponse>> deleteArtwork(
-  //     int studentId, int artworkId) async {
-  //   final url = Uri.parse('$baseUrl/students/$studentId/artworks/$artworkId');
-  //   final authToken = await AuthService.getToken();
+  Future<SuccessResponse<ApiResponse>> deleteSeriesPhoto(
+      int studentId, int seriesPhotoId) async {
+    final url =
+        Uri.parse('$baseUrl/students/$studentId/series-photos/$seriesPhotoId');
+    final authToken = await AuthService.getToken();
 
-  //   final response = await http.delete(url, headers: {
-  //     'Authorization': 'Bearer $authToken',
-  //   });
+    final response = await http.delete(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
 
-  //   final jsonResponse = json.decode(response.body);
+    final jsonResponse = json.decode(response.body);
 
-  //   if (response.statusCode == 200) {
-  //     return SuccessResponse.fromJson(
-  //         jsonResponse, (json) => ApiResponse.fromJson(json, null));
-  //   } else if (response.statusCode == 404) {
-  //     String message =
-  //         jsonResponse['message'] ?? 'Hasil karya tidak dapat ditemukan';
-  //     throw ErrorException(message);
-  //   } else {
-  //     String message =
-  //         jsonResponse['message'] ?? 'Terjadi error saat menghapus hasil karya';
-  //     throw ErrorException(message);
-  //   }
-  // }
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => ApiResponse.fromJson(json, null));
+    } else if (response.statusCode == 404) {
+      String message =
+          jsonResponse['message'] ?? 'Foto berseri tidak dapat ditemukan';
+      throw ErrorException(message);
+    } else {
+      String message = jsonResponse['message'] ??
+          'Terjadi error saat menghapus foto berseri';
+      throw ErrorException(message);
+    }
+  }
 
   Future<File> _compressImage(File file) async {
     final compressedBytes = await FlutterImageCompress.compressWithFile(

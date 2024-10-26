@@ -35,7 +35,7 @@ class SeriesPhoto {
   final String? createdAt;
   final String? updatedAt;
   final List<LearningGoal>? learningGoals;
-  final List<PhotoForSeriesPhoto>? seriesPhoto;
+  final List<PhotoForSeriesPhoto>? seriesPhotos;
 
   SeriesPhoto({
     required this.id,
@@ -45,7 +45,7 @@ class SeriesPhoto {
     this.createdAt,
     this.updatedAt,
     this.learningGoals,
-    this.seriesPhoto,
+    this.seriesPhotos,
   });
 
   factory SeriesPhoto.fromJson(Map<String, dynamic> json) {
@@ -62,8 +62,8 @@ class SeriesPhoto {
                     LearningGoal.fromJson(learningGoal as Map<String, dynamic>))
                 .toList()
             : null,
-        seriesPhoto: json.containsKey('seriesPhoto')
-            ? (json['seriesPhoto'] as List)
+        seriesPhotos: json.containsKey('seriesPhotos')
+            ? (json['seriesPhotos'] as List)
                 .map((photo) =>
                     PhotoForSeriesPhoto.fromJson(photo as Map<String, dynamic>))
                 .toList()
