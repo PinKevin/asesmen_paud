@@ -4,13 +4,11 @@ import 'dart:io';
 import 'package:asesmen_paud/api/dto/artwork_dto.dart';
 import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/payload/artwork_payload.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:asesmen_paud/api/service/photo_service.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
 import 'package:asesmen_paud/api/base_url.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
-import 'package:path_provider/path_provider.dart';
 
 class ArtworkService {
   Future<SuccessResponse<ArtworksPaginated>> getAllStudentArtworks(
@@ -56,7 +54,8 @@ class ArtworkService {
       throw Exception('Foto harus diisi');
     }
 
-    final compressedImage = await _compressImage(File(dto.photo!.path));
+    final compressedImage =
+        await PhotoService().compressImage(File(dto.photo!.path));
 
     var request = http.MultipartRequest('POST', url);
     request.fields['description'] = dto.description;
@@ -126,7 +125,8 @@ class ArtworkService {
     }
 
     if (dto.photo != null) {
-      final compressedImage = await _compressImage(File(dto.photo!.path));
+      final compressedImage =
+          await PhotoService().compressImage(File(dto.photo!.path));
       request.files.add(
           await http.MultipartFile.fromPath('photo', compressedImage.path));
     }
@@ -180,19 +180,5 @@ class ArtworkService {
           jsonResponse['message'] ?? 'Terjadi error saat menghapus hasil karya';
       throw ErrorException(message);
     }
-  }
-
-  Future<File> _compressImage(File file) async {
-    final compressedBytes = await FlutterImageCompress.compressWithFile(
-        file.absolute.path,
-        quality: 85);
-
-    final tempDir = await getTemporaryDirectory();
-    final tempPath =
-        path.join(tempDir.path, 'compressed_${path.basename(file.path)}');
-    final compressedFile = File(tempPath);
-
-    await compressedFile.writeAsBytes(compressedBytes!);
-    return compressedFile;
   }
 }

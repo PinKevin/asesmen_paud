@@ -4,8 +4,8 @@ import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/anecdotal_service.dart';
-import 'package:asesmen_paud/widget/anecdotal/anecdotal_field.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
+import 'package:asesmen_paud/widget/expanded_text_field.dart';
 import 'package:asesmen_paud/widget/photo_field.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -128,14 +128,14 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AnecdotalField(
+                ExpandedTextField(
                     controller: _descriptionController,
                     labelText: 'Deskripsi',
                     errorText: _descriptionError),
                 const SizedBox(
                   height: 20,
                 ),
-                AnecdotalField(
+                ExpandedTextField(
                     controller: _feedbackController,
                     labelText: 'Umpan Balik',
                     errorText: _feedbackError),

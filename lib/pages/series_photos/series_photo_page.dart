@@ -1,9 +1,9 @@
 import 'package:asesmen_paud/api/payload/series_photo_payload.dart';
 
 import 'package:asesmen_paud/api/service/series_photo_service.dart';
+import 'package:asesmen_paud/helper/datetime_converter.dart';
 import 'package:asesmen_paud/pages/series_photos/show_series_photo_page.dart';
-import 'package:asesmen_paud/widget/series_photo/series_photo_list_tile.dart';
-
+import 'package:asesmen_paud/widget/index_list_tile.dart';
 import 'package:flutter/material.dart';
 
 class SeriesPhotosPage extends StatefulWidget {
@@ -170,9 +170,13 @@ class SeriesPhotosPageState extends State<SeriesPhotosPage> {
                         itemBuilder: (context, index) {
                           if (index < _seriesPhotos.length) {
                             final seriesPhoto = _seriesPhotos[index];
-                            return SeriesPhotoListTile(
-                                seriesPhoto: seriesPhoto,
-                                onSeriesPhotoTap: (seriesPhoto) {
+                            return IndexListTile(
+                                item: seriesPhoto,
+                                getCreateDate: (item) =>
+                                    formatDate(item.createdAt!),
+                                getUpdateDate: (item) =>
+                                    formatDate(item.updatedAt!),
+                                onTap: (seriesPhoto) {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(

@@ -1,7 +1,8 @@
 import 'package:asesmen_paud/api/payload/artwork_payload.dart';
 import 'package:asesmen_paud/api/service/artwork_service.dart';
+import 'package:asesmen_paud/helper/datetime_converter.dart';
 import 'package:asesmen_paud/pages/artworks/show_artwork_page.dart';
-import 'package:asesmen_paud/widget/artwork/artwork_list_tile.dart';
+import 'package:asesmen_paud/widget/index_list_tile.dart';
 import 'package:flutter/material.dart';
 
 class ArtworksPage extends StatefulWidget {
@@ -166,9 +167,13 @@ class ArtworksPageState extends State<ArtworksPage> {
                         itemBuilder: (context, index) {
                           if (index < _artworks.length) {
                             final artwork = _artworks[index];
-                            return ArtworkListTile(
-                                artwork: artwork,
-                                onArtworkTap: (artwork) {
+                            return IndexListTile(
+                                item: artwork,
+                                getCreateDate: (item) =>
+                                    formatDate(item.createdAt!),
+                                getUpdateDate: (item) =>
+                                    formatDate(item.updatedAt!),
+                                onTap: (artwork) {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(

@@ -6,7 +6,7 @@ import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/artwork_service.dart';
 import 'package:asesmen_paud/api/service/photo_service.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
-import 'package:asesmen_paud/widget/artwork/artwork_field.dart';
+import 'package:asesmen_paud/widget/expanded_text_field.dart';
 
 import 'package:asesmen_paud/widget/photo_field.dart';
 import 'package:flutter/material.dart';
@@ -140,14 +140,14 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ArtworkField(
+                      ExpandedTextField(
                           controller: _descriptionController,
                           labelText: 'Deskripsi',
                           errorText: _descriptionError),
                       const SizedBox(
                         height: 20,
                       ),
-                      ArtworkField(
+                      ExpandedTextField(
                           controller: _feedbackController,
                           labelText: 'Umpan Balik',
                           errorText: _feedbackError),

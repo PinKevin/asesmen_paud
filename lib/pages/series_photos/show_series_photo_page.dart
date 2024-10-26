@@ -31,20 +31,20 @@ class _ShowSeriesPhotoPageState extends State<ShowSeriesPhotoPage> {
     }
   }
 
-  Future<void> _fetchSeriesPhotoData() async {
-    SeriesPhoto? seriesPhoto = widget.seriesPhoto;
-    try {
-      final updatedSeriesPhoto = await SeriesPhotoService()
-          .showSeriesPhoto(seriesPhoto.studentId, seriesPhoto.id);
-      setState(() {
-        seriesPhoto = updatedSeriesPhoto.payload;
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = e.toString();
-      });
-    }
-  }
+  // Future<void> _fetchSeriesPhotoData() async {
+  //   SeriesPhoto? seriesPhoto = widget.seriesPhoto;
+  //   try {
+  //     final updatedSeriesPhoto = await SeriesPhotoService()
+  //         .showSeriesPhoto(seriesPhoto.studentId, seriesPhoto.id);
+  //     setState(() {
+  //       seriesPhoto = updatedSeriesPhoto.payload;
+  //     });
+  //   } catch (e) {
+  //     setState(() {
+  //       errorMessage = e.toString();
+  //     });
+  //   }
+  // }
 
   // void _goToEditPage(BuildContext context, SeriesPhoto seriesPhoto) async {
   //   final result = await Navigator.push(
@@ -271,21 +271,21 @@ class _ShowSeriesPhotoPageState extends State<ShowSeriesPhotoPage> {
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white),
                             ),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                // _goToEditPage(context, updatedSeriesPhoto);
-                              },
-                              label: const Text(
-                                'Ubah foto berseri',
-                                style: TextStyle(color: Colors.blue),
-                              ),
-                              icon: const Icon(
-                                Icons.edit,
-                                color: Colors.blue,
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white),
-                            ),
+                            // ElevatedButton.icon(
+                            //   onPressed: () {
+                            //     _goToEditPage(context, updatedSeriesPhoto);
+                            //   },
+                            //   label: const Text(
+                            //     'Ubah foto berseri',
+                            //     style: TextStyle(color: Colors.blue),
+                            //   ),
+                            //   icon: const Icon(
+                            //     Icons.edit,
+                            //     color: Colors.blue,
+                            //   ),
+                            //   style: ElevatedButton.styleFrom(
+                            //       backgroundColor: Colors.white),
+                            // ),
                           ],
                         ),
                       )

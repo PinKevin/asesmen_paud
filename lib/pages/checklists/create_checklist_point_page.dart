@@ -4,7 +4,7 @@ import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_scope_payload.dart';
 import 'package:asesmen_paud/api/payload/sub_learning_scope_payload.dart';
 import 'package:asesmen_paud/api/service/learning_service.dart';
-import 'package:asesmen_paud/widget/checklist/checklist_field.dart';
+import 'package:asesmen_paud/widget/expanded_text_field.dart';
 import 'package:flutter/material.dart';
 
 class CreateChecklistPointPage extends StatefulWidget {
@@ -332,7 +332,7 @@ class CreateChecklistPointPageState extends State<CreateChecklistPointPage> {
               const SizedBox(
                 height: 20,
               ),
-              ChecklistField(
+              ExpandedTextField(
                   controller: _contextController,
                   labelText: 'Konteks',
                   errorText: _contextError,
@@ -346,7 +346,7 @@ class CreateChecklistPointPageState extends State<CreateChecklistPointPage> {
               const SizedBox(
                 height: 20,
               ),
-              ChecklistField(
+              ExpandedTextField(
                   controller: _observedEventController,
                   labelText: 'Kejadian yang Teramati',
                   errorText: _observedEventError,

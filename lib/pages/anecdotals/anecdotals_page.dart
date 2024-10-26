@@ -1,7 +1,8 @@
 import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/service/anecdotal_service.dart';
+import 'package:asesmen_paud/helper/datetime_converter.dart';
 import 'package:asesmen_paud/pages/anecdotals/show_anecdotal_page.dart';
-import 'package:asesmen_paud/widget/anecdotal/anecdotal_list_tile.dart';
+import 'package:asesmen_paud/widget/index_list_tile.dart';
 import 'package:flutter/material.dart';
 
 class AnecdotalsPage extends StatefulWidget {
@@ -167,15 +168,19 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
                         itemBuilder: (context, index) {
                           if (index < _anecdotals.length) {
                             final anecdotal = _anecdotals[index];
-                            return AnecdotalListTile(
-                                anecdotal: anecdotal,
-                                onAnecdotalTap: (anecdot) {
+                            return IndexListTile<Anecdotal>(
+                                item: anecdotal,
+                                getCreateDate: (item) =>
+                                    formatDate(item.createdAt!),
+                                getUpdateDate: (item) =>
+                                    formatDate(item.updatedAt!),
+                                onTap: (anecdotal) {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
                                               ShowAnecdotalPage(
-                                                  anecdotal: anecdot)));
+                                                  anecdotal: anecdotal)));
                                 });
                           } else {
                             return _hasMoreData

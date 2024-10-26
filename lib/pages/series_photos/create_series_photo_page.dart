@@ -7,7 +7,7 @@ import 'package:asesmen_paud/api/payload/series_photo_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/series_photo_service.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
-import 'package:asesmen_paud/widget/series_photo/series_photo_field.dart';
+import 'package:asesmen_paud/widget/expanded_text_field.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -205,14 +205,14 @@ class CreateSeriesPhotoPageState extends State<CreateSeriesPhotoPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SeriesPhotoField(
+                ExpandedTextField(
                     controller: _descriptionController,
                     labelText: 'Deskripsi',
                     errorText: _descriptionError),
                 const SizedBox(
                   height: 20,
                 ),
-                SeriesPhotoField(
+                ExpandedTextField(
                     controller: _feedbackController,
                     labelText: 'Umpan Balik',
                     errorText: _feedbackError),

@@ -1,18 +1,22 @@
-import 'package:asesmen_paud/api/payload/checklist_payload.dart';
-import 'package:asesmen_paud/helper/datetime_converter.dart';
 import 'package:flutter/material.dart';
 
-class ChecklistListTile extends StatelessWidget {
-  final Checklist checklist;
-  final Function(Checklist) onChecklistTap;
+class IndexListTile<T> extends StatelessWidget {
+  final T item;
+  final String Function(T) getCreateDate;
+  final String Function(T) getUpdateDate;
+  final Function(T) onTap;
 
-  const ChecklistListTile(
-      {super.key, required this.checklist, required this.onChecklistTap});
+  const IndexListTile(
+      {super.key,
+      required this.item,
+      required this.getCreateDate,
+      required this.getUpdateDate,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    String formattedCreateDate = formatDate(checklist.createdAt!);
-    String formattedUpdateDate = formatDate(checklist.updatedAt!);
+    String formattedCreateDate = getCreateDate(item);
+    String formattedUpdateDate = getUpdateDate(item);
 
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -23,7 +27,7 @@ class ChecklistListTile extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               )),
-          onPressed: () => onChecklistTap(checklist),
+          onPressed: () => onTap(item),
           child: Card(
             margin: EdgeInsets.zero,
             color: Colors.transparent,

@@ -1,7 +1,8 @@
 import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/service/checklist_service.dart';
+import 'package:asesmen_paud/helper/datetime_converter.dart';
 import 'package:asesmen_paud/pages/checklists/show_checklist_page.dart';
-import 'package:asesmen_paud/widget/checklist/checklist_list_tile.dart';
+import 'package:asesmen_paud/widget/index_list_tile.dart';
 import 'package:flutter/material.dart';
 
 class ChecklistsPage extends StatefulWidget {
@@ -167,9 +168,13 @@ class ChecklistsPageState extends State<ChecklistsPage> {
                         itemBuilder: (context, index) {
                           if (index < _checklists.length) {
                             final checklist = _checklists[index];
-                            return ChecklistListTile(
-                                checklist: checklist,
-                                onChecklistTap: (checklist) {
+                            return IndexListTile(
+                                item: checklist,
+                                getCreateDate: (item) =>
+                                    formatDate(checklist.createdAt!),
+                                getUpdateDate: (item) =>
+                                    formatDate(checklist.updatedAt!),
+                                onTap: (checklist) {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(

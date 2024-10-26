@@ -4,13 +4,11 @@ import 'dart:io';
 import 'package:asesmen_paud/api/dto/series_photo_dto.dart';
 import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/payload/series_photo_payload.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:asesmen_paud/api/service/photo_service.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
 import 'package:asesmen_paud/api/base_url.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
-import 'package:path_provider/path_provider.dart';
 
 class SeriesPhotoService {
   Future<SuccessResponse<SeriesPhotoPaginated>> getAllStudentSeriesPhotos(
@@ -60,7 +58,8 @@ class SeriesPhotoService {
     }
 
     for (int i = 0; i < dto.photos.length; i++) {
-      File compressedImage = await _compressImage(File(dto.photos[i].path));
+      File compressedImage =
+          await PhotoService().compressImage(File(dto.photos[i].path));
       request.files.add(await http.MultipartFile.fromPath(
           'photos[$i]', compressedImage.path));
     }
@@ -180,19 +179,5 @@ class SeriesPhotoService {
           'Terjadi error saat menghapus foto berseri';
       throw ErrorException(message);
     }
-  }
-
-  Future<File> _compressImage(File file) async {
-    final compressedBytes = await FlutterImageCompress.compressWithFile(
-        file.absolute.path,
-        quality: 85);
-
-    final tempDir = await getTemporaryDirectory();
-    final tempPath =
-        path.join(tempDir.path, 'compressed_${path.basename(file.path)}');
-    final compressedFile = File(tempPath);
-
-    await compressedFile.writeAsBytes(compressedBytes!);
-    return compressedFile;
   }
 }
