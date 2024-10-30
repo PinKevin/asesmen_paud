@@ -197,7 +197,7 @@ class CreateSeriesPhotoPageState extends State<CreateSeriesPhotoPage> {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Buat penilaian hasil karya'),
+          title: const Text('Buat penilaian foto berseri'),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -293,7 +293,7 @@ class CreateSeriesPhotoPageState extends State<CreateSeriesPhotoPage> {
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Foto Hasil Karya',
+                    'Foto Berseri',
                   ),
                 ),
                 const SizedBox(

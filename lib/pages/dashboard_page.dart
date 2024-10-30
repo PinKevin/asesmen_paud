@@ -70,103 +70,114 @@ class DashboardPageState extends State<DashboardPage> {
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Column(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ElevatedButton(
-                    onPressed: _goToAnecdotStudentsMenu,
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(20),
-                      backgroundColor: Colors.deepPurple,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Icon(
-                      Icons.add,
-                      color: Colors.white,
-                    ),
+                  Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: _goToAnecdotStudentsMenu,
+                        style: ElevatedButton.styleFrom(
+                          shape: const CircleBorder(),
+                          padding: const EdgeInsets.all(20),
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      const Text(
+                        'Anekdot',
+                        style: TextStyle(fontSize: 16),
+                      )
+                    ],
                   ),
-                  const SizedBox(
-                    height: 8,
+                  Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: _goToArtworkStudentsMenu,
+                        style: ElevatedButton.styleFrom(
+                          shape: const CircleBorder(),
+                          padding: const EdgeInsets.all(20),
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      const Text(
+                        'Hasil Karya',
+                        style: TextStyle(fontSize: 16),
+                      )
+                    ],
                   ),
-                  const Text(
-                    'Anekdot',
-                    style: TextStyle(fontSize: 16),
-                  )
                 ],
               ),
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: _goToArtworkStudentsMenu,
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(20),
-                      backgroundColor: Colors.deepPurple,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Icon(
-                      Icons.add,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  const Text(
-                    'Hasil Karya',
-                    style: TextStyle(fontSize: 16),
-                  )
-                ],
+              const SizedBox(
+                height: 30,
               ),
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: _goToChecklistStudentsMenu,
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(20),
-                      backgroundColor: Colors.deepPurple,
-                      foregroundColor: Colors.white,
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: _goToChecklistStudentsMenu,
+                      style: ElevatedButton.styleFrom(
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(20),
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.add,
-                      color: Colors.white,
+                    const SizedBox(
+                      height: 8,
                     ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  const Text(
-                    'Ceklis',
-                    style: TextStyle(fontSize: 16),
-                  )
-                ],
-              ),
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: _goToSeriesPhotoStudentsMenu,
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(20),
-                      backgroundColor: Colors.deepPurple,
-                      foregroundColor: Colors.white,
+                    const Text(
+                      'Ceklis',
+                      style: TextStyle(fontSize: 16),
+                    )
+                  ],
+                ),
+                Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: _goToSeriesPhotoStudentsMenu,
+                      style: ElevatedButton.styleFrom(
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(20),
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.add,
-                      color: Colors.white,
+                    const SizedBox(
+                      height: 8,
                     ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  const Text(
-                    'Foto Berseri',
-                    style: TextStyle(fontSize: 16),
-                  )
-                ],
-              )
+                    const Text(
+                      'Foto Berseri',
+                      style: TextStyle(fontSize: 16),
+                    )
+                  ],
+                )
+              ]),
             ],
           ),
         ));

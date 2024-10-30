@@ -123,7 +123,7 @@ class SeriesPhotosPageState extends State<SeriesPhotosPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hasil karya'),
+        title: const Text('Foto Berseri'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
