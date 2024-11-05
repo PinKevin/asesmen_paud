@@ -52,6 +52,10 @@ class DashboardPageState extends State<DashboardPage> {
         arguments: {'mode': 'series-photo'});
   }
 
+  void _goToReportMenu() {
+    Navigator.pushNamed(context, '/students', arguments: {'mode': 'report'});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -177,6 +181,35 @@ class DashboardPageState extends State<DashboardPage> {
                     )
                   ],
                 )
+              ]),
+              const SizedBox(
+                height: 30,
+              ),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: _goToReportMenu,
+                      style: ElevatedButton.styleFrom(
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(20),
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    const Text(
+                      'Laporan Bulanan',
+                      style: TextStyle(fontSize: 16),
+                    )
+                  ],
+                ),
               ]),
             ],
           ),

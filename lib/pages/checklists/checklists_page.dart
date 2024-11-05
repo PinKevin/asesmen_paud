@@ -168,7 +168,7 @@ class ChecklistsPageState extends State<ChecklistsPage> {
                         itemBuilder: (context, index) {
                           if (index < _checklists.length) {
                             final checklist = _checklists[index];
-                            return IndexListTile(
+                            return IndexListTile<Checklist>(
                                 item: checklist,
                                 getCreateDate: (item) =>
                                     formatDate(checklist.createdAt!),

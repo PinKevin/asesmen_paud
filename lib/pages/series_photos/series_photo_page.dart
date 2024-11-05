@@ -170,7 +170,7 @@ class SeriesPhotosPageState extends State<SeriesPhotosPage> {
                         itemBuilder: (context, index) {
                           if (index < _seriesPhotos.length) {
                             final seriesPhoto = _seriesPhotos[index];
-                            return IndexListTile(
+                            return IndexListTile<SeriesPhoto>(
                                 item: seriesPhoto,
                                 getCreateDate: (item) =>
                                     formatDate(item.createdAt!),

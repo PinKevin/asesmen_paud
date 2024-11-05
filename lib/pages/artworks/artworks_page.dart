@@ -167,7 +167,7 @@ class ArtworksPageState extends State<ArtworksPage> {
                         itemBuilder: (context, index) {
                           if (index < _artworks.length) {
                             final artwork = _artworks[index];
-                            return IndexListTile(
+                            return IndexListTile<Artwork>(
                                 item: artwork,
                                 getCreateDate: (item) =>
                                     formatDate(item.createdAt!),

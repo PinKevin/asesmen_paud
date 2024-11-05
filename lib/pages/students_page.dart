@@ -16,6 +16,7 @@ class StudentsPageState extends State<StudentsPage> {
   String _mode = 'anecdotal';
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  String _errorMessage = '';
 
   final List<Student> _students = [];
   bool _isLoading = false;
@@ -95,9 +96,9 @@ class StudentsPageState extends State<StudentsPage> {
         _currentPage = page;
       });
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      setState(() {
+        _errorMessage = e.toString();
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -150,62 +151,69 @@ class StudentsPageState extends State<StudentsPage> {
                 height: 20,
               ),
               Expanded(
-                  child: _students.isEmpty && _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      : ListView.builder(
-                          controller: _scrollController,
-                          itemCount: _students.length + 1,
-                          itemBuilder: (context, index) {
-                            if (index < _students.length) {
-                              final student = _students[index];
-                              return StudentListTile(
-                                  student: student,
-                                  onStudentTap: (anecdot) {
-                                    if (_mode == 'anecdotal') {
-                                      Navigator.pushNamed(
-                                          context, '/anecdotals',
-                                          arguments: student.id);
-                                    } else if (_mode == 'artwork') {
-                                      Navigator.pushNamed(context, '/artworks',
-                                          arguments: student.id);
-                                    } else if (_mode == 'checklist') {
-                                      Navigator.pushNamed(
-                                          context, '/checklists',
-                                          arguments: student.id);
-                                    } else if (_mode == 'series-photo') {
-                                      Navigator.pushNamed(
-                                          context, '/series-photos',
-                                          arguments: student.id);
-                                    }
-                                  });
-                            } else {
-                              return _hasMoreData
-                                  ? const Padding(
-                                      padding: EdgeInsets.all(16),
-                                      child: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    )
-                                  : _students.isEmpty
+                  child: _errorMessage.isNotEmpty
+                      ? Text(_errorMessage)
+                      : _students.isEmpty && _isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : ListView.builder(
+                              controller: _scrollController,
+                              itemCount: _students.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index < _students.length) {
+                                  final student = _students[index];
+                                  return StudentListTile(
+                                      student: student,
+                                      onStudentTap: (anecdot) {
+                                        if (_mode == 'anecdotal') {
+                                          Navigator.pushNamed(
+                                              context, '/anecdotals',
+                                              arguments: student.id);
+                                        } else if (_mode == 'artwork') {
+                                          Navigator.pushNamed(
+                                              context, '/artworks',
+                                              arguments: student.id);
+                                        } else if (_mode == 'checklist') {
+                                          Navigator.pushNamed(
+                                              context, '/checklists',
+                                              arguments: student.id);
+                                        } else if (_mode == 'series-photo') {
+                                          Navigator.pushNamed(
+                                              context, '/series-photos',
+                                              arguments: student.id);
+                                        } else if (_mode == 'report') {
+                                          Navigator.pushNamed(
+                                              context, '/reports',
+                                              arguments: student.id);
+                                        }
+                                      });
+                                } else {
+                                  return _hasMoreData
                                       ? const Padding(
                                           padding: EdgeInsets.all(16),
                                           child: Center(
-                                            child: Text(
-                                                'Belum ada murid. Silakan hubungi admin!'),
+                                            child: CircularProgressIndicator(),
                                           ),
                                         )
-                                      : const Padding(
-                                          padding: EdgeInsets.all(16),
-                                          child: Center(
-                                            child: Text(
-                                                'Anda sudah mencapai akhir halaman'),
-                                          ),
-                                        );
-                            }
-                          },
-                        ))
+                                      : _students.isEmpty
+                                          ? const Padding(
+                                              padding: EdgeInsets.all(16),
+                                              child: Center(
+                                                child: Text(
+                                                    'Belum ada murid. Silakan hubungi admin!'),
+                                              ),
+                                            )
+                                          : const Padding(
+                                              padding: EdgeInsets.all(16),
+                                              child: Center(
+                                                child: Text(
+                                                    'Anda sudah mencapai akhir halaman'),
+                                              ),
+                                            );
+                                }
+                              },
+                            ))
             ],
           ),
         ));

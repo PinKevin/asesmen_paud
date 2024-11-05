@@ -62,7 +62,7 @@ class Student {
 
   factory Student.fromJson(Map<String, dynamic> json) {
     return Student(
-      id: json['id'] as int,
+      id: int.tryParse(json['id'].toString()) ?? 0,
       name: json['name'] as String,
       nisn: json['nisn'] as String,
       placeOfBirth: json['place_of_birth'] as String?,
