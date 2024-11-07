@@ -1,5 +1,6 @@
 import 'package:asesmen_paud/api/payload/student_report_payload.dart';
 import 'package:asesmen_paud/api/service/report_service.dart';
+import 'package:asesmen_paud/helper/month_list.dart';
 import 'package:asesmen_paud/widget/index_report_list_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -19,16 +20,30 @@ class _ReportsPageState extends State<ReportsPage> {
   bool _hasMoreData = true;
   late int studentId;
 
-  DateTimeRange? _selectedDateRange;
+  // DateTimeRange? _selectedDateRange;
   String? _formattedStartDate;
   String? _formattedEndDate;
 
   String _sortOrder = 'desc';
 
+  final List<Map<int, String>> _monthList = monthList;
+  final List<int> _yearList = [];
+  late int _startYear;
+  late int _endYear;
+
+  int? _selectedMonth;
+  int? _selectedYear;
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _endYear = DateTime.now().year;
+    _startYear = _endYear - 2;
+
+    for (var i = _startYear; i <= _endYear; i++) {
+      _yearList.add(i);
+    }
   }
 
   @override
@@ -38,24 +53,24 @@ class _ReportsPageState extends State<ReportsPage> {
     _fetchReports();
   }
 
-  Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-        context: context,
-        firstDate: DateTime(2024, 7),
-        lastDate: DateTime.now());
+  void _onFilter() {
+    if (_selectedMonth != null && _selectedYear != null) {
+      final startDate = DateTime(_selectedYear!, _selectedMonth!, 1);
+      final endDate = DateTime(_selectedYear!, _selectedMonth! + 1, 0);
 
-    if (picked != null && picked != _selectedDateRange) {
       setState(() {
-        _selectedDateRange = picked;
-        _formattedStartDate =
-            _selectedDateRange?.start.toIso8601String().substring(0, 10);
-        _formattedEndDate =
-            _selectedDateRange?.end.toIso8601String().substring(0, 10);
+        _formattedStartDate = startDate.toIso8601String().substring(0, 10);
+        _formattedEndDate = endDate.toIso8601String().substring(0, 10);
+
         _studentReports.clear();
         _currentPage = 1;
         _hasMoreData = true;
       });
+
       _fetchReports();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Pilih bulan dan tahun untuk mem-filter')));
     }
   }
 
@@ -113,6 +128,34 @@ class _ReportsPageState extends State<ReportsPage> {
     }
   }
 
+  Future<void> _showDownloadConfirmDialog(StudentReport studentReport) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Peringatan'),
+            content: const Text('Ingin download laporan bulanan?'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Kembali',
+                    style: TextStyle(color: Colors.black),
+                  )),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Ya',
+                  )),
+            ],
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,22 +167,72 @@ class _ReportsPageState extends State<ReportsPage> {
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: () => _selectDateRange(context),
-                  child: Text(_selectedDateRange == null
-                      ? 'Pilih rentang tanggal'
-                      : 'Rentang $_formattedStartDate hingga $_formattedEndDate'),
+                Flexible(
+                  child: DropdownButtonFormField<int>(
+                      decoration: const InputDecoration(
+                        labelText: 'Pilih bulan',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: _selectedMonth,
+                      items: _monthList.map((month) {
+                        final monthKey = month.keys.first;
+                        final monthValue = month.values.first;
+                        return DropdownMenuItem<int>(
+                            value: monthKey,
+                            child: Text(
+                              monthValue,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ));
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedMonth = value;
+                        });
+                      }),
                 ),
+                const SizedBox(
+                  width: 15,
+                ),
+                Flexible(
+                  child: DropdownButtonFormField<int>(
+                      decoration: const InputDecoration(
+                        labelText: 'Pilih tahun',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: _selectedYear,
+                      items: _yearList.map((year) {
+                        return DropdownMenuItem(
+                            value: year,
+                            child: Text(
+                              '$year',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ));
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedYear = value;
+                        });
+                      }),
+                )
               ],
             ),
             const SizedBox(
               height: 10,
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                ElevatedButton(
+                    onPressed: () {
+                      _onFilter();
+                    },
+                    child: const Text('Filter')),
                 InkWell(
                     onTap: () {
                       _sortOrder = _sortOrder == 'asc' ? 'desc' : 'asc';
@@ -168,7 +261,10 @@ class _ReportsPageState extends State<ReportsPage> {
                           if (index < _studentReports.length) {
                             final report = _studentReports[index];
                             return IndexReportListTile(
-                                studentReport: report, onTap: (report) {});
+                                studentReport: report,
+                                onTap: (report) {
+                                  _showDownloadConfirmDialog(report);
+                                });
                           } else {
                             return _hasMoreData
                                 ? const Padding(

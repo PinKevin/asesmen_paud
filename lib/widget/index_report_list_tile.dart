@@ -11,10 +11,11 @@ class IndexReportListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String formattedStartDate =
-        DateTimeManipulator().formatDate(studentReport.startReportDate);
-    String formattedEndDate =
-        DateTimeManipulator().formatDate(studentReport.endReportDate);
+    DateTimeManipulator manipulator = DateTimeManipulator();
+
+    String formattedMonth =
+        manipulator.getWordMonthFromDate(studentReport.startReportDate);
+    String createdDate = manipulator.formatDate(studentReport.createdAt!);
 
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -25,16 +26,16 @@ class IndexReportListTile extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               )),
+          onLongPress: () => onTap(studentReport),
           onPressed: () => onTap(studentReport),
           child: Card(
             margin: EdgeInsets.zero,
             color: Colors.transparent,
             elevation: 0,
             child: ListTile(
-              title: Text('Laporan bulan ${studentReport.startReportDate}'),
-              subtitle:
-                  Text('Tanggal $formattedStartDate hingga $formattedEndDate'),
-              trailing: const Icon(Icons.arrow_right_outlined),
+              title: Text('Laporan Bulan $formattedMonth'),
+              subtitle: Text('Dibuat tanggal $createdDate'),
+              trailing: const Icon(Icons.download),
             ),
           ),
         ));

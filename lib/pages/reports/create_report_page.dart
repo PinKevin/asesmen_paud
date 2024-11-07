@@ -17,6 +17,7 @@ class _CreateReportPageState extends State<CreateReportPage> {
 
   int? _selectedMonth;
   int? _selectedYear;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -37,15 +38,24 @@ class _CreateReportPageState extends State<CreateReportPage> {
     }
 
     try {
+      setState(() {
+        _isLoading = true;
+      });
+
       await ReportService()
           .createAndDownloadReport(studentId, _selectedMonth!, _selectedYear!);
 
       if (!mounted) return;
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Laporan berhasil dibuat')));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Terjadi masalah saat membuat laporan. $e')));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -113,10 +123,28 @@ class _CreateReportPageState extends State<CreateReportPage> {
                   height: 20,
                 ),
                 ElevatedButton(
-                    onPressed: () {
-                      _createReport(studentId);
-                    },
-                    child: const Text('Pilih'))
+                  onPressed: () {
+                    _createReport(studentId);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: const Size(200, 40),
+                      backgroundColor: Colors.deepPurple),
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        )
+                      : const Text(
+                          'Buat Laporan',
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                ),
               ],
             ),
           ),
