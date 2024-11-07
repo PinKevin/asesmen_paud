@@ -14,7 +14,7 @@ class Competency {
 
   factory Competency.fromJson(Map<String, dynamic> json) {
     return Competency(
-      id: json['id'],
+      id: int.tryParse(json['id'].toString()) ?? 0,
       competencyName: json['competencyName'],
       element: json['element'],
       createdAt: json['createdAt'],

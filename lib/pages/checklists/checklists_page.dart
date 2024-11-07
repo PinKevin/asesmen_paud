@@ -1,6 +1,6 @@
 import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/service/checklist_service.dart';
-import 'package:asesmen_paud/helper/datetime_converter.dart';
+import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:asesmen_paud/pages/checklists/show_checklist_page.dart';
 import 'package:asesmen_paud/widget/index_list_tile.dart';
 import 'package:flutter/material.dart';
@@ -170,10 +170,10 @@ class ChecklistsPageState extends State<ChecklistsPage> {
                             final checklist = _checklists[index];
                             return IndexListTile<Checklist>(
                                 item: checklist,
-                                getCreateDate: (item) =>
-                                    formatDate(checklist.createdAt!),
-                                getUpdateDate: (item) =>
-                                    formatDate(checklist.updatedAt!),
+                                getCreateDate: (item) => DateTimeManipulator()
+                                    .formatDate(checklist.createdAt!),
+                                getUpdateDate: (item) => DateTimeManipulator()
+                                    .formatDate(checklist.updatedAt!),
                                 onTap: (checklist) {
                                   Navigator.push(
                                       context,

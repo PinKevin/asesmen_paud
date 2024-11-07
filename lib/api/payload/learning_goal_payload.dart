@@ -16,10 +16,11 @@ class LearningGoal {
 
   factory LearningGoal.fromJson(Map<String, dynamic> json) {
     return LearningGoal(
-      id: json['id'],
+      id: int.tryParse(json['id'].toString()) ?? 0,
       learningGoalName: json['learningGoalName'],
       learningGoalCode: json['learningGoalCode'],
-      subLearningScopeId: json['subLearningScopeId'],
+      subLearningScopeId:
+          int.tryParse(json['subLearningScopeId'].toString()) ?? 0,
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
     );

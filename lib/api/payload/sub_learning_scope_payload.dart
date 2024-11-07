@@ -14,9 +14,9 @@ class SubLearningScope {
 
   factory SubLearningScope.fromJson(Map<String, dynamic> json) {
     return SubLearningScope(
-      id: json['id'],
+      id: int.tryParse(json['id'].toString()) ?? 0,
       subLearningScopeName: json['subLearningScopeName'],
-      learningScopeId: json['learningScopeId'],
+      learningScopeId: int.tryParse(json['learningScopeId'].toString()) ?? 0,
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
     );

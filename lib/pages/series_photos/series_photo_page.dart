@@ -1,7 +1,7 @@
 import 'package:asesmen_paud/api/payload/series_photo_payload.dart';
 
 import 'package:asesmen_paud/api/service/series_photo_service.dart';
-import 'package:asesmen_paud/helper/datetime_converter.dart';
+import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:asesmen_paud/pages/series_photos/show_series_photo_page.dart';
 import 'package:asesmen_paud/widget/index_list_tile.dart';
 import 'package:flutter/material.dart';
@@ -172,10 +172,12 @@ class SeriesPhotosPageState extends State<SeriesPhotosPage> {
                             final seriesPhoto = _seriesPhotos[index];
                             return IndexListTile<SeriesPhoto>(
                                 item: seriesPhoto,
-                                getCreateDate: (item) =>
-                                    formatDate(item.createdAt!),
-                                getUpdateDate: (item) =>
-                                    formatDate(item.updatedAt!),
+                                getCreateDate: (seriesPhoto) =>
+                                    DateTimeManipulator()
+                                        .formatDate(seriesPhoto.createdAt!),
+                                getUpdateDate: (seriesPhoto) =>
+                                    DateTimeManipulator()
+                                        .formatDate(seriesPhoto.updatedAt!),
                                 onTap: (seriesPhoto) {
                                   Navigator.push(
                                       context,

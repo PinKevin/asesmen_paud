@@ -1,6 +1,6 @@
 import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/service/anecdotal_service.dart';
-import 'package:asesmen_paud/helper/datetime_converter.dart';
+import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:asesmen_paud/pages/anecdotals/show_anecdotal_page.dart';
 import 'package:asesmen_paud/widget/index_list_tile.dart';
 import 'package:flutter/material.dart';
@@ -170,10 +170,12 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
                             final anecdotal = _anecdotals[index];
                             return IndexListTile<Anecdotal>(
                                 item: anecdotal,
-                                getCreateDate: (item) =>
-                                    formatDate(item.createdAt!),
-                                getUpdateDate: (item) =>
-                                    formatDate(item.updatedAt!),
+                                getCreateDate: (anecdotal) =>
+                                    DateTimeManipulator()
+                                        .formatDate(anecdotal.createdAt!),
+                                getUpdateDate: (anecdotal) =>
+                                    DateTimeManipulator()
+                                        .formatDate(anecdotal.updatedAt!),
                                 onTap: (anecdotal) {
                                   Navigator.push(
                                       context,

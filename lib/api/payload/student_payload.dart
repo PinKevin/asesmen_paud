@@ -29,7 +29,7 @@ class Class {
 
   factory Class.fromJson(Map<String, dynamic> json) {
     return Class(
-        id: json['id'],
+        id: int.tryParse(json['id'].toString()) ?? 0,
         name: json['name'],
         createdAt: json['createdAt'],
         updatedAt: json['updatedAt']);

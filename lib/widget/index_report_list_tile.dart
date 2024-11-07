@@ -1,4 +1,5 @@
 import 'package:asesmen_paud/api/payload/student_report_payload.dart';
+import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:flutter/material.dart';
 
 class IndexReportListTile extends StatelessWidget {
@@ -10,6 +11,11 @@ class IndexReportListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String formattedStartDate =
+        DateTimeManipulator().formatDate(studentReport.startReportDate);
+    String formattedEndDate =
+        DateTimeManipulator().formatDate(studentReport.endReportDate);
+
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: ElevatedButton(
@@ -26,8 +32,8 @@ class IndexReportListTile extends StatelessWidget {
             elevation: 0,
             child: ListTile(
               title: Text('Laporan bulan ${studentReport.startReportDate}'),
-              subtitle: Text(
-                  'Tanggal ${studentReport.startReportDate} hingga ${studentReport.endReportDate}'),
+              subtitle:
+                  Text('Tanggal $formattedStartDate hingga $formattedEndDate'),
               trailing: const Icon(Icons.arrow_right_outlined),
             ),
           ),

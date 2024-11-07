@@ -14,9 +14,9 @@ class LearningScope {
 
   factory LearningScope.fromJson(Map<String, dynamic> json) {
     return LearningScope(
-      id: json['id'],
+      id: int.tryParse(json['id'].toString()) ?? 0,
       learningScopeName: json['learningScopeName'],
-      competencyId: json['competencyId'],
+      competencyId: int.tryParse(json['competencyId'].toString()) ?? 0,
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
     );
