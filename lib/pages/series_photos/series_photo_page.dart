@@ -4,6 +4,7 @@ import 'package:asesmen_paud/api/service/series_photo_service.dart';
 import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:asesmen_paud/pages/series_photos/show_series_photo_page.dart';
 import 'package:asesmen_paud/widget/index_list_tile.dart';
+import 'package:asesmen_paud/widget/sort_button.dart';
 import 'package:flutter/material.dart';
 
 class SeriesPhotosPage extends StatefulWidget {
@@ -140,78 +141,74 @@ class SeriesPhotosPageState extends State<SeriesPhotosPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                InkWell(
-                  onTap: () {
-                    _sortOrder = _sortOrder == 'asc' ? 'desc' : 'asc';
-                    _onSortSelected(_sortOrder);
-                  },
-                  child: Row(
-                    children: [
-                      const Text('Tanggal dibuat'),
-                      Icon(_sortOrder == 'asc'
-                          ? Icons.arrow_drop_up
-                          : Icons.arrow_drop_down)
-                    ],
-                  ),
-                )
+                SortButton(
+                    label: 'Tanggal dibuat',
+                    sortOrder: _sortOrder,
+                    onSortChanged: _onSortSelected)
               ],
             ),
             const SizedBox(
               height: 20,
             ),
             Expanded(
-                child: _seriesPhotos.isEmpty && _isLoading
-                    ? const Center(
+                child: RefreshIndicator(
+              onRefresh: () async {
+                setState(() {
+                  _seriesPhotos.clear();
+                  _currentPage = 1;
+                  _hasMoreData = true;
+                });
+                await _fetchSeriesPhotos();
+              },
+              child: _seriesPhotos.isEmpty && _isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(
                         child: CircularProgressIndicator(),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        itemCount: _seriesPhotos.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index < _seriesPhotos.length) {
-                            final seriesPhoto = _seriesPhotos[index];
-                            return IndexListTile<SeriesPhoto>(
-                                item: seriesPhoto,
-                                getCreateDate: (seriesPhoto) =>
-                                    DateTimeManipulator()
-                                        .formatDate(seriesPhoto.createdAt!),
-                                getUpdateDate: (seriesPhoto) =>
-                                    DateTimeManipulator()
-                                        .formatDate(seriesPhoto.updatedAt!),
-                                onTap: (seriesPhoto) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              ShowSeriesPhotoPage(
-                                                  seriesPhoto: seriesPhoto)));
-                                });
-                          } else {
-                            return _hasMoreData
-                                ? const Padding(
-                                    padding: EdgeInsets.all(16),
-                                    child: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  )
-                                : _seriesPhotos.isEmpty
-                                    ? const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(
-                                              'Belum ada foto berseri. Buat foto berseri baru dengan menekan tombol di kanan bawah!'),
-                                        ),
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(
-                                              'Anda sudah mencapai akhir halaman'),
-                                        ),
-                                      );
-                          }
-                        },
-                      ))
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _seriesPhotos.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index < _seriesPhotos.length) {
+                          final seriesPhoto = _seriesPhotos[index];
+                          return IndexListTile<SeriesPhoto>(
+                              item: seriesPhoto,
+                              getCreateDate: (seriesPhoto) =>
+                                  DateTimeManipulator()
+                                      .formatDate(seriesPhoto.createdAt!),
+                              getUpdateDate: (seriesPhoto) =>
+                                  DateTimeManipulator()
+                                      .formatDate(seriesPhoto.updatedAt!),
+                              onTap: (seriesPhoto) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            ShowSeriesPhotoPage(
+                                                seriesPhoto: seriesPhoto)));
+                              });
+                        } else {
+                          return _hasMoreData
+                              ? const Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Center(
+                                    child: Text(_seriesPhotos.isEmpty
+                                        ? 'Belum ada penilaian foto berseri. Buat baru dengan tekan tombol kanan bawah!'
+                                        : 'Anda sudah mencapai akhir halaman'),
+                                  ),
+                                );
+                        }
+                      },
+                    ),
+            ))
           ],
         ),
       ),

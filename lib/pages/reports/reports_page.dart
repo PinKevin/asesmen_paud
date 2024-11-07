@@ -2,6 +2,7 @@ import 'package:asesmen_paud/api/payload/student_report_payload.dart';
 import 'package:asesmen_paud/api/service/report_service.dart';
 import 'package:asesmen_paud/helper/month_list.dart';
 import 'package:asesmen_paud/widget/index_report_list_tile.dart';
+import 'package:asesmen_paud/widget/sort_button.dart';
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 
@@ -262,64 +263,63 @@ class _ReportsPageState extends State<ReportsPage> {
                       _onFilter();
                     },
                     child: const Text('Filter')),
-                InkWell(
-                    onTap: () {
-                      _sortOrder = _sortOrder == 'asc' ? 'desc' : 'asc';
-                      _onSortSelected(_sortOrder);
-                    },
-                    child: Row(children: [
-                      const Text('Tanggal dibuat'),
-                      Icon(_sortOrder == 'asc'
-                          ? Icons.arrow_drop_up
-                          : Icons.arrow_drop_down)
-                    ]))
+                SortButton(
+                    label: 'Tanggal dibuat',
+                    sortOrder: _sortOrder,
+                    onSortChanged: _onSortSelected)
               ],
             ),
             const SizedBox(
               height: 20,
             ),
             Expanded(
-                child: _studentReports.isEmpty && _isLoading
-                    ? const Center(
+                child: RefreshIndicator(
+              onRefresh: () async {
+                setState(() {
+                  _studentReports.clear();
+                  _currentPage = 1;
+                  _hasMoreData = true;
+                });
+                await _fetchReports();
+              },
+              child: _studentReports.isEmpty && _isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(
                         child: CircularProgressIndicator(),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        itemCount: _studentReports.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index < _studentReports.length) {
-                            final report = _studentReports[index];
-                            return IndexReportListTile(
-                                studentReport: report,
-                                onTap: (report) {
-                                  _showDownloadConfirmDialog(report);
-                                });
-                          } else {
-                            return _hasMoreData
-                                ? const Padding(
-                                    padding: EdgeInsets.all(16),
-                                    child: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  )
-                                : _studentReports.isEmpty
-                                    ? const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(
-                                              'Belum ada laporan bulanan. Buat laporan bulanan baru dengan menekan tombol di kanan bawah!'),
-                                        ),
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(
-                                              'Anda sudah mencapai akhir halaman'),
-                                        ),
-                                      );
-                          }
-                        },
-                      ))
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _studentReports.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index < _studentReports.length) {
+                          final report = _studentReports[index];
+                          return IndexReportListTile(
+                              studentReport: report,
+                              onTap: (report) {
+                                _showDownloadConfirmDialog(report);
+                              });
+                        } else {
+                          return _hasMoreData
+                              ? const Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Center(
+                                    child: Text(_studentReports.isEmpty
+                                        ? 'Belum ada penilaian foto berseri. Buat baru dengan tekan tombol kanan bawah!'
+                                        : 'Anda sudah mencapai akhir halaman'),
+                                  ),
+                                );
+                        }
+                      },
+                    ),
+            ))
           ],
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:asesmen_paud/api/service/anecdotal_service.dart';
 import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:asesmen_paud/pages/anecdotals/show_anecdotal_page.dart';
 import 'package:asesmen_paud/widget/index_list_tile.dart';
+import 'package:asesmen_paud/widget/sort_button.dart';
 import 'package:flutter/material.dart';
 
 class AnecdotalsPage extends StatefulWidget {
@@ -138,20 +139,10 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                InkWell(
-                  onTap: () {
-                    _sortOrder = _sortOrder == 'asc' ? 'desc' : 'asc';
-                    _onSortSelected(_sortOrder);
-                  },
-                  child: Row(
-                    children: [
-                      const Text('Tanggal dibuat'),
-                      Icon(_sortOrder == 'asc'
-                          ? Icons.arrow_drop_up
-                          : Icons.arrow_drop_down)
-                    ],
-                  ),
-                )
+                SortButton(
+                    label: 'Tanggal dibuat',
+                    sortOrder: _sortOrder,
+                    onSortChanged: _onSortSelected)
               ],
             ),
             const SizedBox(

@@ -2,6 +2,7 @@ import 'package:asesmen_paud/api/payload/student_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/student_service.dart';
 import 'package:asesmen_paud/widget/search_field.dart';
+import 'package:asesmen_paud/widget/sort_button.dart';
 import 'package:asesmen_paud/widget/student_list_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -131,89 +132,92 @@ class StudentsPageState extends State<StudentsPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  InkWell(
-                    onTap: () {
-                      _sortOrder = _sortOrder == 'asc' ? 'desc' : 'asc';
-                      _onSortSelected(_sortOrder);
-                    },
-                    child: Row(
-                      children: [
-                        const Text('Nama'),
-                        Icon(_sortOrder == 'asc'
-                            ? Icons.arrow_drop_up
-                            : Icons.arrow_drop_down)
-                      ],
-                    ),
-                  )
+                  SortButton(
+                      label: 'Nama',
+                      sortOrder: _sortOrder,
+                      onSortChanged: _onSortSelected)
                 ],
               ),
               const SizedBox(
                 height: 20,
               ),
               Expanded(
-                  child: _errorMessage.isNotEmpty
-                      ? Text(_errorMessage)
-                      : _students.isEmpty && _isLoading
-                          ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
-                          : ListView.builder(
-                              controller: _scrollController,
-                              itemCount: _students.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index < _students.length) {
-                                  final student = _students[index];
-                                  return StudentListTile(
-                                      student: student,
-                                      onStudentTap: (anecdot) {
-                                        if (_mode == 'anecdotal') {
-                                          Navigator.pushNamed(
-                                              context, '/anecdotals',
-                                              arguments: student.id);
-                                        } else if (_mode == 'artwork') {
-                                          Navigator.pushNamed(
-                                              context, '/artworks',
-                                              arguments: student.id);
-                                        } else if (_mode == 'checklist') {
-                                          Navigator.pushNamed(
-                                              context, '/checklists',
-                                              arguments: student.id);
-                                        } else if (_mode == 'series-photo') {
-                                          Navigator.pushNamed(
-                                              context, '/series-photos',
-                                              arguments: student.id);
-                                        } else if (_mode == 'report') {
-                                          Navigator.pushNamed(
-                                              context, '/reports',
-                                              arguments: student.id);
-                                        }
-                                      });
-                                } else {
-                                  return _hasMoreData
-                                      ? const Padding(
-                                          padding: EdgeInsets.all(16),
-                                          child: Center(
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        )
-                                      : _students.isEmpty
-                                          ? const Padding(
-                                              padding: EdgeInsets.all(16),
-                                              child: Center(
-                                                child: Text(
-                                                    'Belum ada murid. Silakan hubungi admin!'),
-                                              ),
-                                            )
-                                          : const Padding(
-                                              padding: EdgeInsets.all(16),
-                                              child: Center(
-                                                child: Text(
-                                                    'Anda sudah mencapai akhir halaman'),
-                                              ),
-                                            );
-                                }
-                              },
-                            ))
+                  child: RefreshIndicator(
+                onRefresh: () async {
+                  setState(() {
+                    _students.clear();
+                    _currentPage = 1;
+                    _hasMoreData = true;
+                  });
+                  await _fetchStudents();
+                },
+                child: _errorMessage.isNotEmpty
+                    ? const SingleChildScrollView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 10),
+                          child: Center(
+                            child: Text(
+                              'Belum ada murid. Tarik ke bawah untuk menyegarkan.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      )
+                    : _students.isEmpty
+                        ? const Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : ListView.builder(
+                            controller: _scrollController,
+                            itemCount: _students.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index < _students.length) {
+                                final student = _students[index];
+                                return StudentListTile(
+                                    student: student,
+                                    onStudentTap: (anecdot) {
+                                      if (_mode == 'anecdotal') {
+                                        Navigator.pushNamed(
+                                            context, '/anecdotals',
+                                            arguments: student.id);
+                                      } else if (_mode == 'artwork') {
+                                        Navigator.pushNamed(
+                                            context, '/artworks',
+                                            arguments: student.id);
+                                      } else if (_mode == 'checklist') {
+                                        Navigator.pushNamed(
+                                            context, '/checklists',
+                                            arguments: student.id);
+                                      } else if (_mode == 'series-photo') {
+                                        Navigator.pushNamed(
+                                            context, '/series-photos',
+                                            arguments: student.id);
+                                      } else if (_mode == 'report') {
+                                        Navigator.pushNamed(context, '/reports',
+                                            arguments: student.id);
+                                      }
+                                    });
+                              } else {
+                                return _hasMoreData
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(16),
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      )
+                                    : Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Center(
+                                          child: Text(_students.isEmpty
+                                              ? 'Belum ada murid. Silakan hubungi admin!'
+                                              : 'Anda sudah mencapai akhir halaman'),
+                                        ),
+                                      );
+                              }
+                            },
+                          ),
+              ))
             ],
           ),
         ));
