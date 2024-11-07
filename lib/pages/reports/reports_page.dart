@@ -1,5 +1,6 @@
 import 'package:asesmen_paud/api/payload/student_report_payload.dart';
 import 'package:asesmen_paud/api/service/report_service.dart';
+import 'package:asesmen_paud/widget/index_report_list_tile.dart';
 import 'package:flutter/material.dart';
 
 class ReportsPage extends StatefulWidget {
@@ -155,8 +156,53 @@ class _ReportsPageState extends State<ReportsPage> {
             const SizedBox(
               height: 20,
             ),
+            Expanded(
+                child: _studentReports.isEmpty && _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        itemCount: _studentReports.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index < _studentReports.length) {
+                            final report = _studentReports[index];
+                            return IndexReportListTile(
+                                studentReport: report, onTap: (report) {});
+                          } else {
+                            return _hasMoreData
+                                ? const Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  )
+                                : _studentReports.isEmpty
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(16),
+                                        child: Center(
+                                          child: Text(
+                                              'Belum ada laporan bulanan. Buat laporan bulanan baru dengan menekan tombol di kanan bawah!'),
+                                        ),
+                                      )
+                                    : const Padding(
+                                        padding: EdgeInsets.all(16),
+                                        child: Center(
+                                          child: Text(
+                                              'Anda sudah mencapai akhir halaman'),
+                                        ),
+                                      );
+                          }
+                        },
+                      ))
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/create-report', arguments: studentId);
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

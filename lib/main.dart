@@ -7,6 +7,7 @@ import 'package:asesmen_paud/pages/checklists/checklists_page.dart';
 import 'package:asesmen_paud/pages/checklists/create_checklist_page.dart';
 import 'package:asesmen_paud/pages/dashboard_page.dart';
 import 'package:asesmen_paud/pages/login_page.dart';
+import 'package:asesmen_paud/pages/reports/create_report_page.dart';
 import 'package:asesmen_paud/pages/reports/reports_page.dart';
 import 'package:asesmen_paud/pages/series_photos/create_series_photo_page.dart';
 import 'package:asesmen_paud/pages/series_photos/series_photo_page.dart';
@@ -70,7 +71,8 @@ class MyApp extends StatelessWidget {
         '/create-checklist': (context) => const CreateChecklistPage(),
         '/series-photos': (context) => const SeriesPhotosPage(),
         '/create-series-photo': (context) => const CreateSeriesPhotoPage(),
-        '/reports': (context) => const ReportsPage()
+        '/reports': (context) => const ReportsPage(),
+        '/create-report': (context) => const CreateReportPage(),
       },
     );
   }
