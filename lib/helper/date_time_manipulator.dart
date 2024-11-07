@@ -14,4 +14,9 @@ class DateTimeManipulator {
     final DateFormat formatter = DateFormat('MMMM', 'id_ID');
     return formatter.format(dateTime);
   }
+
+  int getYearFromDate(String dateString) {
+    int year = DateTime.parse(dateString).year;
+    return year;
+  }
 }

@@ -15,6 +15,8 @@ class IndexReportListTile extends StatelessWidget {
 
     String formattedMonth =
         manipulator.getWordMonthFromDate(studentReport.startReportDate);
+    int formattedYear =
+        manipulator.getYearFromDate(studentReport.startReportDate);
     String createdDate = manipulator.formatDate(studentReport.createdAt!);
 
     return Padding(
@@ -33,7 +35,7 @@ class IndexReportListTile extends StatelessWidget {
             color: Colors.transparent,
             elevation: 0,
             child: ListTile(
-              title: Text('Laporan Bulan $formattedMonth'),
+              title: Text('Laporan Bulan $formattedMonth $formattedYear'),
               subtitle: Text('Dibuat tanggal $createdDate'),
               trailing: const Icon(Icons.download),
             ),

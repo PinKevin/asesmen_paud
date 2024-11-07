@@ -60,7 +60,7 @@ class FailResponse {
   factory FailResponse.fromJson(Map<String, dynamic> json) {
     return FailResponse(
       status: json['status'] ?? 'fail',
-      message: json['messaage'] ?? 'Unknown error',
+      message: json['message'] ?? 'Unknown error',
       errors: json.containsKey('errors')
           ? (json['errors'] as List)
               .fold<Map<String, ValidationErrorResponse>>({}, (acc, error) {

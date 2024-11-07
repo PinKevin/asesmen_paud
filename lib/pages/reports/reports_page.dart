@@ -3,6 +3,7 @@ import 'package:asesmen_paud/api/service/report_service.dart';
 import 'package:asesmen_paud/helper/month_list.dart';
 import 'package:asesmen_paud/widget/index_report_list_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({super.key});
@@ -20,7 +21,6 @@ class _ReportsPageState extends State<ReportsPage> {
   bool _hasMoreData = true;
   late int studentId;
 
-  // DateTimeRange? _selectedDateRange;
   String? _formattedStartDate;
   String? _formattedEndDate;
 
@@ -146,6 +146,7 @@ class _ReportsPageState extends State<ReportsPage> {
                   )),
               TextButton(
                   onPressed: () {
+                    _downloadExistingReport(studentId, studentReport.id);
                     Navigator.of(context).pop();
                   },
                   child: const Text(
@@ -154,6 +155,34 @@ class _ReportsPageState extends State<ReportsPage> {
             ],
           );
         });
+  }
+
+  Future<void> _downloadExistingReport(int studentId, int reportId) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final String filePath =
+          await ReportService().downloadExistingReport(studentId, reportId);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text('Laporan berhasil diunduh'),
+        action: SnackBarAction(
+            label: 'BUKA',
+            onPressed: () async {
+              await OpenFilex.open(filePath);
+            }),
+      ));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Terjadi masalah saat mengunduh laporan')));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -295,8 +324,15 @@ class _ReportsPageState extends State<ReportsPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/create-report', arguments: studentId);
+        onPressed: () async {
+          final result = await Navigator.pushNamed(context, '/create-report',
+              arguments: studentId);
+          if (result == true) {
+            _studentReports.clear();
+            _currentPage = 1;
+            _hasMoreData = true;
+            _fetchReports();
+          }
         },
         child: const Icon(Icons.add),
       ),

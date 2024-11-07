@@ -1,6 +1,8 @@
+import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/service/report_service.dart';
 import 'package:asesmen_paud/helper/month_list.dart';
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
 
 class CreateReportPage extends StatefulWidget {
   const CreateReportPage({super.key});
@@ -42,16 +44,25 @@ class _CreateReportPageState extends State<CreateReportPage> {
         _isLoading = true;
       });
 
-      await ReportService()
+      final String filePath = await ReportService()
           .createAndDownloadReport(studentId, _selectedMonth!, _selectedYear!);
 
       if (!mounted) return;
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Laporan berhasil dibuat')));
+      Navigator.pop(context, true);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text('Laporan berhasil dibuat'),
+        action: SnackBarAction(
+            label: 'BUKA',
+            onPressed: () async {
+              await OpenFilex.open(filePath);
+            }),
+      ));
+    } on ErrorException catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Terjadi masalah saat membuat laporan. $e')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Terjadi masalah saat membuat laporan')));
     } finally {
       setState(() {
         _isLoading = false;
