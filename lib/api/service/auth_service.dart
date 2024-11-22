@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:asesmen_paud/api/base_url.dart';
 import 'package:asesmen_paud/api/exception.dart';
+import 'package:asesmen_paud/api/payload/profile_payload.dart';
 import 'package:http/http.dart' as http;
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/payload/login_payload.dart';
@@ -83,5 +84,29 @@ class AuthService {
     });
 
     return response.statusCode == 200;
+  }
+
+  Future<SuccessResponse<ProfilePayload>> getProfile() async {
+    final token = await getToken();
+    if (token == null) {
+      throw Exception('Tidak ada token');
+    }
+
+    final url = Uri.parse('$baseUrl/profile');
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json'
+    });
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+          jsonResponse, (json) => ProfilePayload.fromJson(json));
+    } else {
+      String message =
+          jsonResponse['message'] ?? 'Terjadi error saat mengambil profil';
+      throw ErrorException(message);
+    }
   }
 }

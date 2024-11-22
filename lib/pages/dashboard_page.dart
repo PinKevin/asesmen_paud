@@ -14,6 +14,23 @@ class DashboardPageState extends State<DashboardPage> {
   bool _isLoading = false;
   final AuthService authService = AuthService();
 
+  late Future<String?> _teacherName;
+
+  @override
+  void initState() {
+    super.initState();
+    _teacherName = _getTeacherInfo();
+  }
+
+  Future<String?> _getTeacherInfo() async {
+    try {
+      final response = await AuthService().getProfile();
+      return response.payload!.name;
+    } catch (e) {
+      return 'Guru';
+    }
+  }
+
   void _logout() async {
     try {
       setState(() {
@@ -37,97 +54,99 @@ class DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  void _goToAnecdotStudentsMenu() {
-    Navigator.pushNamed(context, '/students', arguments: {'mode': 'anecdotal'});
-  }
-
-  void _goToArtworkStudentsMenu() {
-    Navigator.pushNamed(context, '/students', arguments: {'mode': 'artwork'});
-  }
-
-  void _goToChecklistStudentsMenu() {
-    Navigator.pushNamed(context, '/students', arguments: {'mode': 'checklist'});
-  }
-
-  void _goToSeriesPhotoStudentsMenu() {
-    Navigator.pushNamed(context, '/students',
-        arguments: {'mode': 'series-photo'});
-  }
-
-  void _goToReportMenu() {
-    Navigator.pushNamed(context, '/students', arguments: {'mode': 'report'});
+  void _navigateToStudents({Map<String, dynamic>? arguments}) {
+    Navigator.pushNamed(context, '/students', arguments: arguments);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Dashboard'),
-          actions: [
-            IconButton(
-                onPressed: _logout,
-                icon: _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : const Icon(Icons.logout))
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Greeting(
-                teacherName: 'Orang',
+    return FutureBuilder<String?>(
+        future: _teacherName,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  MenuButton(
-                      icon: Icons.create,
-                      label: 'Anekdot',
-                      onPressed: () {
-                        _goToAnecdotStudentsMenu();
-                      }),
-                  MenuButton(
-                      icon: Icons.palette,
-                      label: 'Hasil Karya',
-                      onPressed: () {
-                        _goToArtworkStudentsMenu();
-                      })
+            );
+          }
+          final teacherName = snapshot.data ?? 'Guru';
+
+          return Scaffold(
+              appBar: AppBar(
+                title: const Text('Dashboard'),
+                actions: [
+                  IconButton(
+                      onPressed: _logout,
+                      icon: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                          : const Icon(Icons.logout))
                 ],
               ),
-              const SizedBox(
-                height: 30,
-              ),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                MenuButton(
-                    icon: Icons.check,
-                    label: 'Ceklis',
-                    onPressed: () {
-                      _goToChecklistStudentsMenu();
-                    }),
-                MenuButton(
-                    icon: Icons.camera_alt,
-                    label: 'Foto Berseri',
-                    onPressed: () {
-                      _goToSeriesPhotoStudentsMenu();
-                    })
-              ]),
-              const SizedBox(
-                height: 30,
-              ),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                MenuButton(
-                    icon: Icons.article,
-                    label: 'Laporan Bulanan',
-                    onPressed: () {
-                      _goToReportMenu();
-                    })
-              ]),
-            ],
-          ),
-        ));
+              body: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Greeting(teacherName: teacherName),
+                    ),
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        MenuButton(
+                            icon: Icons.create,
+                            label: 'Anekdot',
+                            onPressed: () => _navigateToStudents(
+                                arguments: {'mode': 'anecdotal'})),
+                        MenuButton(
+                            icon: Icons.palette,
+                            label: 'Hasil Karya',
+                            onPressed: () => _navigateToStudents(
+                                arguments: {'mode': 'artwork'}))
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          MenuButton(
+                              icon: Icons.check,
+                              label: 'Ceklis',
+                              onPressed: () => _navigateToStudents(
+                                  arguments: {'mode': 'checklist'})),
+                          MenuButton(
+                              icon: Icons.camera_alt,
+                              label: 'Foto Berseri',
+                              onPressed: () => _navigateToStudents(
+                                  arguments: {'mode': 'series-photo'}))
+                        ]),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          MenuButton(
+                              icon: Icons.article,
+                              label: 'Laporan Bulanan',
+                              onPressed: () => _navigateToStudents(
+                                  arguments: {'mode': 'report'}))
+                        ]),
+                  ],
+                ),
+              ));
+        });
   }
 }
