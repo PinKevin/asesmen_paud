@@ -4,7 +4,7 @@ import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_scope_payload.dart';
 import 'package:asesmen_paud/api/payload/sub_learning_scope_payload.dart';
 import 'package:asesmen_paud/api/service/learning_service.dart';
-import 'package:asesmen_paud/widget/expanded_text_field.dart';
+import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
 import 'package:flutter/material.dart';
 
 class CreateChecklistPointPage extends StatefulWidget {

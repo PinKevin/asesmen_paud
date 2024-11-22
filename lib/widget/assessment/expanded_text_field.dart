@@ -16,9 +16,6 @@ class ExpandedTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
-      onTapOutside: (event) {
-        FocusScope.of(context).unfocus();
-      },
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
@@ -28,9 +25,13 @@ class ExpandedTextField extends StatelessWidget {
             const OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
       ),
       keyboardType: TextInputType.multiline,
+      textCapitalization: TextCapitalization.sentences,
       minLines: 1,
       maxLines: 5,
       onChanged: onChanged,
+      onTapOutside: (event) {
+        FocusScope.of(context).unfocus();
+      },
     );
   }
 }

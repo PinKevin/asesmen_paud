@@ -3,7 +3,7 @@ import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/student_service.dart';
 import 'package:asesmen_paud/widget/search_field.dart';
 import 'package:asesmen_paud/widget/sort_button.dart';
-import 'package:asesmen_paud/widget/student_list_tile.dart';
+import 'package:asesmen_paud/widget/student/student_list_tile.dart';
 import 'package:flutter/material.dart';
 
 class StudentsPage extends StatefulWidget {
