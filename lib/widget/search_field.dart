@@ -39,6 +39,9 @@ class SearchFieldState extends State<SearchField> {
           suffixIcon: IconButton(
               onPressed: _hasText ? _clearSearch : null,
               icon: Icon(_hasText ? Icons.clear : Icons.search))),
+      onTapOutside: (event) {
+        FocusScope.of(context).unfocus();
+      },
     );
   }
 

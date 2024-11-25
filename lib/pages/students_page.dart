@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:asesmen_paud/api/payload/student_payload.dart';
-import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/student_service.dart';
 import 'package:asesmen_paud/widget/search_field.dart';
 import 'package:asesmen_paud/widget/sort_button.dart';
-import 'package:asesmen_paud/widget/student/student_list_tile.dart';
+import 'package:asesmen_paud/widget/student/student_list_view.dart';
 import 'package:flutter/material.dart';
 
 class StudentsPage extends StatefulWidget {
@@ -14,18 +15,18 @@ class StudentsPage extends StatefulWidget {
 }
 
 class StudentsPageState extends State<StudentsPage> {
-  String _mode = 'anecdotal';
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  String _errorMessage = '';
-
   final List<Student> _students = [];
-  bool _isLoading = false;
-  int _currentPage = 1;
-  bool _hasMoreData = true;
-  late int studentId;
 
+  String _errorMessage = '';
+  String _mode = 'anecdotal';
   String _sortOrder = 'asc';
+  int _currentPage = 1;
+  bool _isLoading = false;
+  bool _hasMoreData = true;
+
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -37,65 +38,69 @@ class StudentsPageState extends State<StudentsPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map?;
-    _mode = routeArgs != null && routeArgs.containsKey('mode')
-        ? routeArgs['mode']
-        : 'anecdotal';
+    _setMode();
     _fetchStudents();
+  }
+
+  void _setMode() {
+    final routeArgs = ModalRoute.of(context)?.settings.arguments as Map?;
+    _mode = routeArgs?['mode'] ?? 'anecdotal';
+  }
+
+  void _resetStudents() {
+    setState(() {
+      _students.clear();
+      _currentPage = 1;
+      _hasMoreData = true;
+    });
   }
 
   void _onSortSelected(String order) {
     setState(() {
       _sortOrder = order;
-      _students.clear();
-      _currentPage = 1;
-      _hasMoreData = true;
-    });
-    _fetchStudents(sortBy: order);
-  }
-
-  void _onSearchChanged() {
-    setState(() {
-      _students.clear();
-      _currentPage = 1;
-      _hasMoreData = true;
+      _resetStudents();
     });
     _fetchStudents();
   }
 
-  Future<void> _fetchStudents({int page = 1, String sortBy = 'asc'}) async {
-    if (_isLoading || !_hasMoreData) return;
-    String searchQuery = _searchController.text.trim();
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _resetStudents();
+      _fetchStudents();
+    });
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent &&
+        !_isLoading &&
+        _hasMoreData) {
+      _fetchStudents(page: _currentPage + 1);
+    }
+  }
+
+  void _updateStudents(List<Student> newStudents, int page) {
+    setState(() {
+      _students.addAll(newStudents.where((student) =>
+          !_students.any((existing) => existing.id == student.id)));
+      _currentPage = page;
+      _hasMoreData = newStudents.length >= 10;
+    });
+  }
+
+  Future<void> _fetchStudents({int page = 1}) async {
+    if (_isLoading) return;
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      SuccessResponse<StudentsPaginated> studentsResponse;
-      if (searchQuery.isEmpty) {
-        studentsResponse =
-            await StudentService().getAllStudents(page, '', sortBy);
-      } else {
-        studentsResponse =
-            await StudentService().getAllStudents(page, searchQuery, sortBy);
-      }
-
-      final newStudents = studentsResponse.payload!.data;
-
-      setState(() {
-        if (newStudents.isEmpty || newStudents.length < 10) {
-          _hasMoreData = false;
-        }
-
-        for (var student in newStudents) {
-          if (!_students.any((s) => s.id == student.id)) {
-            _students.add(student);
-          }
-        }
-
-        _currentPage = page;
-      });
+      final response = await StudentService()
+          .getAllStudents(page, _searchController.text.trim(), _sortOrder);
+      _updateStudents(response.payload!.data, page);
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -104,14 +109,6 @@ class StudentsPageState extends State<StudentsPage> {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent &&
-        !_isLoading) {
-      _fetchStudents(page: _currentPage + 1, sortBy: _sortOrder);
     }
   }
 
@@ -142,82 +139,18 @@ class StudentsPageState extends State<StudentsPage> {
                 height: 20,
               ),
               Expanded(
-                  child: RefreshIndicator(
-                onRefresh: () async {
-                  setState(() {
-                    _students.clear();
-                    _currentPage = 1;
-                    _hasMoreData = true;
-                  });
-                  await _fetchStudents();
-                },
-                child: _errorMessage.isNotEmpty
-                    ? const SingleChildScrollView(
-                        physics: AlwaysScrollableScrollPhysics(),
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 10),
-                          child: Center(
-                            child: Text(
-                              'Belum ada murid. Tarik ke bawah untuk menyegarkan.',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      )
-                    : _students.isEmpty
-                        ? const Center(
-                            child: CircularProgressIndicator(),
-                          )
-                        : ListView.builder(
-                            controller: _scrollController,
-                            itemCount: _students.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index < _students.length) {
-                                final student = _students[index];
-                                return StudentListTile(
-                                    student: student,
-                                    onStudentTap: (anecdot) {
-                                      if (_mode == 'anecdotal') {
-                                        Navigator.pushNamed(
-                                            context, '/anecdotals',
-                                            arguments: student.id);
-                                      } else if (_mode == 'artwork') {
-                                        Navigator.pushNamed(
-                                            context, '/artworks',
-                                            arguments: student.id);
-                                      } else if (_mode == 'checklist') {
-                                        Navigator.pushNamed(
-                                            context, '/checklists',
-                                            arguments: student.id);
-                                      } else if (_mode == 'series-photo') {
-                                        Navigator.pushNamed(
-                                            context, '/series-photos',
-                                            arguments: student.id);
-                                      } else if (_mode == 'report') {
-                                        Navigator.pushNamed(context, '/reports',
-                                            arguments: student.id);
-                                      }
-                                    });
-                              } else {
-                                return _hasMoreData
-                                    ? const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      )
-                                    : Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(_students.isEmpty
-                                              ? 'Belum ada murid. Silakan hubungi admin!'
-                                              : 'Anda sudah mencapai akhir halaman'),
-                                        ),
-                                      );
-                              }
-                            },
-                          ),
-              ))
+                child: StudentListView(
+                    students: _students,
+                    errorMessage: _errorMessage,
+                    isLoading: _isLoading,
+                    hasMoreData: _hasMoreData,
+                    mode: _mode,
+                    onRefresh: () async {
+                      _resetStudents();
+                      await _fetchStudents();
+                    },
+                    scrollController: _scrollController),
+              )
             ],
           ),
         ));
@@ -225,6 +158,8 @@ class StudentsPageState extends State<StudentsPage> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
