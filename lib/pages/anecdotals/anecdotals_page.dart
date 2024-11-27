@@ -2,7 +2,10 @@ import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/service/anecdotal_service.dart';
 import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:asesmen_paud/pages/anecdotals/show_anecdotal_page.dart';
+import 'package:asesmen_paud/widget/assessment/create_button.dart';
+import 'package:asesmen_paud/widget/assessment/date_range_picker_button.dart';
 import 'package:asesmen_paud/widget/assessment/index_list_tile.dart';
+import 'package:asesmen_paud/widget/assessment/index_list_view.dart';
 import 'package:asesmen_paud/widget/sort_button.dart';
 import 'package:flutter/material.dart';
 
@@ -15,18 +18,17 @@ class AnecdotalsPage extends StatefulWidget {
 
 class AnecdotalsPageState extends State<AnecdotalsPage> {
   final ScrollController _scrollController = ScrollController();
-
   final List<Anecdotal> _anecdotals = [];
-  bool _isLoading = false;
+
+  String _errorMessage = '';
+  String _sortOrder = 'desc';
   int _currentPage = 1;
+  bool _isLoading = false;
   bool _hasMoreData = true;
+
   late int studentId;
 
   DateTimeRange? _selectedDateRange;
-  String? _formattedStartDate;
-  String? _formattedEndDate;
-
-  String _sortOrder = 'desc';
 
   @override
   void initState() {
@@ -41,68 +43,67 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
     _fetchAnecdotals();
   }
 
-  Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-        context: context,
-        firstDate: DateTime(2024, 7),
-        lastDate: DateTime.now());
-
-    if (picked != null && picked != _selectedDateRange) {
-      setState(() {
-        _selectedDateRange = picked;
-        _formattedStartDate =
-            _selectedDateRange?.start.toIso8601String().substring(0, 10);
-        _formattedEndDate =
-            _selectedDateRange?.end.toIso8601String().substring(0, 10);
-        _anecdotals.clear();
-        _currentPage = 1;
-        _hasMoreData = true;
-      });
-      _fetchAnecdotals();
-    }
+  void _resetAnecdotals() {
+    setState(() {
+      _anecdotals.clear();
+      _currentPage = 1;
+      _hasMoreData = true;
+    });
   }
 
   void _onSortSelected(String order) {
     setState(() {
       _sortOrder = order;
-      _anecdotals.clear();
-      _currentPage = 1;
-      _hasMoreData = true;
+      _resetAnecdotals();
     });
-    _fetchAnecdotals(sortBy: order);
+    _fetchAnecdotals();
   }
 
-  Future<void> _fetchAnecdotals({int page = 1, String sortBy = 'desc'}) async {
-    if (_isLoading || !_hasMoreData) return;
+  void _onDateRangeSelected(DateTimeRange? picked) {
+    setState(() {
+      _selectedDateRange = picked;
+      _resetAnecdotals();
+    });
+    _fetchAnecdotals();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent &&
+        !_isLoading) {
+      _fetchAnecdotals(page: _currentPage + 1);
+    }
+  }
+
+  void _updateAnecdotals(List<Anecdotal> newAnecdotal, int page) {
+    setState(() {
+      _anecdotals.addAll(newAnecdotal.where((anecdotal) =>
+          !_anecdotals.any((existing) => existing.id == anecdotal.id)));
+      _currentPage = page;
+      _hasMoreData = newAnecdotal.length >= 10;
+    });
+  }
+
+  Future<void> _fetchAnecdotals({int page = 1}) async {
+    if (_isLoading) return;
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final anecdotalsResponse = await AnecdotalService()
-          .getAllStudentAnecdotals(
-              studentId, page, _formattedStartDate, _formattedEndDate, sortBy);
+      final response = await AnecdotalService().getAllStudentAnecdotals(
+          studentId,
+          page,
+          _selectedDateRange?.start.toIso8601String().substring(0, 10),
+          _selectedDateRange?.end.toIso8601String().substring(0, 10),
+          _sortOrder);
 
-      final newAnecdotals = anecdotalsResponse.payload!.data;
-
-      setState(() {
-        if (newAnecdotals.isEmpty || newAnecdotals.length < 10) {
-          _hasMoreData = false;
-        }
-
-        for (var anecdotal in newAnecdotals) {
-          if (!_anecdotals.any((a) => a.id == anecdotal.id)) {
-            _anecdotals.add(anecdotal);
-          }
-        }
-
-        _currentPage = page;
-      });
+      _updateAnecdotals(response.payload!.data, page);
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      setState(() {
+        _errorMessage = e.toString();
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -110,108 +111,66 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
     }
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent &&
-        !_isLoading) {
-      _fetchAnecdotals(page: _currentPage + 1, sortBy: _sortOrder);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Anekdot'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            ElevatedButton(
-                onPressed: () => _selectDateRange(context),
-                child: Text(_selectedDateRange == null
-                    ? 'Pilih rentang tanggal'
-                    : 'Rentang: $_formattedStartDate hingga $_formattedEndDate')),
-            const SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SortButton(
-                    label: 'Tanggal dibuat',
-                    sortOrder: _sortOrder,
-                    onSortChanged: _onSortSelected)
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Expanded(
-                child: _anecdotals.isEmpty && _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        itemCount: _anecdotals.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index < _anecdotals.length) {
-                            final anecdotal = _anecdotals[index];
-                            return IndexListTile<Anecdotal>(
-                                item: anecdotal,
-                                getCreateDate: (anecdotal) =>
-                                    DateTimeManipulator()
-                                        .formatDate(anecdotal.createdAt!),
-                                getUpdateDate: (anecdotal) =>
-                                    DateTimeManipulator()
-                                        .formatDate(anecdotal.updatedAt!),
-                                onTap: (anecdotal) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              ShowAnecdotalPage(
-                                                  anecdotal: anecdotal)));
-                                });
-                          } else {
-                            return _hasMoreData
-                                ? const Padding(
-                                    padding: EdgeInsets.all(16),
-                                    child: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  )
-                                : _anecdotals.isEmpty
-                                    ? const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(
-                                              'Belum ada anekdot. Buat anekdot baru dengan menekan tombol di kanan bawah!'),
-                                        ),
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(
-                                              'Anda sudah mencapai akhir halaman'),
-                                        ),
-                                      );
-                          }
-                        },
-                      ))
-          ],
+        appBar: AppBar(
+          title: const Text('Anekdot'),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/create-anecdotal',
-              arguments: studentId);
-        },
-        child: const Icon(Icons.add),
-      ),
-    );
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              DateRangePickerButton(
+                  selectedDateRange: _selectedDateRange,
+                  onDateRangeSelected: _onDateRangeSelected),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  SortButton(
+                      label: 'Tanggal dibuat',
+                      sortOrder: _sortOrder,
+                      onSortChanged: _onSortSelected)
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Expanded(
+                  child: IndexListView<Anecdotal>(
+                errorMessage: _errorMessage,
+                isLoading: _isLoading,
+                hasMoreData: _hasMoreData,
+                onRefresh: () async {
+                  _resetAnecdotals();
+                  await _fetchAnecdotals();
+                },
+                scrollController: _scrollController,
+                items: _anecdotals,
+                itemBuilder: (context, anecdotal) => IndexListTile(
+                  item: anecdotal,
+                  getCreateDate: (a) =>
+                      DateTimeManipulator().formatDate(a.createdAt!),
+                  getUpdateDate: (a) =>
+                      DateTimeManipulator().formatDate(a.updatedAt!),
+                  onTap: (a) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ShowAnecdotalPage(anecdotal: a),
+                      ),
+                    );
+                  },
+                ),
+              ))
+            ],
+          ),
+        ),
+        floatingActionButton:
+            CreateButton(mode: 'anecdotal', studentId: studentId));
   }
 
   @override
