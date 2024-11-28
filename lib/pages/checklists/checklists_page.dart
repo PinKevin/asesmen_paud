@@ -1,8 +1,10 @@
 import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/service/checklist_service.dart';
-import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:asesmen_paud/pages/checklists/show_checklist_page.dart';
+import 'package:asesmen_paud/widget/assessment/create_button.dart';
+import 'package:asesmen_paud/widget/assessment/date_range_picker_button.dart';
 import 'package:asesmen_paud/widget/assessment/index_list_tile.dart';
+import 'package:asesmen_paud/widget/assessment/index_list_view.dart';
 import 'package:asesmen_paud/widget/sort_button.dart';
 import 'package:flutter/material.dart';
 
@@ -15,18 +17,17 @@ class ChecklistsPage extends StatefulWidget {
 
 class ChecklistsPageState extends State<ChecklistsPage> {
   final ScrollController _scrollController = ScrollController();
-
   final List<Checklist> _checklists = [];
-  bool _isLoading = false;
+
+  String _errorMessage = '';
+  String _sortOrder = 'desc';
   int _currentPage = 1;
+  bool _isLoading = false;
   bool _hasMoreData = true;
+
   late int studentId;
 
   DateTimeRange? _selectedDateRange;
-  String? _formattedStartDate;
-  String? _formattedEndDate;
-
-  String _sortOrder = 'desc';
 
   @override
   void initState() {
@@ -41,68 +42,81 @@ class ChecklistsPageState extends State<ChecklistsPage> {
     _fetchChecklists();
   }
 
-  Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-        context: context,
-        firstDate: DateTime(2024, 7),
-        lastDate: DateTime.now());
-
-    if (picked != null && picked != _selectedDateRange) {
-      setState(() {
-        _selectedDateRange = picked;
-        _formattedStartDate =
-            _selectedDateRange?.start.toIso8601String().substring(0, 10);
-        _formattedEndDate =
-            _selectedDateRange?.end.toIso8601String().substring(0, 10);
-        _checklists.clear();
-        _currentPage = 1;
-        _hasMoreData = true;
-      });
-      _fetchChecklists();
-    }
+  void _resetChecklists() {
+    setState(() {
+      _checklists.clear();
+      _currentPage = 1;
+      _hasMoreData = true;
+    });
   }
 
   void _onSortSelected(String order) {
     setState(() {
       _sortOrder = order;
-      _checklists.clear();
-      _currentPage = 1;
-      _hasMoreData = true;
+      _resetChecklists();
     });
-    _fetchChecklists(sortBy: order);
+    _fetchChecklists();
   }
 
-  Future<void> _fetchChecklists({int page = 1, String sortBy = 'desc'}) async {
-    if (_isLoading || !_hasMoreData) return;
+  void _onDateRangeSelected(DateTimeRange? picked) {
+    setState(() {
+      _selectedDateRange = picked;
+      _resetChecklists();
+    });
+    _fetchChecklists();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent &&
+        !_isLoading) {
+      _fetchChecklists(page: _currentPage + 1);
+    }
+  }
+
+  void _updateChecklists(List<Checklist> newChecklists, int page) {
+    setState(() {
+      _checklists.addAll(newChecklists.where((checklist) =>
+          !_checklists.any((existing) => existing.id == checklist.id)));
+      _currentPage = page;
+      _hasMoreData = newChecklists.length >= 10;
+    });
+  }
+
+  Future<void> _onRefresh() async {
+    _resetChecklists();
+    await _fetchChecklists();
+  }
+
+  _onTileTap(BuildContext context, Checklist checklist) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ShowChecklistPage(checklist: checklist),
+      ),
+    );
+  }
+
+  Future<void> _fetchChecklists({int page = 1}) async {
+    if (_isLoading) return;
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final checklistsResponse = await ChecklistService()
-          .getAllStudentChecklists(
-              studentId, page, _formattedStartDate, _formattedEndDate, sortBy);
+      final response = await ChecklistService().getAllStudentChecklists(
+          studentId,
+          page,
+          _selectedDateRange?.start.toIso8601String().substring(0, 10),
+          _selectedDateRange?.end.toIso8601String().substring(0, 10),
+          _sortOrder);
 
-      final newChecklists = checklistsResponse.payload!.data;
-
-      setState(() {
-        if (newChecklists.isEmpty || newChecklists.length < 10) {
-          _hasMoreData = false;
-        }
-
-        for (var checklist in newChecklists) {
-          if (!_checklists.any((a) => a.id == checklist.id)) {
-            _checklists.add(checklist);
-          }
-        }
-
-        _currentPage = page;
-      });
+      _updateChecklists(response.payload!.data, page);
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      setState(() {
+        _errorMessage = e.toString();
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -110,106 +124,53 @@ class ChecklistsPageState extends State<ChecklistsPage> {
     }
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent &&
-        !_isLoading) {
-      _fetchChecklists(page: _currentPage + 1, sortBy: _sortOrder);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ceklis'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            ElevatedButton(
-                onPressed: () => _selectDateRange(context),
-                child: Text(_selectedDateRange == null
-                    ? 'Pilih rentang tanggal'
-                    : 'Rentang: $_formattedStartDate hingga $_formattedEndDate')),
-            const SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SortButton(
-                    label: 'Tanggal dibuat',
-                    sortOrder: _sortOrder,
-                    onSortChanged: _onSortSelected)
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Expanded(
-                child: _checklists.isEmpty && _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        itemCount: _checklists.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index < _checklists.length) {
-                            final checklist = _checklists[index];
-                            return IndexListTile<Checklist>(
-                                item: checklist,
-                                getCreateDate: (item) => DateTimeManipulator()
-                                    .formatDate(checklist.createdAt!),
-                                getUpdateDate: (item) => DateTimeManipulator()
-                                    .formatDate(checklist.updatedAt!),
-                                onTap: (checklist) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              ShowChecklistPage(
-                                                  checklist: checklist)));
-                                });
-                          } else {
-                            return _hasMoreData
-                                ? const Padding(
-                                    padding: EdgeInsets.all(16),
-                                    child: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  )
-                                : _checklists.isEmpty
-                                    ? const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(
-                                              'Belum ada penilaian ceklis. Buat ceklis baru dengan menekan tombol di kanan bawah!'),
-                                        ),
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(
-                                              'Anda sudah mencapai akhir halaman'),
-                                        ),
-                                      );
-                          }
-                        },
-                      ))
-          ],
+        appBar: AppBar(
+          title: const Text('Ceklis'),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/create-checklist',
-              arguments: studentId);
-        },
-        child: const Icon(Icons.add),
-      ),
-    );
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              DateRangePickerButton(
+                  selectedDateRange: _selectedDateRange,
+                  onDateRangeSelected: _onDateRangeSelected),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  SortButton(
+                      label: 'Tanggal dibuat',
+                      sortOrder: _sortOrder,
+                      onSortChanged: _onSortSelected)
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Expanded(
+                  child: IndexListView<Checklist>(
+                errorMessage: _errorMessage,
+                isLoading: _isLoading,
+                hasMoreData: _hasMoreData,
+                onRefresh: _onRefresh,
+                scrollController: _scrollController,
+                items: _checklists,
+                itemBuilder: (context, checklist) => IndexListTile<Checklist>(
+                    item: checklist,
+                    createDate: checklist.createdAt!,
+                    updateDate: checklist.updatedAt!,
+                    onTap: (c) => _onTileTap(context, c)),
+              ))
+            ],
+          ),
+        ),
+        floatingActionButton:
+            CreateButton(mode: 'checklist', studentId: studentId));
   }
 
   @override

@@ -1,6 +1,5 @@
 import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
 import 'package:asesmen_paud/api/service/anecdotal_service.dart';
-import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:asesmen_paud/pages/anecdotals/show_anecdotal_page.dart';
 import 'package:asesmen_paud/widget/assessment/create_button.dart';
 import 'package:asesmen_paud/widget/assessment/date_range_picker_button.dart';
@@ -84,6 +83,20 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
     });
   }
 
+  Future<void> _onRefresh() async {
+    _resetAnecdotals();
+    await _fetchAnecdotals();
+  }
+
+  _onTileTap(BuildContext context, Anecdotal anecdotal) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ShowAnecdotalPage(anecdotal: anecdotal),
+      ),
+    );
+  }
+
   Future<void> _fetchAnecdotals({int page = 1}) async {
     if (_isLoading) return;
 
@@ -144,27 +157,14 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
                 errorMessage: _errorMessage,
                 isLoading: _isLoading,
                 hasMoreData: _hasMoreData,
-                onRefresh: () async {
-                  _resetAnecdotals();
-                  await _fetchAnecdotals();
-                },
+                onRefresh: _onRefresh,
                 scrollController: _scrollController,
                 items: _anecdotals,
-                itemBuilder: (context, anecdotal) => IndexListTile(
-                  item: anecdotal,
-                  getCreateDate: (a) =>
-                      DateTimeManipulator().formatDate(a.createdAt!),
-                  getUpdateDate: (a) =>
-                      DateTimeManipulator().formatDate(a.updatedAt!),
-                  onTap: (a) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ShowAnecdotalPage(anecdotal: a),
-                      ),
-                    );
-                  },
-                ),
+                itemBuilder: (context, anecdotal) => IndexListTile<Anecdotal>(
+                    item: anecdotal,
+                    createDate: anecdotal.createdAt!,
+                    updateDate: anecdotal.updatedAt!,
+                    onTap: (a) => _onTileTap(context, a)),
               ))
             ],
           ),
