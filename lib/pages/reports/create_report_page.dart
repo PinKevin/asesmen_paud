@@ -58,8 +58,13 @@ class _CreateReportPageState extends State<CreateReportPage> {
             }),
       ));
     } on ErrorException catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          e.message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red[600],
+      ));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Terjadi masalah saat membuat laporan')));
