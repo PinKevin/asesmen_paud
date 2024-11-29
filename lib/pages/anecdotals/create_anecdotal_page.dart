@@ -6,7 +6,9 @@ import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/anecdotal_service.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
+import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
 import 'package:asesmen_paud/widget/assessment/photo_field.dart';
+import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -28,7 +30,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
   String? _feedbackError;
   String? _learningGoalsError;
   String? _imageError;
-  String _errorMessage = '';
+  // String _errorMessage = '';
 
   Future<void> _goToLearningGoalSelection() async {
     final result = await Navigator.push(context,
@@ -74,7 +76,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
       _feedbackError = null;
       _learningGoalsError = null;
       _imageError = null;
-      _errorMessage = '';
+      // _errorMessage = '';
     });
 
     final dto = CreateAnecdotalDto(
@@ -90,23 +92,21 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
       if (response.status == 'success') {
         if (!mounted) return;
 
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(response.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+            ColorSnackbar.build(message: response.message, success: true));
         Navigator.pop(context);
       }
+    } on ValidationException catch (e) {
+      setState(() {
+        _descriptionError = e.errors['description']?.message ?? '';
+        _feedbackError = e.errors['feedback']?.message ?? '';
+        _learningGoalsError = e.errors['learningGoals']?.message ?? '';
+        _imageError = e.errors['photo']?.message ?? '';
+      });
     } catch (e) {
-      if (e is ValidationException) {
-        setState(() {
-          _descriptionError = e.errors['description']?.message ?? '';
-          _feedbackError = e.errors['feedback']?.message ?? '';
-          _learningGoalsError = e.errors['learningGoals']?.message ?? '';
-          _imageError = e.errors['photo']?.message ?? '';
-        });
-      } else {
-        setState(() {
-          _errorMessage = '$e';
-        });
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          ColorSnackbar.build(message: e.toString(), success: false));
     } finally {
       setState(() {
         _isLoading = false;
@@ -128,6 +128,7 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Description
                 ExpandedTextField(
                     controller: _descriptionController,
                     labelText: 'Deskripsi',
@@ -135,6 +136,8 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                 const SizedBox(
                   height: 20,
                 ),
+
+                // Feedback
                 ExpandedTextField(
                     controller: _feedbackController,
                     labelText: 'Umpan Balik',
@@ -142,108 +145,59 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                 const SizedBox(
                   height: 20,
                 ),
+
+                //Learning Goals
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Capaian Pembelajaran',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
-                if (learningGoals.isNotEmpty)
-                  ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: learningGoals.length,
-                      itemBuilder: (context, index) {
-                        final learningGoal = learningGoals[index];
-                        return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.all(0),
-                                  backgroundColor: Colors.deepPurple[100],
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  )),
-                              onPressed: () {},
-                              child: Card(
-                                margin: EdgeInsets.zero,
-                                color: Colors.transparent,
-                                elevation: 0,
-                                child: ListTile(
-                                  title: Text(
-                                    learningGoal.learningGoalName,
-                                    textAlign: TextAlign.justify,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    '${learningGoal.learningGoalCode}',
-                                    textAlign: TextAlign.justify,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  trailing: IconButton(
-                                      onPressed: () {
-                                        _showDeleteLearningGoalDialog(
-                                            learningGoal);
-                                      },
-                                      icon: const Icon(Icons.delete)),
-                                ),
-                              ),
-                            ));
-                      }),
-                const SizedBox(
-                  height: 5,
+                const SizedBox(height: 5),
+                LearningGoalList(
+                  learningGoals: learningGoals,
+                  learningGoalsError: _learningGoalsError,
+                  editing: true,
+                  onAddLearningGoal: _goToLearningGoalSelection,
+                  onDeleteLearningGoal: (goal) =>
+                      _showDeleteLearningGoalDialog(goal),
                 ),
-                if (_learningGoalsError != null)
-                  Text(
-                    _learningGoalsError ??
-                        'Terjadi error pada capaian pembelajaran',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                if (_learningGoalsError != null)
-                  const SizedBox(
-                    height: 5,
-                  ),
-                ElevatedButton(
-                    onPressed: _goToLearningGoalSelection,
-                    child: const Text('Tambah Capaian Pembelajaran')),
                 const SizedBox(
                   height: 20,
                 ),
+
+                // Photo
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Foto Anekdot',
+                    'Foto',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
-                const SizedBox(
-                  height: 5,
-                ),
+                const SizedBox(height: 5),
                 PhotoField(
                     image: _image,
+                    imageError: _imageError,
                     onImageSelected: (image) {
                       setState(() {
                         _image = image;
                       });
                     }),
-                if (_imageError != null)
-                  const SizedBox(
-                    height: 5,
-                  ),
-                if (_imageError != null)
-                  Text(
-                    _imageError ?? 'Terjadi error pada gambar',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                const SizedBox(
-                  height: 10,
-                ),
-                if (_errorMessage.isNotEmpty)
-                  Text(_errorMessage,
-                      style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 10),
+
+                // Common error message
+                // if (_errorMessage.isNotEmpty)
+                //   Text(_errorMessage,
+                //       style: const TextStyle(color: Colors.red)),
+
+                // Submit
                 ElevatedButton(
                   onPressed: () {
                     _submit(studentId);
