@@ -7,7 +7,7 @@ import 'package:asesmen_paud/api/service/anecdotal_service.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
 import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
-import 'package:asesmen_paud/widget/assessment/photo_field.dart';
+import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
 import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,8 +29,6 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
   String? _descriptionError;
   String? _feedbackError;
   String? _learningGoalsError;
-  String? _imageError;
-  // String _errorMessage = '';
 
   Future<void> _goToLearningGoalSelection() async {
     final result = await Navigator.push(context,
@@ -75,8 +73,6 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
       _descriptionError = null;
       _feedbackError = null;
       _learningGoalsError = null;
-      _imageError = null;
-      // _errorMessage = '';
     });
 
     final dto = CreateAnecdotalDto(
@@ -101,7 +97,6 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
         _descriptionError = e.errors['description']?.message ?? '';
         _feedbackError = e.errors['feedback']?.message ?? '';
         _learningGoalsError = e.errors['learningGoals']?.message ?? '';
-        _imageError = e.errors['photo']?.message ?? '';
       });
     } catch (e) {
       if (!mounted) return;
@@ -182,20 +177,14 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                   ),
                 ),
                 const SizedBox(height: 5),
-                PhotoField(
-                    image: _image,
-                    imageError: _imageError,
+                PhotoManager(
+                    mode: PhotoMode.create,
                     onImageSelected: (image) {
                       setState(() {
                         _image = image;
                       });
                     }),
                 const SizedBox(height: 10),
-
-                // Common error message
-                // if (_errorMessage.isNotEmpty)
-                //   Text(_errorMessage,
-                //       style: const TextStyle(color: Colors.red)),
 
                 // Submit
                 ElevatedButton(
