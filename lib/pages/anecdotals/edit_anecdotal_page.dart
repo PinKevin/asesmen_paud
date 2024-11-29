@@ -8,6 +8,7 @@ import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
 import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
 import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
+import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -101,20 +102,22 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
       if (response.status == 'success') {
         if (!mounted) return;
 
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(response.message)));
+        ScaffoldMessenger.of(context).showSnackBar(ColorSnackbar.build(
+          message: response.message,
+          success: true,
+        ));
         Navigator.pop(context, true);
       }
+    } on ValidationException catch (e) {
+      setState(() {
+        _descriptionError = e.errors['description']?.message ?? '';
+        _feedbackError = e.errors['feedback']?.message ?? '';
+        _learningGoalsError = e.errors['learningGoals']?.message ?? '';
+      });
     } catch (e) {
-      if (e is ValidationException) {
-        setState(() {
-          _descriptionError = e.errors['description']?.message ?? '';
-          _feedbackError = e.errors['feedback']?.message ?? '';
-          _learningGoalsError = e.errors['learningGoals']?.message ?? '';
-        });
-      } else {
-        setState(() {});
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          ColorSnackbar.build(message: e.toString(), success: true));
     } finally {
       setState(() {
         _isLoading = false;
@@ -202,6 +205,7 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
                   }),
               const SizedBox(height: 10),
 
+              // Submit
               ElevatedButton(
                 onPressed: () {
                   _submit(anecdotal.studentId, anecdotal.id);

@@ -4,11 +4,11 @@ import 'package:asesmen_paud/api/payload/artwork_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/artwork_service.dart';
-import 'package:asesmen_paud/api/service/photo_service.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
-
-import 'package:asesmen_paud/widget/assessment/photo_field.dart';
+import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
+import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
+import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -24,7 +24,7 @@ class EditArtworkPage extends StatefulWidget {
 class _EditArtworkPageState extends State<EditArtworkPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _feedbackController = TextEditingController();
-  List<dynamic> learningGoals = [];
+  late List<dynamic> _editableLearningGoals = [];
   XFile? _image;
   bool onChangedImage = false;
 
@@ -32,15 +32,22 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
   String? _descriptionError;
   String? _feedbackError;
   String? _learningGoalsError;
-  String? _imageError;
-  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _descriptionController.text = widget.artwork.description;
+    _feedbackController.text = widget.artwork.feedback;
+
+    _editableLearningGoals = List.from(widget.artwork.learningGoals ?? []);
+  }
 
   Future<void> _goToLearningGoalSelection() async {
     final result = await Navigator.push(context,
         MaterialPageRoute(builder: (context) => const LearningGoalsPage()));
     if (result != null) {
       setState(() {
-        learningGoals.add(result);
+        _editableLearningGoals.add(result);
       });
     }
   }
@@ -60,7 +67,9 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
                   child: const Text('Kembali')),
               TextButton(
                   onPressed: () {
-                    learningGoals.remove(learningGoal);
+                    setState(() {
+                      _editableLearningGoals.remove(learningGoal);
+                    });
                     Navigator.of(context).pop();
                   },
                   child: const Text(
@@ -78,15 +87,15 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
       _descriptionError = null;
       _feedbackError = null;
       _learningGoalsError = null;
-      _imageError = null;
-      _errorMessage = '';
     });
 
     final dto = EditArtworkDto(
-        description: _descriptionController.text,
-        feedback: _feedbackController.text,
-        learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
-        photo: _image);
+      description: _descriptionController.text,
+      feedback: _feedbackController.text,
+      learningGoals:
+          _editableLearningGoals.map((goal) => goal.id as int).toList(),
+      photo: _image,
+    );
 
     try {
       final SuccessResponse<Artwork> response =
@@ -94,23 +103,22 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
       if (response.status == 'success') {
         if (!mounted) return;
 
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(response.message)));
+        ScaffoldMessenger.of(context).showSnackBar(ColorSnackbar.build(
+          message: response.message,
+          success: true,
+        ));
         Navigator.pop(context, true);
       }
+    } on ValidationException catch (e) {
+      setState(() {
+        _descriptionError = e.errors['description']?.message ?? '';
+        _feedbackError = e.errors['feedback']?.message ?? '';
+        _learningGoalsError = e.errors['learningGoals']?.message ?? '';
+      });
     } catch (e) {
-      if (e is ValidationException) {
-        setState(() {
-          _descriptionError = e.errors['description']?.message ?? '';
-          _feedbackError = e.errors['feedback']?.message ?? '';
-          _learningGoalsError = e.errors['learningGoals']?.message ?? '';
-          _imageError = e.errors['photo']?.message ?? '';
-        });
-      } else {
-        setState(() {
-          _errorMessage = '$e';
-        });
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          ColorSnackbar.build(message: e.toString(), success: true));
     } finally {
       setState(() {
         _isLoading = false;
@@ -119,214 +127,113 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _descriptionController.text = widget.artwork.description;
-    _feedbackController.text = widget.artwork.feedback;
-    learningGoals = widget.artwork.learningGoals ?? [];
-  }
-
-  @override
   Widget build(BuildContext context) {
     final artwork = widget.artwork;
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Ubah penilaian hasil karya'),
+      appBar: AppBar(
+        title: const Text('Ubah penilaian hasil karya'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Description
+              ExpandedTextField(
+                controller: _descriptionController,
+                labelText: 'Deskripsi',
+                errorText: _descriptionError,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+
+              // Feedback
+              ExpandedTextField(
+                controller: _feedbackController,
+                labelText: 'Umpan Balik',
+                errorText: _feedbackError,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+
+              // Learning Goals
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Capaian Pembelajaran',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 5),
+              LearningGoalList(
+                learningGoals: _editableLearningGoals,
+                learningGoalsError: _learningGoalsError,
+                editing: true,
+                onAddLearningGoal: _goToLearningGoalSelection,
+                onDeleteLearningGoal: (goal) =>
+                    _showDeleteLearningGoalDialog(goal),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+
+              // Photo
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Foto',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 5),
+              PhotoManager(
+                  mode: PhotoMode.edit,
+                  initialImageUrl: artwork.photoLink,
+                  onImageSelected: (image) {
+                    setState(() {
+                      _image = image;
+                    });
+                  }),
+              const SizedBox(height: 10),
+
+              // Submit
+              ElevatedButton(
+                onPressed: () {
+                  _submit(artwork.studentId, artwork.id);
+                },
+                style: ElevatedButton.styleFrom(
+                    fixedSize: const Size(200, 40),
+                    backgroundColor: Colors.deepPurple),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      )
+                    : const Text(
+                        'Ubah Hasil Karya',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+              ),
+            ],
+          ),
         ),
-        body: SingleChildScrollView(
-            child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ExpandedTextField(
-                          controller: _descriptionController,
-                          labelText: 'Deskripsi',
-                          errorText: _descriptionError),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      ExpandedTextField(
-                          controller: _feedbackController,
-                          labelText: 'Umpan Balik',
-                          errorText: _feedbackError),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Capaian Pembelajaran',
-                        ),
-                      ),
-                      if (learningGoals.isNotEmpty)
-                        ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: learningGoals.length,
-                            itemBuilder: (context, index) {
-                              final learningGoal = learningGoals[index];
-                              return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.all(0),
-                                        backgroundColor: Colors.deepPurple[100],
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        )),
-                                    onPressed: () {},
-                                    child: Card(
-                                      margin: EdgeInsets.zero,
-                                      color: Colors.transparent,
-                                      elevation: 0,
-                                      child: ListTile(
-                                        title: Text(
-                                          learningGoal.learningGoalName,
-                                          textAlign: TextAlign.justify,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        subtitle: Text(
-                                          '${learningGoal.learningGoalCode}',
-                                          textAlign: TextAlign.justify,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        trailing: IconButton(
-                                            onPressed: () {
-                                              _showDeleteLearningGoalDialog(
-                                                  learningGoal);
-                                            },
-                                            icon: const Icon(Icons.delete)),
-                                      ),
-                                    ),
-                                  ));
-                            }),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      if (_learningGoalsError != null)
-                        Text(
-                          _learningGoalsError ??
-                              'Terjadi error pada capaian pembelajaran',
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      if (_learningGoalsError != null)
-                        const SizedBox(
-                          height: 5,
-                        ),
-                      ElevatedButton(
-                          onPressed: _goToLearningGoalSelection,
-                          child: const Text('Tambah Capaian Pembelajaran')),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Foto Hasil Karya',
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      if (onChangedImage == true)
-                        PhotoField(
-                            image: _image,
-                            onImageSelected: (image) {
-                              setState(() {
-                                _image = image;
-                              });
-                            }),
-                      if (onChangedImage == false)
-                        FutureBuilder(
-                            future: PhotoService().getPhoto(artwork.photoLink),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Padding(
-                                  padding: EdgeInsets.only(top: 40),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-                              } else if (snapshot.hasError) {
-                                return const Center(
-                                  child: Text('Gagal memuat foto'),
-                                );
-                              } else if (snapshot.hasData &&
-                                  snapshot.data != null) {
-                                return ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: Image.memory(
-                                    snapshot.data!,
-                                    fit: BoxFit.cover,
-                                  ),
-                                );
-                              } else {
-                                return const Center(
-                                  child: Text('Tidak ada foto'),
-                                );
-                              }
-                            }),
-                      if (onChangedImage == false)
-                        const SizedBox(
-                          height: 10,
-                        ),
-                      if (onChangedImage == false)
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              onChangedImage = !onChangedImage;
-                            });
-                          },
-                          child: const Text('Ganti foto'),
-                        ),
-                      if (_imageError != null)
-                        const SizedBox(
-                          height: 5,
-                        ),
-                      if (_imageError != null)
-                        Text(
-                          _imageError ?? 'Terjadi error pada gambar',
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      if (_errorMessage.isNotEmpty)
-                        Text(_errorMessage,
-                            style: const TextStyle(color: Colors.red)),
-                      ElevatedButton(
-                        onPressed: () {
-                          _submit(artwork.studentId, artwork.id);
-                        },
-                        style: ElevatedButton.styleFrom(
-                            fixedSize: const Size(200, 40),
-                            backgroundColor: Colors.deepPurple),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              )
-                            : const Text(
-                                'Ubah Hasil Karya',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.white),
-                              ),
-                      ),
-                    ]))));
+      ),
+    );
   }
 }

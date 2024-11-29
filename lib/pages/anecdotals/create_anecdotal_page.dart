@@ -55,7 +55,9 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                   child: const Text('Kembali')),
               TextButton(
                   onPressed: () {
-                    learningGoals.remove(learningGoal);
+                    setState(() {
+                      learningGoals.remove(learningGoal);
+                    });
                     Navigator.of(context).pop();
                   },
                   child: const Text(

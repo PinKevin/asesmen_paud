@@ -6,7 +6,9 @@ import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/artwork_service.dart';
 import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
-import 'package:asesmen_paud/widget/assessment/photo_field.dart';
+import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
+import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
+import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -27,8 +29,6 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
   String? _descriptionError;
   String? _feedbackError;
   String? _learningGoalsError;
-  String? _imageError;
-  String _errorMessage = '';
 
   Future<void> _goToLearningGoalSelection() async {
     final result = await Navigator.push(context,
@@ -55,7 +55,9 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
                   child: const Text('Kembali')),
               TextButton(
                   onPressed: () {
-                    learningGoals.remove(learningGoal);
+                    setState(() {
+                      learningGoals.remove(learningGoal);
+                    });
                     Navigator.of(context).pop();
                   },
                   child: const Text(
@@ -73,15 +75,14 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
       _descriptionError = null;
       _feedbackError = null;
       _learningGoalsError = null;
-      _imageError = null;
-      _errorMessage = '';
     });
 
     final dto = CreateArtworkDto(
-        description: _descriptionController.text,
-        feedback: _feedbackController.text,
-        learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
-        photo: _image);
+      description: _descriptionController.text,
+      feedback: _feedbackController.text,
+      learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
+      photo: _image,
+    );
 
     try {
       final SuccessResponse<Artwork> response =
@@ -90,23 +91,20 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
       if (response.status == 'success') {
         if (!mounted) return;
 
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(response.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+            ColorSnackbar.build(message: response.message, success: true));
         Navigator.pop(context);
       }
+    } on ValidationException catch (e) {
+      setState(() {
+        _descriptionError = e.errors['description']?.message ?? '';
+        _feedbackError = e.errors['feedback']?.message ?? '';
+        _learningGoalsError = e.errors['learningGoals']?.message ?? '';
+      });
     } catch (e) {
-      if (e is ValidationException) {
-        setState(() {
-          _descriptionError = e.errors['description']?.message ?? '';
-          _feedbackError = e.errors['feedback']?.message ?? '';
-          _learningGoalsError = e.errors['learningGoals']?.message ?? '';
-          _imageError = e.errors['photo']?.message ?? '';
-        });
-      } else {
-        setState(() {
-          _errorMessage = '$e';
-        });
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          ColorSnackbar.build(message: e.toString(), success: true));
     } finally {
       setState(() {
         _isLoading = false;
@@ -128,6 +126,7 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Description
                 ExpandedTextField(
                     controller: _descriptionController,
                     labelText: 'Deskripsi',
@@ -135,6 +134,8 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
                 const SizedBox(
                   height: 20,
                 ),
+
+                // Feedback
                 ExpandedTextField(
                     controller: _feedbackController,
                     labelText: 'Umpan Balik',
@@ -142,108 +143,59 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
                 const SizedBox(
                   height: 20,
                 ),
+
+                // Learning Goals
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Capaian Pembelajaran',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
-                if (learningGoals.isNotEmpty)
-                  ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: learningGoals.length,
-                      itemBuilder: (context, index) {
-                        final learningGoal = learningGoals[index];
-                        return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.all(0),
-                                  backgroundColor: Colors.deepPurple[100],
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  )),
-                              onPressed: () {},
-                              child: Card(
-                                margin: EdgeInsets.zero,
-                                color: Colors.transparent,
-                                elevation: 0,
-                                child: ListTile(
-                                  title: Text(
-                                    learningGoal.learningGoalName,
-                                    textAlign: TextAlign.justify,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    '${learningGoal.learningGoalCode}',
-                                    textAlign: TextAlign.justify,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  trailing: IconButton(
-                                      onPressed: () {
-                                        _showDeleteLearningGoalDialog(
-                                            learningGoal);
-                                      },
-                                      icon: const Icon(Icons.delete)),
-                                ),
-                              ),
-                            ));
-                      }),
                 const SizedBox(
                   height: 5,
                 ),
-                if (_learningGoalsError != null)
-                  Text(
-                    _learningGoalsError ??
-                        'Terjadi error pada capaian pembelajaran',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                if (_learningGoalsError != null)
-                  const SizedBox(
-                    height: 5,
-                  ),
-                ElevatedButton(
-                    onPressed: _goToLearningGoalSelection,
-                    child: const Text('Tambah Capaian Pembelajaran')),
+                LearningGoalList(
+                  learningGoals: learningGoals,
+                  learningGoalsError: _learningGoalsError,
+                  editing: true,
+                  onAddLearningGoal: _goToLearningGoalSelection,
+                  onDeleteLearningGoal: (goal) =>
+                      _showDeleteLearningGoalDialog(goal),
+                ),
                 const SizedBox(
                   height: 20,
                 ),
+
+                // Photo
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Foto Hasil Karya',
+                    'Foto',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
                 const SizedBox(
                   height: 5,
                 ),
-                PhotoField(
-                    image: _image,
+                PhotoManager(
+                    mode: PhotoMode.create,
                     onImageSelected: (image) {
                       setState(() {
                         _image = image;
                       });
                     }),
-                if (_imageError != null)
-                  const SizedBox(
-                    height: 5,
-                  ),
-                if (_imageError != null)
-                  Text(
-                    _imageError ?? 'Terjadi error pada gambar',
-                    style: const TextStyle(color: Colors.red),
-                  ),
                 const SizedBox(
                   height: 10,
                 ),
-                if (_errorMessage.isNotEmpty)
-                  Text(_errorMessage,
-                      style: const TextStyle(color: Colors.red)),
+
+                // Submit
                 ElevatedButton(
                   onPressed: () {
                     _submit(studentId);

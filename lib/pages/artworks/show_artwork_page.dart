@@ -1,7 +1,12 @@
+import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/payload/artwork_payload.dart';
 import 'package:asesmen_paud/api/service/artwork_service.dart';
-import 'package:asesmen_paud/api/service/photo_service.dart';
 import 'package:asesmen_paud/pages/artworks/edit_artwork_page.dart';
+import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
+import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
+import 'package:asesmen_paud/widget/assessment/show_field.dart';
+import 'package:asesmen_paud/widget/assessment/show_menu.dart';
+import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 
 class ShowArtworkPage extends StatefulWidget {
@@ -14,7 +19,40 @@ class ShowArtworkPage extends StatefulWidget {
 }
 
 class _ShowArtworkPageState extends State<ShowArtworkPage> {
-  String? errorMessage;
+  Artwork? _artwork;
+  String? _errorMessage;
+  bool _isLoading = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchArtworkData();
+  }
+
+  Future<void> _fetchArtworkData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final response = await ArtworkService().showArtwork(
+        widget.artwork.studentId,
+        widget.artwork.id,
+      );
+      setState(() {
+        _artwork = response.payload;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   Future<void> _delete(
       BuildContext context, int studentId, int artworkId) async {
@@ -24,257 +62,156 @@ class _ShowArtworkPageState extends State<ShowArtworkPage> {
 
       if (!context.mounted) return;
       Navigator.popUntil(context, ModalRoute.withName('/artworks'));
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(response.message)));
+      ScaffoldMessenger.of(context).showSnackBar(
+          ColorSnackbar.build(message: response.message, success: true));
+    } on ErrorException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        ColorSnackbar.build(
+          message: e.message,
+          success: false,
+        ),
+      );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        ColorSnackbar.build(
+          message: e.toString(),
+          success: false,
+        ),
+      );
     }
   }
 
-  Future<void> _fetchArtworkData() async {
-    Artwork? artwork = widget.artwork;
-    try {
-      final updatedArtwork =
-          await ArtworkService().showArtwork(artwork.studentId, artwork.id);
-      setState(() {
-        artwork = updatedArtwork.payload;
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = e.toString();
-      });
-    }
-  }
-
-  void _goToEditPage(BuildContext context, Artwork artwork) async {
-    final result = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => EditArtworkPage(
-                  artwork: artwork,
-                )));
-
-    if (result) {
-      await _fetchArtworkData();
-    }
+  void _goToEditPage() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditArtworkPage(
+          artwork: _artwork!,
+        ),
+      ),
+    );
+    await _fetchArtworkData();
   }
 
   Future<void> _showDeleteDialog(
-      BuildContext context, int studentId, int artworkId) async {
+    BuildContext context,
+    int studentId,
+    int artworkId,
+  ) async {
     await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-                title: const Text('Hapus hasil karya'),
-                content: const Text('Yakin ingin hapus hasil karya?'),
-                actions: [
-                  TextButton(
-                      onPressed: () {
-                        _delete(context, studentId, artworkId);
-                      },
-                      child: const Text(
-                        'Hapus',
-                        style: TextStyle(color: Colors.red),
-                      )),
-                  TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Batal')),
-                ]));
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus hasil karya'),
+        content: const Text('Yakin ingin hapus hasil karya?'),
+        actions: [
+          TextButton(
+              onPressed: () {
+                _delete(context, studentId, artworkId);
+              },
+              child: const Text(
+                'Hapus',
+                style: TextStyle(color: Colors.red),
+              )),
+          TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Batal')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShowPage() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ShowField(
+              title: 'Deskripsi',
+              content: _artwork!.description,
+            ),
+            ShowField(
+              title: 'Umpan balik',
+              content: _artwork!.feedback,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Capaian Pembelajaran',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            LearningGoalList(
+              learningGoals: _artwork!.learningGoals!,
+              editing: false,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Foto',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            PhotoManager(
+              mode: PhotoMode.show,
+              initialImageUrl: _artwork!.photoLink,
+              onImageSelected: (_) {},
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            ShowMenu<Artwork>(
+              assessment: _artwork!,
+              onEdit: (context) => _goToEditPage(),
+              onDelete: (context) => _showDeleteDialog(
+                context,
+                _artwork!.studentId,
+                _artwork!.id,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Text(
+          _errorMessage!,
+          style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+
+    if (_artwork == null) {
+      return const Center(child: Text('Data tidak ditemukan'));
+    }
+
+    return _buildShowPage();
   }
 
   @override
   Widget build(BuildContext context) {
-    final artwork = widget.artwork;
-
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Detail hasil karya'),
-        ),
-        body: FutureBuilder(
-            future: ArtworkService().showArtwork(artwork.studentId, artwork.id),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData) {
-                return const Center(child: Text('Data tidak ditemukan'));
-              }
-
-              final updatedArtwork = snapshot.data!.payload!;
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Deskripsi',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Text(
-                        updatedArtwork.description,
-                        textAlign: TextAlign.justify,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Umpan Balik',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Text(
-                        updatedArtwork.feedback,
-                        textAlign: TextAlign.justify,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Capaian Pembelajaran',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      if (updatedArtwork.learningGoals!.isNotEmpty)
-                        ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: updatedArtwork.learningGoals!.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              final learningGoal =
-                                  updatedArtwork.learningGoals?[index];
-                              return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.all(0),
-                                        backgroundColor: Colors.deepPurple[50],
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        )),
-                                    onPressed: () {},
-                                    child: Card(
-                                      margin: EdgeInsets.zero,
-                                      color: Colors.transparent,
-                                      elevation: 0,
-                                      child: ListTile(
-                                        title: Text(
-                                          learningGoal!.learningGoalName,
-                                          textAlign: TextAlign.justify,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        subtitle: Text(
-                                          learningGoal.learningGoalCode,
-                                          textAlign: TextAlign.justify,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ));
-                            }),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Foto',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      FutureBuilder(
-                          future:
-                              PhotoService().getPhoto(updatedArtwork.photoLink),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Padding(
-                                padding: EdgeInsets.only(top: 40),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            } else if (snapshot.hasError) {
-                              return const Center(
-                                child: Text('Gagal memuat foto'),
-                              );
-                            } else if (snapshot.hasData &&
-                                snapshot.data != null) {
-                              return ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.memory(
-                                  snapshot.data!,
-                                  fit: BoxFit.cover,
-                                ),
-                              );
-                            } else {
-                              return const Center(
-                                child: Text('Tidak ada foto'),
-                              );
-                            }
-                          }),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              _showDeleteDialog(
-                                  context, artwork.studentId, artwork.id);
-                            },
-                            label: const Text(
-                              'Hapus hasil karya',
-                              style: TextStyle(color: Colors.red),
-                            ),
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                            ),
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              _goToEditPage(context, updatedArtwork);
-                            },
-                            label: const Text(
-                              'Ubah hasil karya',
-                              style: TextStyle(color: Colors.blue),
-                            ),
-                            icon: const Icon(
-                              Icons.edit,
-                              color: Colors.blue,
-                            ),
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              );
-            }));
+      appBar: AppBar(
+        title: const Text('Detail hasil karya'),
+      ),
+      body: _buildContent(),
+    );
   }
 }
