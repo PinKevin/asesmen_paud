@@ -47,6 +47,10 @@ class SeriesPhotoService {
 
   Future<SuccessResponse<SeriesPhoto>> createSeriesPhoto(
       int studentId, CreateSeriesPhotoDto dto) async {
+    if (dto.photos.length < 3 || dto.photos.length > 5) {
+      throw ErrorException('Foto harus berjumlah 3-5');
+    }
+
     final Uri url = Uri.parse('$baseUrl/students/$studentId/series-photos');
     final authToken = await AuthService.getToken();
 

@@ -79,7 +79,7 @@ class IndexReportListTile extends StatelessWidget {
                           height: 20,
                           child: Center(
                             child: CircularProgressIndicator(
-                              strokeWidth: 4,
+                              strokeWidth: 3,
                             ),
                           ),
                         )

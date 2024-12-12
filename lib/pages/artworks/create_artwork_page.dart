@@ -104,7 +104,7 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          ColorSnackbar.build(message: e.toString(), success: true));
+          ColorSnackbar.build(message: e.toString(), success: false));
     } finally {
       setState(() {
         _isLoading = false;

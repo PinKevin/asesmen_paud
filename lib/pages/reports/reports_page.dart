@@ -2,6 +2,7 @@ import 'package:asesmen_paud/api/payload/student_report_payload.dart';
 import 'package:asesmen_paud/api/service/report_service.dart';
 import 'package:asesmen_paud/widget/assessment/create_button.dart';
 import 'package:asesmen_paud/widget/assessment/index_list_view.dart';
+import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:asesmen_paud/widget/dropdown.dart';
 import 'package:asesmen_paud/widget/report/index_report_list_tile.dart';
 import 'package:asesmen_paud/widget/sort_button.dart';
@@ -129,8 +130,11 @@ class _ReportsPageState extends State<ReportsPage> {
         _isLoading = true;
       });
 
-      final String filePath =
-          await ReportService().downloadExistingReport(studentId, reportId);
+      final String filePath = await ReportService().downloadExistingReport(
+        context,
+        studentId,
+        reportId,
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -142,8 +146,8 @@ class _ReportsPageState extends State<ReportsPage> {
             }),
       ));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Terjadi masalah saat mengunduh laporan')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(ColorSnackbar.build(message: '$e', success: false));
     } finally {
       setState(() {
         _isLoading = false;

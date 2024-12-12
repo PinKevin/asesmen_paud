@@ -101,7 +101,6 @@ class _PhotoManagerState extends State<PhotoManager> {
         child: Image.file(
           File(_selectedImage!.path),
           fit: BoxFit.cover,
-          height: 300,
         ),
       );
     }

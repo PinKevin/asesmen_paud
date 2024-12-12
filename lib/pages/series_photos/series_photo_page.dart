@@ -171,7 +171,7 @@ class SeriesPhotosPageState extends State<SeriesPhotosPage> {
           ),
         ),
         floatingActionButton:
-            CreateButton(mode: 'series-phoyo', studentId: studentId));
+            CreateButton(mode: 'series-photo', studentId: studentId));
   }
 
   @override

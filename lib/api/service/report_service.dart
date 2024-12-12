@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:asesmen_paud/api/base_url.dart';
 import 'package:asesmen_paud/api/exception.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:asesmen_paud/api/payload/student_report_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
@@ -44,7 +45,10 @@ class ReportService {
   }
 
   Future<String> createAndDownloadReport(
-      int studentId, int month, int year) async {
+    int studentId,
+    int month,
+    int year,
+  ) async {
     DateTime startDate = DateTime(year, month, 1);
     DateTime endDate =
         DateTime(year, month + 1, 1).subtract(const Duration(days: 1));
@@ -92,57 +96,53 @@ class ReportService {
     }
   }
 
-  Future<String> downloadExistingReport(int studentId, int reportId) async {
-    if (await _requestStoragePermission()) {
-      try {
-        final String? authToken = await AuthService.getToken();
-        final Uri url = Uri.parse(
-            '$baseUrl/students/$studentId/reports/$reportId/download-report');
-        final headers = {
-          'Authorization': 'Bearer $authToken',
-          'Accept':
-              'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        };
+  Future<String> downloadExistingReport(
+      BuildContext context, int studentId, int reportId) async {
+    try {
+      bool permission = await _requestStoragePermission();
+      final String? authToken = await AuthService.getToken();
+      final Uri url = Uri.parse(
+          '$baseUrl/students/$studentId/reports/$reportId/download-report');
+      final headers = {
+        'Authorization': 'Bearer $authToken',
+        'Accept':
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      };
 
-        final response = await http.get(url, headers: headers);
+      final response = await http.get(url, headers: headers);
 
-        if (response.statusCode == 200) {
-          final contentDisposition = response.headers['content-disposition'];
-          String fileName = 'Laporan.docx';
+      if (response.statusCode == 200 && permission) {
+        final contentDisposition = response.headers['content-disposition'];
+        String fileName = 'Laporan.docx';
 
-          if (contentDisposition != null &&
-              contentDisposition.contains('filename=')) {
-            final regex = RegExp(r'filename="?([^"]+)"?');
-            final match = regex.firstMatch(contentDisposition);
-            if (match != null) {
-              fileName = match.group(1) ?? fileName;
-            }
+        if (contentDisposition != null &&
+            contentDisposition.contains('filename=')) {
+          final regex = RegExp(r'filename="?([^"]+)"?');
+          final match = regex.firstMatch(contentDisposition);
+          if (match != null) {
+            fileName = match.group(1) ?? fileName;
           }
-
-          final filePath = await _saveFile(response.bodyBytes, fileName);
-          return filePath;
-        } else {
-          throw Exception(response.reasonPhrase);
         }
-      } catch (e) {
-        throw Exception('Error saat mengambil laporan');
+
+        final filePath = await _saveFile(response.bodyBytes, fileName);
+        return filePath;
+      } else {
+        throw Exception(response.reasonPhrase);
       }
-    } else {
-      throw Exception('Error saat meminta izin penyimpanan');
+    } catch (e) {
+      throw Exception('Error saat mengambil laporan.');
     }
   }
 
-  static Future<bool> _requestStoragePermission() async {
-    PermissionStatus status = await Permission.storage.status;
+  Future<bool> _requestStoragePermission() async {
+    PermissionStatus status = await Permission.manageExternalStorage.status;
 
     if (status.isGranted) {
       return true;
-    } else if (status.isDenied || status.isLimited) {
-      status = await Permission.storage.request();
+    } else {
+      status = await Permission.manageExternalStorage.request();
       return status.isGranted;
     }
-
-    return false;
   }
 
   Future<String> _saveFile(List<int> bytes, String fileName) async {
@@ -166,7 +166,7 @@ class ReportService {
 
       return filePath;
     } catch (e) {
-      throw Exception('Error saat download');
+      throw Exception('Error saat download $e');
     }
   }
 }

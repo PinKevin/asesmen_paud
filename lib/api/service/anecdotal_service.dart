@@ -54,9 +54,6 @@ class AnecdotalService {
       throw Exception('Foto harus diisi');
     }
 
-    final compressedImage =
-        await PhotoService().compressImage(File(dto.photo!.path));
-
     var request = http.MultipartRequest('POST', url);
     request.fields['description'] = dto.description;
     request.fields['feedback'] = dto.feedback;
@@ -65,7 +62,7 @@ class AnecdotalService {
     }
 
     request.files
-        .add(await http.MultipartFile.fromPath('photo', compressedImage.path));
+        .add(await http.MultipartFile.fromPath('photo', dto.photo!.path));
 
     request.headers.addAll({
       'Authorization': 'Bearer $authToken',

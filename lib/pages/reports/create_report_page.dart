@@ -44,8 +44,11 @@ class _CreateReportPageState extends State<CreateReportPage> {
         _isLoading = true;
       });
 
-      final String filePath = await ReportService()
-          .createAndDownloadReport(studentId, _selectedMonth!, _selectedYear!);
+      final String filePath = await ReportService().createAndDownloadReport(
+        studentId,
+        _selectedMonth!,
+        _selectedYear!,
+      );
 
       if (!mounted) return;
       Navigator.pop(context, true);
