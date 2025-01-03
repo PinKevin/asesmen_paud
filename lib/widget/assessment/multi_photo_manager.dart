@@ -78,7 +78,6 @@ class _PhotoManagerState extends State<MultiPhotoManager> {
   }
 
   Future<void> _loadInitialImages() async {
-    print(widget.initialImageUrls);
     if (widget.initialImageUrls == null) return;
 
     setState(() {
