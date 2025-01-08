@@ -6,11 +6,12 @@ class CreateArtworkDto {
   final List<int> learningGoals;
   final XFile? photo;
 
-  CreateArtworkDto(
-      {required this.description,
-      required this.feedback,
-      required this.learningGoals,
-      required this.photo});
+  CreateArtworkDto({
+    required this.description,
+    required this.feedback,
+    required this.learningGoals,
+    required this.photo,
+  });
 
   Map<String, dynamic> toJson() {
     return {
@@ -27,11 +28,12 @@ class EditArtworkDto {
   final List<int>? learningGoals;
   final XFile? photo;
 
-  EditArtworkDto(
-      {required this.description,
-      required this.feedback,
-      required this.learningGoals,
-      required this.photo});
+  EditArtworkDto({
+    required this.description,
+    required this.feedback,
+    required this.learningGoals,
+    required this.photo,
+  });
 
   Map<String, dynamic> toJson() {
     return {
