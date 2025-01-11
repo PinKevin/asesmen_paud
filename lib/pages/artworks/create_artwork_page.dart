@@ -94,7 +94,7 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
 
     if (learningGoals.isEmpty) {
       setState(() {
-        _learningGoalsError = 'Capaian pembelajaran harus diisi';
+        _learningGoalsError = 'Capaian pembelajaran harus dipilih';
       });
       hasError = true;
     }

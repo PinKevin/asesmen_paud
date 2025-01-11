@@ -29,10 +29,13 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
   String? _descriptionError;
   String? _feedbackError;
   String? _learningGoalsError;
+  String? _photoError;
 
   Future<void> _goToLearningGoalSelection() async {
-    final result = await Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const LearningGoalsPage()));
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LearningGoalsPage()),
+    );
     if (result != null) {
       setState(() {
         learningGoals.add(result);
@@ -69,19 +72,62 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
         });
   }
 
+  bool _validateInputs() {
+    bool hasError = false;
+
+    if (_descriptionController.text.isEmpty) {
+      setState(() {
+        _descriptionError = 'Deskripsi harus diisi';
+      });
+      hasError = true;
+    }
+
+    if (_feedbackController.text.isEmpty) {
+      setState(() {
+        _feedbackError = 'Umpan balik harus diisi';
+      });
+      hasError = true;
+    }
+
+    if (learningGoals.isEmpty) {
+      setState(() {
+        _learningGoalsError = 'Capaian pembelajaran harus dipilih';
+      });
+      hasError = true;
+    }
+
+    if (_image == null) {
+      setState(() {
+        _photoError = 'Foto harus diisi';
+      });
+      hasError = true;
+    }
+
+    return hasError;
+  }
+
   Future<void> _submit(int studentId) async {
     setState(() {
       _isLoading = true;
       _descriptionError = null;
       _feedbackError = null;
       _learningGoalsError = null;
+      _photoError = null;
     });
 
+    if (_validateInputs()) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
     final dto = CreateAnecdotalDto(
-        description: _descriptionController.text,
-        feedback: _feedbackController.text,
-        learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
-        photo: _image);
+      description: _descriptionController.text,
+      feedback: _feedbackController.text,
+      learningGoals: learningGoals.map((goal) => goal.id as int).toList(),
+      photo: _image,
+    );
 
     try {
       final SuccessResponse<Anecdotal> response =
@@ -186,6 +232,11 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
                         _image = image;
                       });
                     }),
+                if (_photoError != null)
+                  Text(
+                    _photoError!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 const SizedBox(height: 10),
 
                 // Submit

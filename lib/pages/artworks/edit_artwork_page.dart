@@ -101,7 +101,7 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
 
     if (_editableLearningGoals.isEmpty) {
       setState(() {
-        _learningGoalsError = 'Capaian pembelajaran harus diisi';
+        _learningGoalsError = 'Capaian pembelajaran harus dipilih';
       });
       hasError = true;
     }
