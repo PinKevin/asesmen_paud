@@ -72,6 +72,48 @@ class CreateSeriesPhotoPageState extends State<CreateSeriesPhotoPage> {
         });
   }
 
+  bool _validateInputs() {
+    bool hasError = false;
+
+    if (_descriptionController.text.isEmpty) {
+      setState(() {
+        _descriptionError = 'Deskripsi harus diisi';
+      });
+      hasError = true;
+    }
+
+    if (_feedbackController.text.isEmpty) {
+      setState(() {
+        _feedbackError = 'Umpan balik harus diisi';
+      });
+      hasError = true;
+    }
+
+    if (learningGoals.isEmpty) {
+      setState(() {
+        _learningGoalsError = 'Capaian pembelajaran harus dipilih';
+      });
+      hasError = true;
+    }
+
+    if (_images!.isEmpty) {
+      setState(() {
+        _imagesError = 'Foto harus diisi';
+      });
+      hasError = true;
+    }
+    if (_images!.isNotEmpty) {
+      if (_images!.length < 3 || _images!.length > 5) {
+        setState(() {
+          _imagesError = 'Foto harus berjumlah 3-5';
+        });
+        hasError = true;
+      }
+    }
+
+    return hasError;
+  }
+
   Future<void> _submit(int studentId) async {
     setState(() {
       _isLoading = true;
@@ -80,6 +122,13 @@ class CreateSeriesPhotoPageState extends State<CreateSeriesPhotoPage> {
       _learningGoalsError = null;
       _imagesError = null;
     });
+
+    if (_validateInputs()) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
 
     final dto = CreateSeriesPhotoDto(
         description: _descriptionController.text,
