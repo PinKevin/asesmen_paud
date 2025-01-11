@@ -29,10 +29,13 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
   String? _descriptionError;
   String? _feedbackError;
   String? _learningGoalsError;
+  String? _photoError;
 
   Future<void> _goToLearningGoalSelection() async {
-    final result = await Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const LearningGoalsPage()));
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LearningGoalsPage()),
+    );
     if (result != null) {
       setState(() {
         learningGoals.add(result);
@@ -42,31 +45,68 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
 
   Future<void> _showDeleteLearningGoalDialog(LearningGoal learningGoal) {
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Peringatan'),
-            content: const Text('Yakin ingin hapus capaian pembelajaran?'),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Kembali')),
-              TextButton(
-                  onPressed: () {
-                    setState(() {
-                      learningGoals.remove(learningGoal);
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    'Hapus',
-                    style: TextStyle(color: Colors.red),
-                  )),
-            ],
-          );
-        });
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Peringatan'),
+          content: const Text('Yakin ingin hapus capaian pembelajaran?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Kembali'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  learningGoals.remove(learningGoal);
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Hapus',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  bool _validateInputs() {
+    bool hasError = false;
+
+    if (_descriptionController.text.isEmpty) {
+      setState(() {
+        _descriptionError = 'Deskripsi harus diisi';
+      });
+      hasError = true;
+    }
+
+    if (_feedbackController.text.isEmpty) {
+      setState(() {
+        _feedbackError = 'Umpan balik harus diisi';
+      });
+      hasError = true;
+    }
+
+    if (learningGoals.isEmpty) {
+      setState(() {
+        _learningGoalsError = 'Capaian pembelajaran harus diisi';
+      });
+      hasError = true;
+    }
+
+    if (_image == null) {
+      setState(() {
+        _photoError = 'Foto harus diisi';
+      });
+      hasError = true;
+    }
+
+    return hasError;
   }
 
   Future<void> _submit(int studentId) async {
@@ -75,7 +115,15 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
       _descriptionError = null;
       _feedbackError = null;
       _learningGoalsError = null;
+      _photoError = null;
     });
+
+    if (_validateInputs()) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
 
     final dto = CreateArtworkDto(
       description: _descriptionController.text,
@@ -117,111 +165,122 @@ class CreateArtworkPageState extends State<CreateArtworkPage> {
     final int studentId = ModalRoute.of(context)!.settings.arguments as int;
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Buat penilaian hasil karya'),
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Description
-                ExpandedTextField(
-                    controller: _descriptionController,
-                    labelText: 'Deskripsi',
-                    errorText: _descriptionError),
-                const SizedBox(
-                  height: 20,
-                ),
+      appBar: AppBar(
+        title: const Text('Buat penilaian hasil karya'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Description
+              ExpandedTextField(
+                controller: _descriptionController,
+                labelText: 'Deskripsi',
+                errorText: _descriptionError,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
 
-                // Feedback
-                ExpandedTextField(
-                    controller: _feedbackController,
-                    labelText: 'Umpan Balik',
-                    errorText: _feedbackError),
-                const SizedBox(
-                  height: 20,
-                ),
+              // Feedback
+              ExpandedTextField(
+                controller: _feedbackController,
+                labelText: 'Umpan Balik',
+                errorText: _feedbackError,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
 
-                // Learning Goals
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Capaian Pembelajaran',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
-                    ),
+              // Learning Goals
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Capaian Pembelajaran',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
                   ),
                 ),
-                const SizedBox(
-                  height: 5,
-                ),
-                LearningGoalList(
-                  learningGoals: learningGoals,
-                  learningGoalsError: _learningGoalsError,
-                  editing: true,
-                  onAddLearningGoal: _goToLearningGoalSelection,
-                  onDeleteLearningGoal: (goal) =>
-                      _showDeleteLearningGoalDialog(goal),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              LearningGoalList(
+                learningGoals: learningGoals,
+                learningGoalsError: _learningGoalsError,
+                editing: true,
+                onAddLearningGoal: _goToLearningGoalSelection,
+                onDeleteLearningGoal: (goal) =>
+                    _showDeleteLearningGoalDialog(goal),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
 
-                // Photo
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Foto',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
-                    ),
+              // Photo
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Foto',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
                   ),
                 ),
-                const SizedBox(
-                  height: 5,
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              PhotoManager(
+                mode: PhotoMode.create,
+                onImageSelected: (image) {
+                  setState(
+                    () {
+                      _image = image;
+                    },
+                  );
+                },
+              ),
+              if (_photoError != null)
+                Text(
+                  _photoError!,
+                  style: const TextStyle(color: Colors.red),
                 ),
-                PhotoManager(
-                    mode: PhotoMode.create,
-                    onImageSelected: (image) {
-                      setState(() {
-                        _image = image;
-                      });
-                    }),
-                const SizedBox(
-                  height: 10,
-                ),
+              const SizedBox(
+                height: 10,
+              ),
 
-                // Submit
-                ElevatedButton(
-                  onPressed: () {
-                    _submit(studentId);
-                  },
-                  style: ElevatedButton.styleFrom(
-                      fixedSize: const Size(240, 40),
-                      backgroundColor: Colors.deepPurple),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
+              // Submit
+              ElevatedButton(
+                onPressed: () {
+                  _submit(studentId);
+                },
+                style: ElevatedButton.styleFrom(
+                    fixedSize: const Size(240, 40),
+                    backgroundColor: Colors.deepPurple),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
                           ),
-                        )
-                      : const Text(
-                          'Tambah Hasil Karya',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
-                ),
-              ],
-            ),
+                      )
+                    : const Text(
+                        'Tambah Hasil Karya',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

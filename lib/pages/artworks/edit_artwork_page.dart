@@ -26,12 +26,13 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
   final TextEditingController _feedbackController = TextEditingController();
   late List<dynamic> _editableLearningGoals = [];
   XFile? _image;
-  bool onChangedImage = false;
+  bool isImageChanged = false;
 
   bool _isLoading = false;
   String? _descriptionError;
   String? _feedbackError;
   String? _learningGoalsError;
+  String? _photoError;
 
   @override
   void initState() {
@@ -81,13 +82,55 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
         });
   }
 
+  bool _validateInputs() {
+    bool hasError = false;
+
+    if (_descriptionController.text.isEmpty) {
+      setState(() {
+        _descriptionError = 'Deskripsi harus diisi';
+      });
+      hasError = true;
+    }
+
+    if (_feedbackController.text.isEmpty) {
+      setState(() {
+        _feedbackError = 'Umpan balik harus diisi';
+      });
+      hasError = true;
+    }
+
+    if (_editableLearningGoals.isEmpty) {
+      setState(() {
+        _learningGoalsError = 'Capaian pembelajaran harus diisi';
+      });
+      hasError = true;
+    }
+
+    if (isImageChanged && _image == null) {
+      setState(() {
+        _photoError = 'Foto harus diisi';
+      });
+      hasError = true;
+    }
+
+    return hasError;
+  }
+
   Future<void> _submit(int studentId, int artworkId) async {
     setState(() {
       _isLoading = true;
       _descriptionError = null;
       _feedbackError = null;
       _learningGoalsError = null;
+      _photoError = null;
     });
+
+    if (_validateInputs()) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
 
     final dto = EditArtworkDto(
       description: _descriptionController.text,
@@ -202,8 +245,14 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
                   onImageSelected: (image) {
                     setState(() {
                       _image = image;
+                      isImageChanged = true;
                     });
                   }),
+              if (_photoError != null)
+                Text(
+                  _photoError!,
+                  style: const TextStyle(color: Colors.red),
+                ),
               const SizedBox(height: 10),
 
               // Submit
