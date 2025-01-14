@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 class StudentListTile extends StatelessWidget {
   final Student student;
-  // final Function(Student) onStudentTap;
   final void Function() onStudentTap;
 
   const StudentListTile(

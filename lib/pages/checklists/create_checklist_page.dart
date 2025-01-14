@@ -193,10 +193,6 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
                                       },
                                       itemBuilder: (BuildContext context) {
                                         return [
-                                          // const PopupMenuItem<String>(
-                                          //   value: 'edit',
-                                          //   child: Text('Edit'),
-                                          // ),
                                           const PopupMenuItem<String>(
                                             value: 'delete',
                                             child: Text('Hapus'),

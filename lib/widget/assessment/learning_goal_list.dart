@@ -23,7 +23,6 @@ class LearningGoalList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (learningGoals.isNotEmpty)
           ListView.builder(

@@ -1,5 +1,6 @@
 import 'package:asesmen_paud/api/payload/series_photo_payload.dart';
 import 'package:asesmen_paud/api/service/series_photo_service.dart';
+import 'package:asesmen_paud/pages/series_photos/edit_series_photo_page.dart';
 import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
 import 'package:asesmen_paud/widget/assessment/multi_photo_manager.dart';
 import 'package:asesmen_paud/widget/assessment/show_field.dart';
@@ -64,33 +65,18 @@ class _ShowSeriesPhotoPageState extends State<ShowSeriesPhotoPage> {
     }
   }
 
-  // Future<void> _fetchSeriesPhotoData() async {
-  //   SeriesPhoto? seriesPhoto = widget.seriesPhoto;
-  //   try {
-  //     final updatedSeriesPhoto = await SeriesPhotoService()
-  //         .showSeriesPhoto(seriesPhoto.studentId, seriesPhoto.id);
-  //     setState(() {
-  //       seriesPhoto = updatedSeriesPhoto.payload;
-  //     });
-  //   } catch (e) {
-  //     setState(() {
-  //       errorMessage = e.toString();
-  //     });
-  //   }
-  // }
+  void _goToEditPage() async {
+    final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => EditSeriesPhotoPage(
+                  seriesPhoto: _seriesPhoto!,
+                )));
 
-  // void _goToEditPage(BuildContext context, SeriesPhoto seriesPhoto) async {
-  //   final result = await Navigator.push(
-  //       context,
-  //       MaterialPageRoute(
-  //           builder: (context) => EditSeriesPhotoPage(
-  //                 seriesPhoto: seriesPhoto,
-  //               )));
-
-  //   if (result) {
-  //     await _fetchSeriesPhotoData();
-  //   }
-  // }
+    if (result) {
+      await _fetchSeriesPhotoData();
+    }
+  }
 
   Future<void> _showDeleteDialog(
     BuildContext context,
@@ -166,7 +152,7 @@ class _ShowSeriesPhotoPageState extends State<ShowSeriesPhotoPage> {
             ),
             ShowMenu<SeriesPhoto>(
               assessment: _seriesPhoto!,
-              onEdit: (_) {},
+              onEdit: (context) => _goToEditPage(),
               onDelete: (context) => _showDeleteDialog(
                 context,
                 _seriesPhoto!.studentId,

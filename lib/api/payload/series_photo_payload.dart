@@ -36,7 +36,6 @@ class SeriesPhoto {
   final String? updatedAt;
   final List<LearningGoal>? learningGoals;
   final List<PhotoForSeriesPhoto>? seriesPhotos;
-  // final List<String>? photosLink;
 
   SeriesPhoto({
     required this.id,
@@ -47,7 +46,6 @@ class SeriesPhoto {
     this.updatedAt,
     this.learningGoals,
     this.seriesPhotos,
-    // this.photosLink,
   });
 
   factory SeriesPhoto.fromJson(Map<String, dynamic> json) {

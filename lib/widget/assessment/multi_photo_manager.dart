@@ -14,7 +14,7 @@ class MultiPhotoManager extends StatefulWidget {
   final PhotoMode mode;
   final String? imageError;
   final List<String>? initialImageUrls;
-  final Function(List<XFile>?) onImagesSelected;
+  final Function(List<dynamic>?) onImagesSelected;
 
   const MultiPhotoManager({
     super.key,
@@ -29,15 +29,18 @@ class MultiPhotoManager extends StatefulWidget {
 }
 
 class _PhotoManagerState extends State<MultiPhotoManager> {
-  final List<XFile> _selectedImages = [];
-  final List<Uint8List?> _loadedImages = [];
+  final List<dynamic> _images = [];
+  final List<dynamic> _requestImages = [];
   bool _isLoading = false;
   int _currentImageIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    if (widget.mode != PhotoMode.create) _loadInitialImages();
+    if (widget.mode != PhotoMode.create) {
+      _requestImages.addAll(widget.initialImageUrls ?? []);
+      _loadInitialImages();
+    }
   }
 
   Future<Uint8List?> _loadImage(String imageEndpoint) async {
@@ -70,11 +73,17 @@ class _PhotoManagerState extends State<MultiPhotoManager> {
 
     if (selectedImage != null) {
       final XFile? compressedImage = await _compressImage(selectedImage);
-      setState(() {
-        _selectedImages.add(compressedImage ?? selectedImage);
-      });
-      widget.onImagesSelected(_selectedImages);
+      _addImage(compressedImage ?? selectedImage);
     }
+  }
+
+  void _addImage(dynamic image) {
+    setState(() {
+      _images.add(image);
+      _requestImages.add(image);
+    });
+
+    widget.onImagesSelected(_requestImages);
   }
 
   Future<void> _loadInitialImages() async {
@@ -88,7 +97,7 @@ class _PhotoManagerState extends State<MultiPhotoManager> {
         widget.initialImageUrls!.map((url) => _loadImage(url)).toList();
     final results = await Future.wait(futures);
     setState(() {
-      _loadedImages.addAll(results);
+      _images.addAll(results);
       _isLoading = false;
     });
   }
@@ -125,78 +134,76 @@ class _PhotoManagerState extends State<MultiPhotoManager> {
         });
   }
 
-  void _showDeleteDialog(int index, bool isNetworkImage) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Hapus foto'),
-          content: const Text('Yakin ingin hapus foto?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Batal'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  if (isNetworkImage) {
-                    _loadedImages.removeAt(index);
-                  } else {
-                    _selectedImages.removeAt(index);
-                  }
-                });
-                widget.onImagesSelected(_selectedImages);
-                Navigator.pop(context);
-              },
-              child: const Text(
-                'Hapus',
-                style: TextStyle(color: Colors.red),
+  void _showDeleteDialog(int index) {
+    if (widget.mode != PhotoMode.show) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Hapus foto'),
+            content: const Text('Yakin ingin hapus foto?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Batal'),
               ),
-            ),
-          ],
-        );
-      },
-    );
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _images.removeAt(index);
+                    _requestImages.removeAt(index);
+                  });
+
+                  widget.onImagesSelected(_requestImages);
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Hapus',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   Widget _buildImageCarousel() {
-    final List<Widget> items = [
-      ..._selectedImages.map(
-        (file) => GestureDetector(
-          onLongPress: () =>
-              _showDeleteDialog(_selectedImages.indexOf(file), false),
+    final List<Widget> items = _images.map((image) {
+      if (image is XFile) {
+        return GestureDetector(
+          onLongPress: () => _showDeleteDialog(_images.indexOf(image)),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Image.file(
-              File(file.path),
+              File(image.path),
               fit: BoxFit.cover,
             ),
           ),
-        ),
-      ),
-      ..._loadedImages.asMap().entries.map((entry) {
-        final index = entry.key;
-        final image = entry.value;
+        );
+      } else if (image is Uint8List) {
         return GestureDetector(
-          onLongPress: () => _showDeleteDialog(index, true),
+          onLongPress: () => _showDeleteDialog(_images.indexOf(image)),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: image != null
-                ? Image.memory(
-                    image,
-                    fit: BoxFit.fill,
-                    width: double.infinity,
-                  )
-                : const Center(
-                    child: Text('Gambar tidak ditemukan'),
-                  ),
+            child: Image.memory(
+              image,
+              fit: BoxFit.cover,
+            ),
           ),
         );
-      })
-    ];
+      } else {
+        return GestureDetector(
+          onLongPress: () => _showDeleteDialog(_images.indexOf(image)),
+          child: const Center(
+            child: Text('Format tidak didukung'),
+          ),
+        );
+      }
+    }).toList();
 
     if (items.isEmpty) {
       return const Center(
@@ -226,8 +233,10 @@ class _PhotoManagerState extends State<MultiPhotoManager> {
               child: Container(
                   width: 8,
                   height: 8,
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 2,
+                  ),
                   decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: _currentImageIndex == entry.key
@@ -245,13 +254,11 @@ class _PhotoManagerState extends State<MultiPhotoManager> {
       return const SizedBox.shrink();
     }
 
-    final hasPhotos = _selectedImages.isNotEmpty || _loadedImages.isNotEmpty;
-    final canAddMorePhotos =
-        (_selectedImages.length + _loadedImages.length) < 5;
+    final canAddMorePhotos = _images.length < 5;
 
     return Column(
       children: [
-        if (hasPhotos)
+        if (_images.isNotEmpty)
           const Padding(
             padding: EdgeInsets.only(bottom: 8.0),
             child: Text(
