@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 class PhotoService {
   Future<Uint8List?> getPhoto(String photoLink) async {
-    final url = Uri.parse('$baseUrl/uploads/$photoLink');
+    final url = Uri.parse('$baseUrl/get-photo/$photoLink');
     final authToken = await AuthService.getToken();
 
     final response = await http.get(url, headers: {
