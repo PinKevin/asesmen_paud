@@ -13,15 +13,18 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
-class CreateStudentPage extends StatefulWidget {
-  const CreateStudentPage({super.key});
+class EditStudentPage extends StatefulWidget {
+  final Student student;
+
+  const EditStudentPage({super.key, required this.student});
 
   @override
-  State<CreateStudentPage> createState() => CreateStudentPageState();
+  State<EditStudentPage> createState() => EditStudentPageState();
 }
 
-class CreateStudentPageState extends State<CreateStudentPage> {
+class EditStudentPageState extends State<EditStudentPage> {
   List<Class> _classes = [];
+  late int _studentId;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _nisnController = TextEditingController();
@@ -36,9 +39,11 @@ class CreateStudentPageState extends State<CreateStudentPage> {
   String? _selectedReligion;
   DateTime? _selectedAcceptanceDate;
   Class? _selectedClass;
+  String? _initialImageUrl;
 
   bool _isLoading = false;
   bool _isClassLoading = false;
+  bool isImageChanged = false;
   String? _nameError;
   String? _nisnError;
   String? _placeOfBirthError;
@@ -53,8 +58,16 @@ class CreateStudentPageState extends State<CreateStudentPage> {
     _isClassLoading = true;
     try {
       final response = await StudentService().getAllTeacherClass();
+      final classes = response.payload!;
+
+      final matchedClass = classes.firstWhere(
+        (c) => c.name == widget.student.className,
+        orElse: () => classes.first,
+      );
+
       setState(() {
         _classes = response.payload!;
+        _selectedClass = matchedClass;
       });
     } catch (e) {
       setState(() {
@@ -119,14 +132,7 @@ class CreateStudentPageState extends State<CreateStudentPage> {
       hasError = true;
     }
 
-    // if (learningGoals.isEmpty) {
-    //   setState(() {
-    //     _learningGoalsError = 'Capaian pembelajaran harus dipilih';
-    //   });
-    //   hasError = true;
-    // }
-
-    if (_image == null) {
+    if (isImageChanged && _image == null) {
       setState(() {
         _photoError = 'Foto harus diisi';
       });
@@ -136,7 +142,7 @@ class CreateStudentPageState extends State<CreateStudentPage> {
     return hasError;
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit(int studentId) async {
     setState(() {
       _isLoading = true;
       _nameError = null;
@@ -156,7 +162,7 @@ class CreateStudentPageState extends State<CreateStudentPage> {
       return;
     }
 
-    final dto = CreateStudentDto(
+    final dto = EditStudentDto(
       name: _nameController.text,
       nisn: _nisnController.text,
       placeOfBirth: _placeOfBirthController.text,
@@ -170,7 +176,7 @@ class CreateStudentPageState extends State<CreateStudentPage> {
 
     try {
       final SuccessResponse<Student> response =
-          await StudentService().createStudent(dto);
+          await StudentService().editStudent(studentId, dto);
 
       if (response.status == 'success') {
         if (!mounted) return;
@@ -210,13 +216,34 @@ class CreateStudentPageState extends State<CreateStudentPage> {
   void initState() {
     super.initState();
     _loadClasses();
+    _studentId = widget.student.id;
+    _nameController.text = widget.student.name;
+    _nisnController.text = widget.student.nisn;
+    _placeOfBirthController.text = widget.student.placeOfBirth ?? '';
+    _dateOfBirthController.text = widget.student.dateOfBirth!;
+    if (widget.student.dateOfBirth != null) {
+      DateTime initialDateOfBirth = DateTime.parse(widget.student.dateOfBirth!);
+      _dateOfBirthController.text =
+          DateFormat('dd-MM-yyyy').format(initialDateOfBirth);
+      _selectedDateOfBirth = initialDateOfBirth;
+    }
+    if (widget.student.acceptanceDate != null) {
+      DateTime initialAcceptanceDate =
+          DateTime.parse(widget.student.acceptanceDate!);
+      _acceptanceDateController.text =
+          DateFormat('dd-MM-yyyy').format(initialAcceptanceDate);
+      _selectedAcceptanceDate = initialAcceptanceDate;
+    }
+    _selectedGender = widget.student.gender;
+    _selectedReligion = widget.student.religion;
+    _initialImageUrl = widget.student.photoProfileLink;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah murid'),
+        title: const Text('Ubah data murid'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -239,6 +266,7 @@ class CreateStudentPageState extends State<CreateStudentPage> {
                 controller: _nisnController,
                 labelText: 'NISN',
                 errorText: _nisnError,
+                enabled: false,
               ),
               const SizedBox(
                 height: 20,
@@ -366,10 +394,12 @@ class CreateStudentPageState extends State<CreateStudentPage> {
               ),
               const SizedBox(height: 5),
               PhotoManager(
-                  mode: PhotoMode.create,
+                  mode: PhotoMode.edit,
+                  initialImageUrl: _initialImageUrl,
                   onImageSelected: (image) {
                     setState(() {
                       _image = image;
+                      isImageChanged = true;
                     });
                   }),
               if (_photoError != null)
@@ -382,7 +412,7 @@ class CreateStudentPageState extends State<CreateStudentPage> {
               // Submit
               ElevatedButton(
                 onPressed: () {
-                  _submit();
+                  _submit(_studentId);
                 },
                 style: ElevatedButton.styleFrom(
                   fixedSize: const Size(200, 40),
@@ -400,7 +430,7 @@ class CreateStudentPageState extends State<CreateStudentPage> {
                         ),
                       )
                     : const Text(
-                        'Tambah Murid',
+                        'Ubah Data Murid',
                         style: TextStyle(fontSize: 16, color: Colors.white),
                       ),
               ),

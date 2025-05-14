@@ -131,4 +131,49 @@ class StudentService {
       throw ErrorException(message);
     }
   }
+
+  Future<SuccessResponse<Student>> editStudent(
+    int studentId,
+    EditStudentDto dto,
+  ) async {
+    String? photoLink;
+    if (dto.photo != null) {
+      final uploadPhotoResponse = await FileService().uploadPhoto(dto.photo!);
+      photoLink = uploadPhotoResponse.payload!.filePath;
+    }
+
+    final Map<String, dynamic> requestBody = {
+      ...dto.toJson(),
+      'photoProfileLink': photoLink,
+    };
+
+    final Uri url = Uri.parse('$baseUrl/students/$studentId');
+    final authToken = await AuthService.getToken();
+
+    final response = await http.put(
+      url,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+        'Content-Type': 'application/json'
+      },
+      body: json.encode(requestBody),
+    );
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+        jsonResponse,
+        (data) => Student.fromJson(data),
+      );
+    } else if (response.statusCode == 404) {
+      String message = jsonResponse['message'] ?? 'Murid tidak dapat ditemukan';
+      throw ErrorException(message);
+    } else if (response.statusCode == 422) {
+      final failResponse = FailResponse.fromJson(jsonResponse);
+      throw ValidationException(failResponse.errors ?? {});
+    } else {
+      throw Exception('Tidak bisa mengubah murid.');
+    }
+  }
 }

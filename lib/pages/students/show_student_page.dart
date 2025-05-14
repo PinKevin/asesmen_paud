@@ -2,6 +2,7 @@ import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/payload/student_payload.dart';
 import 'package:asesmen_paud/api/service/student_service.dart';
 import 'package:asesmen_paud/helper/date_time_manipulator.dart';
+import 'package:asesmen_paud/pages/students/edit_student_page.dart';
 import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
 import 'package:asesmen_paud/widget/assessment/show_field.dart';
 import 'package:asesmen_paud/widget/assessment/show_menu.dart';
@@ -84,15 +85,15 @@ class _ShowStudentPageState extends State<ShowStudentPage> {
   }
 
   Future<void> _goToEditPage() async {
-    // await Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => EditAnecdotalPage(
-    //       anecdotal: _anecdotal!,
-    //     ),
-    //   ),
-    // );
-    // await _fetchStudentData();
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditStudentPage(
+          student: _student!,
+        ),
+      ),
+    );
+    await _fetchStudentData();
   }
 
   Future<void> _showDeleteDialog(BuildContext context, int studentId) async {

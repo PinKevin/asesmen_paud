@@ -45,7 +45,7 @@ class EditStudentDto {
   final String? gender;
   final String? religion;
   final String? acceptanceDate;
-  final String? classId;
+  final int? classId;
   final XFile? photo;
 
   EditStudentDto({
@@ -60,11 +60,16 @@ class EditStudentDto {
     this.photo,
   });
 
-  // Map<String, dynamic> toJson() {
-  //   return {
-  //     'description': description,
-  //     'feedback': feedback,
-  //     'learningGoals': learningGoals.map((goal) => goal.toString()).toList()
-  //   };
-  // }
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'nisn': nisn,
+      'placeOfBirth': placeOfBirth,
+      'dateOfBirth': dateOfBirth,
+      'gender': gender,
+      'religion': religion,
+      'acceptanceDate': acceptanceDate,
+      'classId': classId,
+    };
+  }
 }
