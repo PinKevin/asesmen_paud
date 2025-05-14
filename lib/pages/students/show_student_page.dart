@@ -54,16 +54,13 @@ class _ShowStudentPageState extends State<ShowStudentPage> {
 
   Future<void> _delete(BuildContext context, int studentId) async {
     try {
-      // final response = await AnecdotalService().deleteAnecdotal(
-      //   studentId,
-      //   anecdotalId,
-      // );
+      final response = await StudentService().deleteStudent(studentId);
 
       if (!context.mounted) return;
       Navigator.popUntil(context, ModalRoute.withName('/students'));
       ScaffoldMessenger.of(context).showSnackBar(
         ColorSnackbar.build(
-          message: 'Delete',
+          message: response.message,
           success: true,
         ),
       );

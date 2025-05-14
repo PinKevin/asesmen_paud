@@ -176,4 +176,31 @@ class StudentService {
       throw Exception('Tidak bisa mengubah murid.');
     }
   }
+
+  Future<SuccessResponse<ApiResponse>> deleteStudent(int studentId) async {
+    final Uri url = Uri.parse('$baseUrl/students/$studentId');
+    final authToken = await AuthService.getToken();
+
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+        'Content-Type': 'application/json'
+      },
+    );
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+        jsonResponse,
+        (json) => ApiResponse.fromJson(json, null),
+      );
+    } else if (response.statusCode == 404) {
+      String message = jsonResponse['message'] ?? 'Murid tidak dapat ditemukan';
+      throw ErrorException(message);
+    } else {
+      throw Exception('Tidak bisa menghapus murid.');
+    }
+  }
 }
