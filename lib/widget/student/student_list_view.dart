@@ -1,4 +1,5 @@
 import 'package:asesmen_paud/api/payload/student_payload.dart';
+import 'package:asesmen_paud/pages/students/show_student_page.dart';
 import 'package:asesmen_paud/widget/student/student_list_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +22,12 @@ class StudentListView extends StatelessWidget {
       required this.onRefresh,
       required this.scrollController});
 
-  void _navigateToIndexPage(BuildContext context, String mode, int studentId) {
+  void _navigateToIndexOrShowPage(
+    BuildContext context,
+    String mode,
+    int? studentId,
+    Student? student,
+  ) {
     final routes = {
       'anecdotal': '/anecdotals',
       'artwork': '/artworks',
@@ -33,7 +39,20 @@ class StudentListView extends StatelessWidget {
     final routeName = routes[mode];
 
     if (routeName != null) {
-      Navigator.pushNamed(context, routeName, arguments: studentId);
+      if (studentId != null) {
+        Navigator.pushNamed(context, routeName, arguments: studentId);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ID murid tidak tersedia')),
+        );
+      }
+    } else if (student != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ShowStudentPage(student: student),
+        ),
+      );
     }
   }
 
@@ -65,7 +84,7 @@ class StudentListView extends StatelessWidget {
             return StudentListTile(
               student: student,
               onStudentTap: () {
-                _navigateToIndexPage(context, mode, student.id);
+                _navigateToIndexOrShowPage(context, mode, student.id, student);
               },
             );
           } else if (hasMoreData) {

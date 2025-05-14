@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class ShowMenu<T> extends StatelessWidget {
-  final T assessment;
+  final T item;
   final Function(BuildContext) onEdit;
   final Function(BuildContext) onDelete;
 
   const ShowMenu({
     super.key,
-    required this.assessment,
+    required this.item,
     required this.onEdit,
     required this.onDelete,
   });
@@ -20,7 +20,7 @@ class ShowMenu<T> extends StatelessWidget {
         ElevatedButton.icon(
           onPressed: () => onDelete(context),
           label: const Text(
-            'Hapus Asesmen',
+            'Hapus Data',
             style: TextStyle(color: Colors.red),
           ),
           icon: const Icon(
@@ -32,7 +32,7 @@ class ShowMenu<T> extends StatelessWidget {
         ElevatedButton.icon(
           onPressed: () => onEdit(context),
           label: const Text(
-            'Ubah Asesmen',
+            'Ubah Data',
             style: TextStyle(color: Colors.blue),
           ),
           icon: const Icon(

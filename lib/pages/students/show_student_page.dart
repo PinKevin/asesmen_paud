@@ -1,47 +1,44 @@
 import 'package:asesmen_paud/api/exception.dart';
-import 'package:asesmen_paud/api/payload/anecdotal_payload.dart';
-import 'package:asesmen_paud/api/service/anecdotal_service.dart';
-import 'package:asesmen_paud/pages/anecdotals/edit_anecdotal_page.dart';
-import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
+import 'package:asesmen_paud/api/payload/student_payload.dart';
+import 'package:asesmen_paud/api/service/student_service.dart';
+import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
 import 'package:asesmen_paud/widget/assessment/show_field.dart';
 import 'package:asesmen_paud/widget/assessment/show_menu.dart';
 import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 
-class ShowAnecdotalPage extends StatefulWidget {
-  final Anecdotal anecdotal;
+class ShowStudentPage extends StatefulWidget {
+  final Student student;
 
-  const ShowAnecdotalPage({super.key, required this.anecdotal});
+  const ShowStudentPage({super.key, required this.student});
 
   @override
-  State<ShowAnecdotalPage> createState() => _ShowAnecdotalPageState();
+  State<ShowStudentPage> createState() => _ShowStudentPageState();
 }
 
-class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
-  Anecdotal? _anecdotal;
+class _ShowStudentPageState extends State<ShowStudentPage> {
+  Student? _student;
   String? _errorMessage;
   bool _isLoading = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _fetchAnecdotalData();
+    _student ??= widget.student;
+    _fetchStudentData();
   }
 
-  Future<void> _fetchAnecdotalData() async {
+  Future<void> _fetchStudentData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final response = await AnecdotalService().showAnecdotal(
-        widget.anecdotal.studentId,
-        widget.anecdotal.id,
-      );
+      final response = await StudentService().showStudent(widget.student.id);
       setState(() {
-        _anecdotal = response.payload;
+        _student = response.payload;
       });
     } catch (e) {
       setState(() {
@@ -54,17 +51,18 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
     }
   }
 
-  Future<void> _delete(
-      BuildContext context, int studentId, int anecdotalId) async {
+  Future<void> _delete(BuildContext context, int studentId) async {
     try {
-      final response =
-          await AnecdotalService().deleteAnecdotal(studentId, anecdotalId);
+      // final response = await AnecdotalService().deleteAnecdotal(
+      //   studentId,
+      //   anecdotalId,
+      // );
 
       if (!context.mounted) return;
-      Navigator.popUntil(context, ModalRoute.withName('/anecdotals'));
+      Navigator.popUntil(context, ModalRoute.withName('/students'));
       ScaffoldMessenger.of(context).showSnackBar(
         ColorSnackbar.build(
-          message: response.message,
+          message: 'Delete',
           success: true,
         ),
       );
@@ -86,28 +84,27 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
   }
 
   Future<void> _goToEditPage() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditAnecdotalPage(
-          anecdotal: _anecdotal!,
-        ),
-      ),
-    );
-    await _fetchAnecdotalData();
+    // await Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => EditAnecdotalPage(
+    //       anecdotal: _anecdotal!,
+    //     ),
+    //   ),
+    // );
+    // await _fetchStudentData();
   }
 
-  Future<void> _showDeleteDialog(
-      BuildContext context, int studentId, int anecdotalId) async {
+  Future<void> _showDeleteDialog(BuildContext context, int studentId) async {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus anekdot'),
-        content: const Text('Yakin ingin hapus anekdot?'),
+        title: const Text('Hapus murid'),
+        content: const Text('Yakin ingin hapus data murid?'),
         actions: [
           TextButton(
             onPressed: () {
-              _delete(context, studentId, anecdotalId);
+              _delete(context, studentId);
             },
             child: const Text(
               'Hapus',
@@ -133,26 +130,38 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ShowField(
-              title: 'Deskripsi',
-              content: _anecdotal!.description,
+              title: 'Nama',
+              content: _student!.name,
             ),
             ShowField(
-              title: 'Umpan balik',
-              content: _anecdotal!.feedback,
+              title: 'NISN',
+              content: _student!.nisn,
             ),
-            const SizedBox(
-              height: 10,
+            ShowField(
+              title: 'Tempat Lahir',
+              content: _student!.placeOfBirth!,
             ),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Capaian Pembelajaran',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+            ShowField(
+              title: 'Tanggal Lahir',
+              content: DateTimeManipulator()
+                  .convertIsoToDate(_student!.dateOfBirth!),
             ),
-            LearningGoalList(
-              learningGoals: _anecdotal!.learningGoals!,
-              editing: false,
+            ShowField(
+              title: 'Jenis Kelamin',
+              content: _student!.gender!,
+            ),
+            ShowField(
+              title: 'Agama',
+              content: _student!.religion!,
+            ),
+            ShowField(
+              title: 'Tanggal Penerimaan',
+              content: DateTimeManipulator()
+                  .convertIsoToDate(_student!.acceptanceDate!),
+            ),
+            ShowField(
+              title: 'Nama Kelas',
+              content: _student!.className!,
             ),
             const SizedBox(
               height: 10,
@@ -164,21 +173,21 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
-            PhotoManager(
-              mode: PhotoMode.show,
-              initialImageUrl: _anecdotal!.photoLink,
-              onImageSelected: (_) {},
-            ),
+            if (_student?.photoProfileLink != null)
+              PhotoManager(
+                mode: PhotoMode.show,
+                initialImageUrl: _student!.photoProfileLink!,
+                onImageSelected: (_) {},
+              ),
             const SizedBox(
               height: 10,
             ),
-            ShowMenu<Anecdotal>(
-              item: _anecdotal!,
+            ShowMenu<Student>(
+              item: _student!,
               onEdit: (context) => _goToEditPage(),
               onDelete: (context) => _showDeleteDialog(
                 context,
-                _anecdotal!.studentId,
-                _anecdotal!.id,
+                _student!.id,
               ),
             )
           ],
@@ -201,7 +210,7 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
       );
     }
 
-    if (_anecdotal == null) {
+    if (_student == null) {
       return const Center(child: Text('Data tidak ditemukan'));
     }
 
@@ -212,7 +221,7 @@ class _ShowAnecdotalPageState extends State<ShowAnecdotalPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detail anekdot'),
+        title: const Text('Detail murid'),
       ),
       body: _buildContent(),
     );

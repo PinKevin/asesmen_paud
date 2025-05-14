@@ -151,7 +151,7 @@ class _ShowSeriesPhotoPageState extends State<ShowSeriesPhotoPage> {
               height: 10,
             ),
             ShowMenu<SeriesPhoto>(
-              assessment: _seriesPhoto!,
+              item: _seriesPhoto!,
               onEdit: (context) => _goToEditPage(),
               onDelete: (context) => _showDeleteDialog(
                 context,

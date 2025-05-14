@@ -170,7 +170,7 @@ class _ShowArtworkPageState extends State<ShowArtworkPage> {
               height: 10,
             ),
             ShowMenu<Artwork>(
-              assessment: _artwork!,
+              item: _artwork!,
               onEdit: (context) => _goToEditPage(),
               onDelete: (context) => _showDeleteDialog(
                 context,

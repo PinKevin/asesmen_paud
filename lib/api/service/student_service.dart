@@ -106,4 +106,29 @@ class StudentService {
       throw Exception('Tidak bisa menambahkan murid.');
     }
   }
+
+  Future<SuccessResponse<Student>> showStudent(int studentId) async {
+    final Uri url = Uri.parse('$baseUrl/students/$studentId');
+    final authToken = await AuthService.getToken();
+
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+        jsonResponse,
+        (json) => Student.fromJson(json),
+      );
+    } else if (response.statusCode == 404) {
+      String message = jsonResponse['message'] ?? 'Murid tidak dapat ditemukan';
+      throw ErrorException(message);
+    } else {
+      String message =
+          jsonResponse['message'] ?? 'Terjadi error saat mengambil data murid';
+      throw ErrorException(message);
+    }
+  }
 }
