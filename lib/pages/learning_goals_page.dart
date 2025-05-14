@@ -3,6 +3,7 @@ import 'package:asesmen_paud/api/payload/learning_goal_payload.dart';
 import 'package:asesmen_paud/api/payload/learning_scope_payload.dart';
 import 'package:asesmen_paud/api/payload/sub_learning_scope_payload.dart';
 import 'package:asesmen_paud/api/service/learning_service.dart';
+import 'package:asesmen_paud/widget/assessment/expanded_dropdown.dart';
 import 'package:flutter/material.dart';
 
 class LearningGoalsPage extends StatefulWidget {
@@ -106,151 +107,86 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              if (_competencyError != null) Text(_competencyError!),
-              DropdownButtonFormField(
-                  isExpanded: true,
-                  isDense: false,
-                  decoration: const InputDecoration(
-                    labelText: 'Pilih kompetensi',
-                    border: OutlineInputBorder(),
-                  ),
-                  value: _selectedCompetency,
-                  items: _competencies.map((competency) {
-                    return DropdownMenuItem(
-                      value: competency,
-                      child: Text(
-                        competency.competencyName,
-                        softWrap: true,
-                        maxLines: 3,
-                        overflow: TextOverflow.visible,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.normal, fontSize: 14),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCompetency = value;
-                      _selectedLearningScope = null;
-                      _selectedSubLearningScope = null;
-                      selectedLearningGoal = null;
-                      if (value != null) _fetchLearningScopes(value.id);
-                    });
-                  }),
+              ExpandedDropdown<Competency>(
+                label: 'Pilih kompetensi',
+                items: _competencies,
+                selectedItem: _selectedCompetency,
+                itemLabel: (item) => item?.competencyName,
+                errorText: _competencyError,
+                onChanged: (value) {
+                  setState(() {
+                    _competencyError = null;
+                    _selectedCompetency = value;
+                    _selectedLearningScope = null;
+                    _selectedSubLearningScope = null;
+                    selectedLearningGoal = null;
+                    if (value != null) _fetchLearningScopes(value.id);
+                  });
+                },
+              ),
               const SizedBox(
                 height: 20,
               ),
-              if (_learningScopeError != null) Text(_learningScopeError!),
-              DropdownButtonFormField(
-                  isExpanded: true,
-                  isDense: false,
-                  decoration: const InputDecoration(
-                    labelText: 'Pilih lingkup pembelajaran',
-                    border: OutlineInputBorder(),
-                  ),
-                  value: _selectedLearningScope,
-                  items: _learningScopes.map((learningScope) {
-                    return DropdownMenuItem(
-                      value: learningScope,
-                      child: Text(
-                        learningScope.learningScopeName,
-                        softWrap: true,
-                        maxLines: 3,
-                        overflow: TextOverflow.visible,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.normal, fontSize: 14),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedLearningScope = value;
-                      _selectedSubLearningScope = null;
-                      selectedLearningGoal = null;
-                      if (value != null) _fetchSubLearningScopes(value.id);
-                    });
-                  }),
+              ExpandedDropdown<LearningScope>(
+                label: 'Pilih lingkup pembelajaran',
+                items: _learningScopes,
+                selectedItem: _selectedLearningScope,
+                itemLabel: (item) => item?.learningScopeName,
+                errorText: _learningScopeError,
+                onChanged: (value) {
+                  setState(() {
+                    _learningScopeError = null;
+                    _selectedLearningScope = value;
+                    _selectedSubLearningScope = null;
+                    selectedLearningGoal = null;
+                    if (value != null) _fetchSubLearningScopes(value.id);
+                  });
+                },
+              ),
               const SizedBox(
                 height: 20,
               ),
-              if (_subLearningScopeError != null) Text(_subLearningScopeError!),
-              DropdownButtonFormField(
-                  isExpanded: true,
-                  isDense: false,
-                  decoration: const InputDecoration(
-                    labelText: 'Pilih sub lingkup pembelajaran',
-                    border: OutlineInputBorder(),
-                  ),
-                  value: _selectedSubLearningScope,
-                  items: _subLearningScopes.map((subLearningScope) {
-                    return DropdownMenuItem(
-                      value: subLearningScope,
-                      child: Text(
-                        subLearningScope.subLearningScopeName,
-                        softWrap: true,
-                        maxLines: 3,
-                        overflow: TextOverflow.visible,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.normal, fontSize: 14),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedSubLearningScope = value;
-                      selectedLearningGoal = null;
-
-                      if (value != null) _fetchLearningGoals(value.id);
-                    });
-                  }),
+              ExpandedDropdown<SubLearningScope>(
+                label: 'Pilih sub lingkup pembelajaran',
+                items: _subLearningScopes,
+                selectedItem: _selectedSubLearningScope,
+                itemLabel: (item) => item?.subLearningScopeName,
+                errorText: _subLearningScopeError,
+                onChanged: (value) {
+                  setState(() {
+                    _subLearningScopeError = null;
+                    _selectedSubLearningScope = value;
+                    selectedLearningGoal = null;
+                    if (value != null) _fetchLearningGoals(value.id);
+                  });
+                },
+              ),
               const SizedBox(
                 height: 20,
               ),
-              DropdownButtonFormField(
-                  isExpanded: true,
-                  isDense: false,
-                  decoration: const InputDecoration(
-                    labelText: 'Pilih capaian pembelajaran',
-                    border: OutlineInputBorder(),
-                  ),
-                  value: selectedLearningGoal,
-                  items: _learningGoals.map((learningGoal) {
-                    return DropdownMenuItem(
-                        value: learningGoal,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              learningGoal.learningGoalCode,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              learningGoal.learningGoalName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 14,
-                              ),
-                            )
-                          ],
-                        ));
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedLearningGoal = value;
-                    });
-                  }),
+              ExpandedDropdown<LearningGoal>(
+                label: 'Pilih capaian pembelajaran',
+                items: _learningGoals,
+                selectedItem: selectedLearningGoal,
+                itemLabel: (item) => item?.learningGoalName,
+                itemSubLabel: (item) => item?.learningGoalCode,
+                errorText: _learningGoalError,
+                onChanged: (value) {
+                  setState(() {
+                    _learningGoalError = null;
+                    selectedLearningGoal = value;
+                  });
+                },
+              ),
               const SizedBox(
                 height: 20,
               ),
-              if (_learningGoalError != null) Text(_learningGoalError!),
               ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, selectedLearningGoal);
-                  },
-                  child: const Text('Pilih'))
+                onPressed: () {
+                  Navigator.pop(context, selectedLearningGoal);
+                },
+                child: const Text('Pilih'),
+              )
             ],
           ),
         ));

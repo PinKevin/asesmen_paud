@@ -6,6 +6,7 @@ import 'package:asesmen_paud/api/service/checklist_service.dart';
 import 'package:asesmen_paud/pages/checklists/create_checklist_point_page.dart';
 import 'package:asesmen_paud/pages/checklists/edit_checklist_point_page.dart';
 import 'package:asesmen_paud/pages/checklists/show_checklist_point_page.dart';
+import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 
 class CreateChecklistPage extends StatefulWidget {
@@ -56,7 +57,9 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
                   child: const Text('Kembali')),
               TextButton(
                   onPressed: () {
-                    checklistPoints.remove(checklistPoint);
+                    setState(() {
+                      checklistPoints.remove(checklistPoint);
+                    });
                     Navigator.of(context).pop();
                   },
                   child: const Text(
@@ -95,8 +98,8 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
       if (response.status == 'success') {
         if (!mounted) return;
 
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(response.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+            ColorSnackbar.build(message: response.message, success: true));
         Navigator.pop(context);
       }
     } catch (e) {
@@ -121,126 +124,128 @@ class CreateChecklistPageState extends State<CreateChecklistPage> {
     final int studentId = ModalRoute.of(context)!.settings.arguments as int;
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Buat penilaian ceklis'),
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Poin Ceklis',
-                  ),
+      appBar: AppBar(
+        title: const Text('Buat penilaian ceklis'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Poin Ceklis',
                 ),
-                if (checklistPoints.isNotEmpty)
-                  ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: checklistPoints.length,
-                      itemBuilder: (context, index) {
-                        final checklistPoint = checklistPoints[index];
-                        return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.all(0),
-                                  backgroundColor: Colors.deepPurple[100],
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  )),
-                              onPressed: () {
-                                _viewMoreChecklistPoint(checklistPoint);
-                              },
-                              child: Card(
-                                margin: EdgeInsets.zero,
-                                color: Colors.transparent,
-                                elevation: 0,
-                                child: ListTile(
-                                    title: Text(
-                                      checklistPoint.context,
-                                      textAlign: TextAlign.justify,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      checklistPoint.hasAppeared == true
-                                          ? 'Sudah muncul'
-                                          : 'Belum muncul',
-                                      textAlign: TextAlign.justify,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    trailing: PopupMenuButton(
-                                      icon: const Icon(Icons.more_vert),
-                                      onSelected: (value) {
-                                        switch (value) {
-                                          case 'edit':
-                                            _goToEditChecklistPoint(
-                                                checklistPoint);
-                                            break;
-                                          case 'delete':
-                                            _showDeleteChecklistDialog(
-                                                checklistPoint);
-                                            break;
-                                          default:
-                                        }
-                                      },
-                                      itemBuilder: (BuildContext context) {
-                                        return [
-                                          const PopupMenuItem<String>(
-                                            value: 'delete',
-                                            child: Text('Hapus'),
-                                          ),
-                                        ];
-                                      },
-                                    )),
+              ),
+              if (checklistPoints.isNotEmpty)
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: checklistPoints.length,
+                  itemBuilder: (context, index) {
+                    final checklistPoint = checklistPoints[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(0),
+                            backgroundColor: Colors.deepPurple[100],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            )),
+                        onPressed: () {
+                          _viewMoreChecklistPoint(checklistPoint);
+                        },
+                        child: Card(
+                          margin: EdgeInsets.zero,
+                          color: Colors.transparent,
+                          elevation: 0,
+                          child: ListTile(
+                            title: Text(
+                              checklistPoint.context,
+                              textAlign: TextAlign.justify,
+                              style: const TextStyle(
+                                fontSize: 14,
                               ),
-                            ));
-                      }),
-                const SizedBox(
-                  height: 5,
-                ),
-                ElevatedButton(
-                    onPressed: _goToAddChecklistPointPage,
-                    child: const Text('Tambah Poin Ceklis')),
-                const SizedBox(
-                  height: 10,
-                ),
-                if (_errorMessage.isNotEmpty)
-                  Text(_errorMessage,
-                      style: const TextStyle(color: Colors.red)),
-                ElevatedButton(
-                  onPressed: () {
-                    _submit(studentId);
-                  },
-                  style: ElevatedButton.styleFrom(
-                      fixedSize: const Size(280, 40),
-                      backgroundColor: Colors.deepPurple),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
+                            ),
+                            subtitle: Text(
+                              checklistPoint.hasAppeared == true
+                                  ? 'Sudah muncul'
+                                  : 'Belum muncul',
+                              textAlign: TextAlign.justify,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            trailing: PopupMenuButton(
+                              icon: const Icon(Icons.more_vert),
+                              onSelected: (value) {
+                                switch (value) {
+                                  case 'edit':
+                                    _goToEditChecklistPoint(checklistPoint);
+                                    break;
+                                  case 'delete':
+                                    _showDeleteChecklistDialog(checklistPoint);
+                                    break;
+                                  default:
+                                }
+                              },
+                              itemBuilder: (BuildContext context) {
+                                return [
+                                  const PopupMenuItem<String>(
+                                    value: 'delete',
+                                    child: Text('Hapus'),
+                                  ),
+                                ];
+                              },
                             ),
                           ),
-                        )
-                      : const Text(
-                          'Tambah Penilaian Ceklis',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
+                      ),
+                    );
+                  },
                 ),
-              ],
-            ),
+              const SizedBox(
+                height: 5,
+              ),
+              ElevatedButton(
+                onPressed: _goToAddChecklistPointPage,
+                child: const Text('Tambah Poin Ceklis'),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              if (_errorMessage.isNotEmpty)
+                Text(_errorMessage, style: const TextStyle(color: Colors.red)),
+              ElevatedButton(
+                onPressed: () {
+                  _submit(studentId);
+                },
+                style: ElevatedButton.styleFrom(
+                    fixedSize: const Size(280, 40),
+                    backgroundColor: Colors.deepPurple),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      )
+                    : const Text(
+                        'Tambah Penilaian Ceklis',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
