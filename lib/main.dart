@@ -11,7 +11,8 @@ import 'package:asesmen_paud/pages/reports/create_report_page.dart';
 import 'package:asesmen_paud/pages/reports/reports_page.dart';
 import 'package:asesmen_paud/pages/series_photos/create_series_photo_page.dart';
 import 'package:asesmen_paud/pages/series_photos/series_photo_page.dart';
-import 'package:asesmen_paud/pages/students_page.dart';
+import 'package:asesmen_paud/pages/students/create_student_page.dart';
+import 'package:asesmen_paud/pages/students/students_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => const DashboardPage(),
         '/login': (context) => const LoginPage(),
         '/students': (context) => const StudentsPage(),
+        '/create-student': (context) => const CreateStudentPage(),
         '/anecdotals': (context) => const AnecdotalsPage(),
         '/create-anecdotal': (context) => const CreateAnecdotalPage(),
         '/artworks': (context) => const ArtworksPage(),

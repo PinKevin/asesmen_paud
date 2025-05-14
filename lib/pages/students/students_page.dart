@@ -20,7 +20,7 @@ class StudentsPageState extends State<StudentsPage> {
   final List<Student> _students = [];
 
   String _errorMessage = '';
-  String _mode = 'anecdotal';
+  String _mode = 'student';
   String _sortOrder = 'asc';
   int _currentPage = 1;
   bool _isLoading = false;
@@ -44,7 +44,7 @@ class StudentsPageState extends State<StudentsPage> {
 
   void _setMode() {
     final routeArgs = ModalRoute.of(context)?.settings.arguments as Map?;
-    _mode = routeArgs?['mode'] ?? 'anecdotal';
+    _mode = routeArgs?['mode'] ?? 'student';
   }
 
   void _resetStudents() {
@@ -98,8 +98,12 @@ class StudentsPageState extends State<StudentsPage> {
     });
 
     try {
-      final response = await StudentService()
-          .getAllStudents(page, _searchController.text.trim(), _sortOrder);
+      final response = await StudentService().getAllStudents(
+        page,
+        _searchController.text.trim(),
+        _sortOrder,
+      );
+
       _updateStudents(response.payload!.data, page);
     } catch (e) {
       setState(() {
@@ -112,48 +116,63 @@ class StudentsPageState extends State<StudentsPage> {
     }
   }
 
+  void _onAddStudent() {
+    Navigator.pushNamed(context, '/create-student');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Daftar Murid'),
+      appBar: AppBar(
+        title: const Text('Daftar Murid'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            SearchField(controller: _searchController),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Chip(label: Text('tes')),
+                SortButton(
+                  label: 'Nama',
+                  sortOrder: _sortOrder,
+                  onSortChanged: _onSortSelected,
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Expanded(
+              child: StudentListView(
+                students: _students,
+                errorMessage: _errorMessage,
+                isLoading: _isLoading,
+                hasMoreData: _hasMoreData,
+                mode: _mode,
+                onRefresh: () async {
+                  _resetStudents();
+                  await _fetchStudents();
+                },
+                scrollController: _scrollController,
+              ),
+            )
+          ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              SearchField(controller: _searchController),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SortButton(
-                      label: 'Nama',
-                      sortOrder: _sortOrder,
-                      onSortChanged: _onSortSelected)
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Expanded(
-                child: StudentListView(
-                    students: _students,
-                    errorMessage: _errorMessage,
-                    isLoading: _isLoading,
-                    hasMoreData: _hasMoreData,
-                    mode: _mode,
-                    onRefresh: () async {
-                      _resetStudents();
-                      await _fetchStudents();
-                    },
-                    scrollController: _scrollController),
-              )
-            ],
-          ),
-        ));
+      ),
+      floatingActionButton: _mode == 'student'
+          ? FloatingActionButton(
+              onPressed: _onAddStudent,
+              tooltip: 'Tambah Murid',
+              child: const Icon(Icons.add),
+            )
+          : null,
+    );
   }
 
   @override

@@ -106,11 +106,12 @@ class ChecklistsPageState extends State<ChecklistsPage> {
 
     try {
       final response = await ChecklistService().getAllStudentChecklists(
-          studentId,
-          page,
-          _selectedDateRange?.start.toIso8601String().substring(0, 10),
-          _selectedDateRange?.end.toIso8601String().substring(0, 10),
-          _sortOrder);
+        studentId,
+        page,
+        _selectedDateRange?.start.toIso8601String().substring(0, 10),
+        _selectedDateRange?.end.toIso8601String().substring(0, 10),
+        _sortOrder,
+      );
 
       _updateChecklists(response.payload!.data, page);
     } catch (e) {
@@ -144,9 +145,10 @@ class ChecklistsPageState extends State<ChecklistsPage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   SortButton(
-                      label: 'Tanggal dibuat',
-                      sortOrder: _sortOrder,
-                      onSortChanged: _onSortSelected)
+                    label: 'Tanggal dibuat',
+                    sortOrder: _sortOrder,
+                    onSortChanged: _onSortSelected,
+                  )
                 ],
               ),
               const SizedBox(

@@ -31,6 +31,7 @@ class StudentListView extends StatelessWidget {
     };
 
     final routeName = routes[mode];
+
     if (routeName != null) {
       Navigator.pushNamed(context, routeName, arguments: studentId);
     }
@@ -54,35 +55,40 @@ class StudentListView extends StatelessWidget {
     }
 
     return RefreshIndicator(
-        onRefresh: onRefresh,
-        child: ListView.builder(
-            controller: scrollController,
-            itemCount: students.length + 1,
-            itemBuilder: (context, index) {
-              if (index < students.length) {
-                final student = students[index];
-                return StudentListTile(
-                    student: student,
-                    onStudentTap: () {
-                      _navigateToIndexPage(context, mode, student.id);
-                    });
-              } else if (hasMoreData) {
-                return const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } else {
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Center(
-                    child: Text(students.isEmpty
-                        ? 'Belum ada murid. Silakan hubungi admin!'
-                        : 'Anda sudah mencapai akhir halaman.'),
-                  ),
-                );
-              }
-            }));
+      onRefresh: onRefresh,
+      child: ListView.builder(
+        controller: scrollController,
+        itemCount: students.length + 1,
+        itemBuilder: (context, index) {
+          if (index < students.length) {
+            final student = students[index];
+            return StudentListTile(
+              student: student,
+              onStudentTap: () {
+                _navigateToIndexPage(context, mode, student.id);
+              },
+            );
+          } else if (hasMoreData) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Center(
+                child: Text(
+                  students.isEmpty
+                      ? 'Belum ada murid.'
+                      : 'Anda sudah mencapai akhir halaman.',
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 }
