@@ -4,6 +4,7 @@ import 'package:asesmen_paud/api/payload/student_payload.dart';
 import 'package:asesmen_paud/api/service/student_service.dart';
 import 'package:asesmen_paud/widget/search_field.dart';
 import 'package:asesmen_paud/widget/sort_button.dart';
+import 'package:asesmen_paud/widget/student/class_chip_selection.dart';
 import 'package:asesmen_paud/widget/student/student_list_view.dart';
 import 'package:flutter/material.dart';
 
@@ -17,13 +18,16 @@ class StudentsPage extends StatefulWidget {
 class StudentsPageState extends State<StudentsPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  List<Classroom> _classes = [];
   final List<Student> _students = [];
 
+  Classroom? _selectedClass;
   String _errorMessage = '';
   String _mode = 'student';
   String _sortOrder = 'asc';
   int _currentPage = 1;
   bool _isLoading = false;
+  bool _isClassLoading = false;
   bool _hasMoreData = true;
 
   Timer? _debounce;
@@ -33,6 +37,7 @@ class StudentsPageState extends State<StudentsPage> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _searchController.addListener(_onSearchChanged);
+    _loadClasses();
   }
 
   @override
@@ -102,6 +107,7 @@ class StudentsPageState extends State<StudentsPage> {
         page,
         _searchController.text.trim(),
         _sortOrder,
+        _selectedClass?.id,
       );
 
       _updateStudents(response.payload!.data, page);
@@ -112,6 +118,25 @@ class StudentsPageState extends State<StudentsPage> {
     } finally {
       setState(() {
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadClasses() async {
+    setState(() {
+      _isClassLoading = true;
+    });
+
+    try {
+      final response = await StudentService().getAllTeacherClass();
+      setState(() {
+        _classes = response.payload!;
+      });
+    } catch (e) {
+      setState(() {});
+    } finally {
+      setState(() {
+        _isClassLoading = false;
       });
     }
   }
@@ -137,7 +162,18 @@ class StudentsPageState extends State<StudentsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Chip(label: Text('tes')),
+                ClassChipSelection(
+                  classes: _classes,
+                  selectedClass: _selectedClass,
+                  isLoading: _isClassLoading,
+                  onClassSelected: (selected) {
+                    setState(() {
+                      _selectedClass = selected;
+                      _resetStudents();
+                      _fetchStudents();
+                    });
+                  },
+                ),
                 SortButton(
                   label: 'Nama',
                   sortOrder: _sortOrder,

@@ -21,7 +21,7 @@ class CreateStudentPage extends StatefulWidget {
 }
 
 class CreateStudentPageState extends State<CreateStudentPage> {
-  List<Class> _classes = [];
+  List<Classroom> _classes = [];
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _nisnController = TextEditingController();
@@ -35,7 +35,7 @@ class CreateStudentPageState extends State<CreateStudentPage> {
   String? _selectedGender;
   String? _selectedReligion;
   DateTime? _selectedAcceptanceDate;
-  Class? _selectedClass;
+  Classroom? _selectedClass;
 
   bool _isLoading = false;
   bool _isClassLoading = false;
@@ -50,7 +50,10 @@ class CreateStudentPageState extends State<CreateStudentPage> {
   String? _photoError;
 
   Future<void> _loadClasses() async {
-    _isClassLoading = true;
+    setState(() {
+      _isClassLoading = true;
+    });
+
     try {
       final response = await StudentService().getAllTeacherClass();
       setState(() {
@@ -118,13 +121,6 @@ class CreateStudentPageState extends State<CreateStudentPage> {
       });
       hasError = true;
     }
-
-    // if (learningGoals.isEmpty) {
-    //   setState(() {
-    //     _learningGoalsError = 'Capaian pembelajaran harus dipilih';
-    //   });
-    //   hasError = true;
-    // }
 
     if (_image == null) {
       setState(() {
@@ -336,7 +332,7 @@ class CreateStudentPageState extends State<CreateStudentPage> {
               if (_isClassLoading)
                 const CircularProgressIndicator()
               else
-                ExpandedDropdown<Class>(
+                ExpandedDropdown<Classroom>(
                   label: 'Kelas',
                   items: _classes,
                   selectedItem: _selectedClass,

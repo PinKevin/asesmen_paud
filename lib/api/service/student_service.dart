@@ -10,7 +10,7 @@ import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
 
 class StudentService {
-  Future<SuccessResponse<List<Class>>> getAllTeacherClass() async {
+  Future<SuccessResponse<List<Classroom>>> getAllTeacherClass() async {
     final url = Uri.parse('$baseUrl/classes');
     final authToken = await AuthService.getToken();
     final response = await http.get(url, headers: {
@@ -21,11 +21,11 @@ class StudentService {
 
     if (response.statusCode == 200) {
       if (jsonResponse['payload'] is List) {
-        final List<Class> classes = (jsonResponse['payload'] as List)
-            .map((item) => Class.fromJson(item))
+        final List<Classroom> classes = (jsonResponse['payload'] as List)
+            .map((item) => Classroom.fromJson(item))
             .toList();
 
-        return SuccessResponse<List<Class>>(
+        return SuccessResponse<List<Classroom>>(
           status: jsonResponse['status'],
           message: jsonResponse['message'],
           payload: classes,
@@ -39,7 +39,11 @@ class StudentService {
   }
 
   Future<SuccessResponse<StudentsPaginated>> getAllStudents(
-      int page, String? query, String? sortOrder) async {
+    int page,
+    String? query,
+    String? sortOrder,
+    int? classId,
+  ) async {
     String stringUrl = '$baseUrl/students?page=$page';
 
     if (sortOrder != null) {
@@ -48,6 +52,10 @@ class StudentService {
 
     if (query != null) {
       stringUrl += '&q=$query';
+    }
+
+    if (classId != null) {
+      stringUrl += '&class=$classId';
     }
 
     final Uri url = Uri.parse(stringUrl);

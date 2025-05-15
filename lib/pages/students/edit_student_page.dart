@@ -23,7 +23,7 @@ class EditStudentPage extends StatefulWidget {
 }
 
 class EditStudentPageState extends State<EditStudentPage> {
-  List<Class> _classes = [];
+  List<Classroom> _classes = [];
   late int _studentId;
 
   final TextEditingController _nameController = TextEditingController();
@@ -38,7 +38,7 @@ class EditStudentPageState extends State<EditStudentPage> {
   String? _selectedGender;
   String? _selectedReligion;
   DateTime? _selectedAcceptanceDate;
-  Class? _selectedClass;
+  Classroom? _selectedClass;
   String? _initialImageUrl;
 
   bool _isLoading = false;
@@ -55,7 +55,10 @@ class EditStudentPageState extends State<EditStudentPage> {
   String? _photoError;
 
   Future<void> _loadClasses() async {
-    _isClassLoading = true;
+    setState(() {
+      _isClassLoading = true;
+    });
+
     try {
       final response = await StudentService().getAllTeacherClass();
       final classes = response.payload!;
@@ -364,7 +367,7 @@ class EditStudentPageState extends State<EditStudentPage> {
               if (_isClassLoading)
                 const CircularProgressIndicator()
               else
-                ExpandedDropdown<Class>(
+                ExpandedDropdown<Classroom>(
                   label: 'Kelas',
                   items: _classes,
                   selectedItem: _selectedClass,

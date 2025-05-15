@@ -15,20 +15,20 @@ class StudentsPaginated {
   }
 }
 
-class Class {
+class Classroom {
   final int id;
   final String name;
   final String? createdAt;
   final String? updatedAt;
 
-  Class(
+  Classroom(
       {required this.id,
       required this.name,
       required this.createdAt,
       required this.updatedAt});
 
-  factory Class.fromJson(Map<String, dynamic> json) {
-    return Class(
+  factory Classroom.fromJson(Map<String, dynamic> json) {
+    return Classroom(
         id: int.tryParse(json['id'].toString()) ?? 0,
         name: json['name'],
         createdAt: json['createdAt'],
