@@ -162,11 +162,9 @@ class DashboardPageState extends State<DashboardPage> {
                       ),
                       MenuButton(
                         icon: Icons.info,
-                        label: 'Murid',
-                        onPressed: () => _navigateToStudents(
-                          arguments: {'mode': 'student'},
-                        ),
-                      )
+                        label: 'Tentang Aplikasi',
+                        onPressed: () => Navigator.pushNamed(context, '/about'),
+                      ),
                     ],
                   ),
                 ),
