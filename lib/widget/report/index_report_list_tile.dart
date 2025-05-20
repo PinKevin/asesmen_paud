@@ -8,12 +8,13 @@ class IndexReportListTile extends StatelessWidget {
   final Function() onDownload;
   final Function() onDelete;
 
-  const IndexReportListTile(
-      {super.key,
-      required this.studentReport,
-      required this.isLoading,
-      required this.onDownload,
-      required this.onDelete});
+  const IndexReportListTile({
+    super.key,
+    required this.studentReport,
+    required this.isLoading,
+    required this.onDownload,
+    required this.onDelete,
+  });
 
   void _showDeleteConfirmationDialog(BuildContext context) {
     showDialog(
@@ -33,7 +34,7 @@ class IndexReportListTile extends StatelessWidget {
                   )),
               TextButton(
                   onPressed: () {
-                    onDownload();
+                    onDelete();
                     Navigator.of(context).pop();
                   },
                   child: const Text(

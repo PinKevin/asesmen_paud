@@ -1,3 +1,4 @@
+import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/payload/student_report_payload.dart';
 import 'package:asesmen_paud/api/service/report_service.dart';
 import 'package:asesmen_paud/widget/assessment/create_button.dart';
@@ -155,68 +156,115 @@ class _ReportsPageState extends State<ReportsPage> {
     }
   }
 
+  Future<void> _delete(
+    BuildContext context,
+    int studentId,
+    int reportId,
+  ) async {
+    try {
+      final response = await ReportService().deleteReport(studentId, reportId);
+
+      if (!context.mounted) return;
+      Navigator.popUntil(context, ModalRoute.withName('/reports'));
+      ScaffoldMessenger.of(context).showSnackBar(
+        ColorSnackbar.build(
+          message: response.message,
+          success: true,
+        ),
+      );
+    } on ErrorException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        ColorSnackbar.build(
+          message: e.message,
+          success: false,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        ColorSnackbar.build(
+          message: e.toString(),
+          success: false,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Laporan Bulanan'),
+      appBar: AppBar(
+        title: const Text('Laporan Bulanan'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Dropdown<int>(
+                    labelText: 'Pilih tahun',
+                    value: _selectedYear,
+                    options: years,
+                    displayText: (year) => year.toString(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        _selectedYear = value;
+                        _filterByYear(_selectedYear);
+                      }
+                    },
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SortButton(
+                  label: 'Tanggal laporan',
+                  sortOrder: _sortOrder,
+                  onSortChanged: _onSortSelected,
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Expanded(
+              child: IndexListView<StudentReport>(
+                errorMessage: _errorMessage,
+                isLoading: _isLoading,
+                hasMoreData: _hasMoreData,
+                onRefresh: _onRefresh,
+                scrollController: _scrollController,
+                items: _studentReports,
+                itemBuilder: (context, report) => IndexReportListTile(
+                  studentReport: report,
+                  isLoading: _isLoading,
+                  onDownload: () {
+                    _downloadExistingReport(studentId, report.id);
+                  },
+                  onDelete: () {
+                    _delete(
+                      context,
+                      studentId,
+                      report.id,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                      child: Dropdown<int>(
-                          labelText: 'Pilih tahun',
-                          value: _selectedYear,
-                          options: years,
-                          displayText: (year) => year.toString(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              _selectedYear = value;
-                              _filterByYear(_selectedYear);
-                            }
-                          }))
-                ],
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SortButton(
-                      label: 'Tanggal laporan',
-                      sortOrder: _sortOrder,
-                      onSortChanged: _onSortSelected)
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Expanded(
-                  child: IndexListView<StudentReport>(
-                      errorMessage: _errorMessage,
-                      isLoading: _isLoading,
-                      hasMoreData: _hasMoreData,
-                      onRefresh: _onRefresh,
-                      scrollController: _scrollController,
-                      items: _studentReports,
-                      itemBuilder: (context, report) => IndexReportListTile(
-                            studentReport: report,
-                            isLoading: _isLoading,
-                            onDownload: () {
-                              _downloadExistingReport(studentId, report.id);
-                            },
-                            onDelete: () {},
-                          ))),
-            ],
-          ),
-        ),
-        floatingActionButton:
-            CreateButton(mode: 'report', studentId: studentId));
+      ),
+      floatingActionButton: CreateButton(
+        mode: 'report',
+        studentId: studentId,
+      ),
+    );
   }
 }

@@ -134,6 +134,35 @@ class ReportService {
     }
   }
 
+  Future<SuccessResponse<ApiResponse>> deleteReport(
+    int studentId,
+    int reportId,
+  ) async {
+    final url = Uri.parse('$baseUrl/students/$studentId/reports/$reportId');
+    final authToken = await AuthService.getToken();
+
+    final response = await http.delete(url, headers: {
+      'Authorization': 'Bearer $authToken',
+    });
+
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+        jsonResponse,
+        (json) => ApiResponse.fromJson(json, null),
+      );
+    } else if (response.statusCode == 404) {
+      String message =
+          jsonResponse['message'] ?? 'Laporan tidak dapat ditemukan';
+      throw ErrorException(message);
+    } else {
+      String message =
+          jsonResponse['message'] ?? 'Terjadi error saat menghapus laporan';
+      throw ErrorException(message);
+    }
+  }
+
   Future<bool> _requestStoragePermission() async {
     PermissionStatus status = await Permission.manageExternalStorage.status;
 
