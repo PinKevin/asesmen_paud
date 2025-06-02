@@ -88,7 +88,7 @@ class AnecdotalsPageState extends State<AnecdotalsPage> {
     await _fetchAnecdotals();
   }
 
-  _onTileTap(BuildContext context, Anecdotal anecdotal) {
+  void _onTileTap(BuildContext context, Anecdotal anecdotal) {
     Navigator.push(
       context,
       MaterialPageRoute(

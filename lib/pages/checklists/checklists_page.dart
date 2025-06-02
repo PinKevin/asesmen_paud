@@ -88,7 +88,7 @@ class ChecklistsPageState extends State<ChecklistsPage> {
     await _fetchChecklists();
   }
 
-  _onTileTap(BuildContext context, Checklist checklist) {
+  void _onTileTap(BuildContext context, Checklist checklist) {
     Navigator.push(
       context,
       MaterialPageRoute(

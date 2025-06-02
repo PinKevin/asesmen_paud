@@ -88,7 +88,7 @@ class SeriesPhotosPageState extends State<SeriesPhotosPage> {
     await _fetchSeriesPhotos();
   }
 
-  _onTileTap(BuildContext context, SeriesPhoto seriesPhoto) {
+  void _onTileTap(BuildContext context, SeriesPhoto seriesPhoto) {
     Navigator.push(
       context,
       MaterialPageRoute(

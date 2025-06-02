@@ -88,7 +88,7 @@ class ArtworksPageState extends State<ArtworksPage> {
     await _fetchArtworks();
   }
 
-  _onTileTap(BuildContext context, Artwork artwork) {
+  void _onTileTap(BuildContext context, Artwork artwork) {
     Navigator.push(
       context,
       MaterialPageRoute(
