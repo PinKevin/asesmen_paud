@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:asesmen_paud/api/service/photo_service.dart';
+import 'package:asesmen_paud/widget/button/submit_secondary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
@@ -148,45 +149,31 @@ class _PhotoManagerState extends State<PhotoManager> {
 
     if ((_selectedImage == null && widget.mode == PhotoMode.create) ||
         _isImageDeleted) {
-      return ElevatedButton(
-          onPressed: () {
-            _showImageSourceDialog(context);
-          },
-          child: const Text('Tambah foto'));
+      return SubmitSecondaryButton(
+        text: 'Tambah Foto',
+        onPressed: () => _showImageSourceDialog(context),
+      );
     }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ElevatedButton.icon(
-          onPressed: () {
-            _showImageSourceDialog(context);
-          },
-          icon: const Icon(
-            Icons.edit,
-            color: Colors.blue,
-          ),
-          label: const Text(
-            'Ubah foto',
-            style: TextStyle(color: Colors.blue),
-          ),
+        SubmitSecondaryButton(
+          text: 'Ubah Foto',
+          onPressed: () => _showImageSourceDialog(context),
+          textColor: Colors.blue,
+          icon: Icons.edit,
+          iconColor: Colors.blue,
         ),
-        ElevatedButton.icon(
+        SubmitSecondaryButton(
+          text: 'Hapus Foto',
           onPressed: () {
-            setState(() {
-              _selectedImage = null;
-              _isImageDeleted = true;
-            });
-            widget.onImageSelected(null);
+            _selectedImage = null;
+            _isImageDeleted = true;
           },
-          icon: const Icon(
-            Icons.delete,
-            color: Colors.red,
-          ),
-          label: const Text(
-            'Hapus foto',
-            style: TextStyle(color: Colors.red),
-          ),
+          textColor: Colors.red,
+          icon: Icons.delete,
+          iconColor: Colors.red,
         ),
       ],
     );

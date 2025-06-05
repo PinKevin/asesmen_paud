@@ -57,79 +57,83 @@ class IndexReportListTile extends StatelessWidget {
     String createdDate = manipulator.formatDate(studentReport.createdAt!);
 
     return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(0),
-              backgroundColor: Colors.deepPurple[100],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              )),
-          onPressed: () {},
-          child: Card(
-            margin: EdgeInsets.zero,
-            color: Colors.transparent,
-            elevation: 0,
-            child: ListTile(
-              title: Text('Laporan Bulan $formattedMonth $formattedYear'),
-              subtitle: Text('Dibuat tanggal $createdDate'),
-              trailing: PopupMenuButton(
-                  icon: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3,
-                            ),
-                          ),
-                        )
-                      : const Icon(
-                          Icons.more_vert,
-                          size: 30,
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.all(0),
+          backgroundColor: Colors.deepPurple[100],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        onPressed: () {},
+        child: Card(
+          margin: EdgeInsets.zero,
+          color: Colors.transparent,
+          elevation: 0,
+          child: ListTile(
+            title: Text('Laporan Bulan $formattedMonth $formattedYear'),
+            subtitle: Text('Dibuat tanggal $createdDate'),
+            trailing: PopupMenuButton(
+              icon: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
                         ),
-                  onSelected: (value) {
-                    if (value == 'download') {
-                      onDownload();
-                    } else if (value == 'delete') {
-                      _showDeleteConfirmationDialog(context);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                        const PopupMenuItem(
-                            value: 'download',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.download,
-                                  color: Colors.black,
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Text('Download')
-                              ],
-                            )),
-                        const PopupMenuItem(
-                            value: 'delete',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Text(
-                                  'Hapus',
-                                  style: TextStyle(color: Colors.red),
-                                )
-                              ],
-                            ))
-                      ]),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.more_vert,
+                      size: 30,
+                    ),
+              onSelected: (value) {
+                if (value == 'download') {
+                  onDownload();
+                } else if (value == 'delete') {
+                  _showDeleteConfirmationDialog(context);
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                    value: 'download',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.download,
+                          color: Colors.black,
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text('Download')
+                      ],
+                    )),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      Text(
+                        'Hapus',
+                        style: TextStyle(color: Colors.red),
+                      )
+                    ],
+                  ),
+                )
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

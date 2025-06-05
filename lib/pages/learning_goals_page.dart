@@ -4,6 +4,7 @@ import 'package:asesmen_paud/api/payload/learning_scope_payload.dart';
 import 'package:asesmen_paud/api/payload/sub_learning_scope_payload.dart';
 import 'package:asesmen_paud/api/service/learning_service.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_dropdown.dart';
+import 'package:asesmen_paud/widget/button/submit_secondary_button.dart';
 import 'package:flutter/material.dart';
 
 class LearningGoalsPage extends StatefulWidget {
@@ -181,11 +182,12 @@ class LearningGoalsPageState extends State<LearningGoalsPage> {
               const SizedBox(
                 height: 20,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context, selectedLearningGoal);
-                },
-                child: const Text('Pilih'),
+              SubmitSecondaryButton(
+                text: 'Pilih',
+                onPressed: () => Navigator.pop(
+                  context,
+                  selectedLearningGoal,
+                ),
               )
             ],
           ),

@@ -1,3 +1,4 @@
+import 'package:asesmen_paud/widget/button/submit_secondary_button.dart';
 import 'package:flutter/material.dart';
 
 class ShowMenu<T> extends StatelessWidget {
@@ -17,29 +18,19 @@ class ShowMenu<T> extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ElevatedButton.icon(
-          onPressed: () => onDelete(context),
-          label: const Text(
-            'Hapus Data',
-            style: TextStyle(color: Colors.red),
-          ),
-          icon: const Icon(
-            Icons.delete,
-            color: Colors.red,
-          ),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
-        ),
-        ElevatedButton.icon(
+        SubmitSecondaryButton(
+          text: 'Ubah Data',
           onPressed: () => onEdit(context),
-          label: const Text(
-            'Ubah Data',
-            style: TextStyle(color: Colors.blue),
-          ),
-          icon: const Icon(
-            Icons.edit,
-            color: Colors.blue,
-          ),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+          textColor: Colors.blue,
+          icon: Icons.edit,
+          iconColor: Colors.blue,
+        ),
+        SubmitSecondaryButton(
+          text: 'Hapus Data',
+          onPressed: () => onDelete(context),
+          textColor: Colors.red,
+          icon: Icons.delete,
+          iconColor: Colors.red,
         ),
       ],
     );

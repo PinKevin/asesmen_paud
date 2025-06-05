@@ -35,11 +35,12 @@ class LearningGoalList extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(0),
-                        backgroundColor: Colors.deepPurple[100],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        )),
+                      padding: const EdgeInsets.all(0),
+                      backgroundColor: Colors.deepPurple[100],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     onPressed: () {},
                     child: Card(
                       margin: EdgeInsets.zero,
@@ -68,7 +69,8 @@ class LearningGoalList extends StatelessWidget {
                             ? IconButton(
                                 onPressed: () =>
                                     onDeleteLearningGoal?.call(learningGoal),
-                                icon: const Icon(Icons.delete))
+                                icon: const Icon(Icons.delete),
+                              )
                             : null,
                       ),
                     ),

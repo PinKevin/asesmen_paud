@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:asesmen_paud/api/service/photo_service.dart';
+import 'package:asesmen_paud/widget/button/submit_secondary_button.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -272,11 +273,9 @@ class _PhotoManagerState extends State<MultiPhotoManager> {
             style: const TextStyle(color: Colors.red),
           ),
         if (canAddMorePhotos)
-          ElevatedButton(
-            onPressed: () {
-              _showImageSourceDialog(context);
-            },
-            child: const Text('Tambah foto'),
+          SubmitSecondaryButton(
+            text: 'Tambah Foto',
+            onPressed: () => _showImageSourceDialog(context),
           ),
         const SizedBox(
           height: 20,
