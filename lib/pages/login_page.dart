@@ -1,6 +1,7 @@
 import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/payload/login_payload.dart';
+import 'package:asesmen_paud/widget/button/submit_primary.dart';
 import 'package:flutter/material.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
 
@@ -73,7 +74,7 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Sign-in'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -81,34 +82,40 @@ class LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: const OutlineInputBorder(),
-                  errorText: _emailError,
-                  errorBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red))),
+                labelText: 'Email',
+                border: const OutlineInputBorder(),
+                errorText: _emailError,
+                errorBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                ),
+              ),
             ),
             const SizedBox(
               height: 20,
             ),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: const OutlineInputBorder(),
-                  errorText: _passwordError,
-                  errorBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red)),
-                  suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _passwordVisible = !_passwordVisible;
-                        });
-                      },
-                      icon: Icon(_passwordVisible
-                          ? Icons.visibility_off
-                          : Icons.visibility))),
               obscureText: !_passwordVisible,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border: const OutlineInputBorder(),
+                errorText: _passwordError,
+                errorBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                ),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _passwordVisible = !_passwordVisible;
+                    });
+                  },
+                  icon: Icon(
+                    _passwordVisible ? Icons.visibility_off : Icons.visibility,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(
               height: 10,
@@ -118,26 +125,10 @@ class LoginPageState extends State<LoginPage> {
             const SizedBox(
               height: 10,
             ),
-            ElevatedButton(
+            SubmitPrimaryButton(
+              text: 'Sign-in',
               onPressed: _login,
-              style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(200, 40),
-                  backgroundColor: Colors.deepPurple),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      ),
-                    )
-                  : const Text(
-                      'Login',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
+              isLoading: _isLoading,
             ),
             const SizedBox(
               height: 20,

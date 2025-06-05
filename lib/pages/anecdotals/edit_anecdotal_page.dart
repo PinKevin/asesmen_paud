@@ -8,6 +8,7 @@ import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
 import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
 import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
+import 'package:asesmen_paud/widget/button/submit_primary.dart';
 import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -240,14 +241,15 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
               ),
               const SizedBox(height: 5),
               PhotoManager(
-                  mode: PhotoMode.edit,
-                  initialImageUrl: anecdotal.photoLink,
-                  onImageSelected: (image) {
-                    setState(() {
-                      _image = image;
-                      isImageChanged = true;
-                    });
-                  }),
+                mode: PhotoMode.edit,
+                initialImageUrl: anecdotal.photoLink,
+                onImageSelected: (image) {
+                  setState(() {
+                    _image = image;
+                    isImageChanged = true;
+                  });
+                },
+              ),
               if (_photoError != null)
                 Text(
                   _photoError!,
@@ -256,28 +258,10 @@ class _EditAnecdotalPageState extends State<EditAnecdotalPage> {
               const SizedBox(height: 10),
 
               // Submit
-              ElevatedButton(
-                onPressed: () {
-                  _submit(anecdotal.studentId, anecdotal.id);
-                },
-                style: ElevatedButton.styleFrom(
-                    fixedSize: const Size(200, 40),
-                    backgroundColor: Colors.deepPurple),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      )
-                    : const Text(
-                        'Ubah Anekdot',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
+              SubmitPrimaryButton(
+                text: 'Ubah',
+                onPressed: () => _submit(anecdotal.studentId, anecdotal.id),
+                isLoading: _isLoading,
               ),
             ],
           ),

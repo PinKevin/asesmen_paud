@@ -8,6 +8,7 @@ import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
 import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
 import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
+import 'package:asesmen_paud/widget/button/submit_primary.dart';
 import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -149,7 +150,11 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-          ColorSnackbar.build(message: e.toString(), success: false));
+        ColorSnackbar.build(
+          message: e.toString(),
+          success: false,
+        ),
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -162,110 +167,98 @@ class CreateAnecdotalPageState extends State<CreateAnecdotalPage> {
     final int studentId = ModalRoute.of(context)!.settings.arguments as int;
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Buat penilaian anekdot'),
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Description
-                ExpandedTextField(
-                    controller: _descriptionController,
-                    labelText: 'Deskripsi',
-                    errorText: _descriptionError),
-                const SizedBox(
-                  height: 20,
-                ),
+      appBar: AppBar(
+        title: const Text('Buat penilaian anekdot'),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Description
+              ExpandedTextField(
+                controller: _descriptionController,
+                labelText: 'Deskripsi',
+                errorText: _descriptionError,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
 
-                // Feedback
-                ExpandedTextField(
-                    controller: _feedbackController,
-                    labelText: 'Umpan Balik',
-                    errorText: _feedbackError),
-                const SizedBox(
-                  height: 20,
-                ),
+              // Feedback
+              ExpandedTextField(
+                controller: _feedbackController,
+                labelText: 'Umpan Balik',
+                errorText: _feedbackError,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
 
-                //Learning Goals
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Capaian Pembelajaran',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
-                    ),
+              //Learning Goals
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Capaian Pembelajaran',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 5),
-                LearningGoalList(
-                  learningGoals: learningGoals,
-                  learningGoalsError: _learningGoalsError,
-                  editing: true,
-                  onAddLearningGoal: _goToLearningGoalSelection,
-                  onDeleteLearningGoal: (goal) =>
-                      _showDeleteLearningGoalDialog(goal),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
+              ),
+              const SizedBox(height: 5),
+              LearningGoalList(
+                learningGoals: learningGoals,
+                learningGoalsError: _learningGoalsError,
+                editing: true,
+                onAddLearningGoal: _goToLearningGoalSelection,
+                onDeleteLearningGoal: (goal) =>
+                    _showDeleteLearningGoalDialog(goal),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
 
-                // Photo
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Foto',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
-                    ),
+              // Photo
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Foto',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
                   ),
                 ),
-                const SizedBox(height: 5),
-                PhotoManager(
-                    mode: PhotoMode.create,
-                    onImageSelected: (image) {
-                      setState(() {
-                        _image = image;
-                      });
-                    }),
-                if (_photoError != null)
-                  Text(
-                    _photoError!,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                const SizedBox(height: 10),
-
-                // Submit
-                ElevatedButton(
-                  onPressed: () {
-                    _submit(studentId);
-                  },
-                  style: ElevatedButton.styleFrom(
-                      fixedSize: const Size(200, 40),
-                      backgroundColor: Colors.deepPurple),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          ),
-                        )
-                      : const Text(
-                          'Tambah Anekdot',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
+              ),
+              const SizedBox(height: 5),
+              PhotoManager(
+                mode: PhotoMode.create,
+                onImageSelected: (image) {
+                  setState(
+                    () {
+                      _image = image;
+                    },
+                  );
+                },
+              ),
+              if (_photoError != null)
+                Text(
+                  _photoError!,
+                  style: const TextStyle(color: Colors.red),
                 ),
-              ],
-            ),
+              const SizedBox(height: 10),
+
+              // Submit
+              SubmitPrimaryButton(
+                text: 'Simpan',
+                onPressed: () => _submit(studentId),
+                isLoading: _isLoading,
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

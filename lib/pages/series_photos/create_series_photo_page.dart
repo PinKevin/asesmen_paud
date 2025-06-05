@@ -9,6 +9,7 @@ import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
 import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
 import 'package:asesmen_paud/widget/assessment/multi_photo_manager.dart';
+import 'package:asesmen_paud/widget/button/submit_primary.dart';
 import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 
@@ -251,28 +252,10 @@ class CreateSeriesPhotoPageState extends State<CreateSeriesPhotoPage> {
                   },
                 ),
 
-                ElevatedButton(
-                  onPressed: () {
-                    _submit(studentId);
-                  },
-                  style: ElevatedButton.styleFrom(
-                      fixedSize: const Size(240, 40),
-                      backgroundColor: Colors.deepPurple),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          ),
-                        )
-                      : const Text(
-                          'Tambah Foto Berseri',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
+                SubmitPrimaryButton(
+                  text: 'Simpan',
+                  onPressed: () => _submit(studentId),
+                  isLoading: _isLoading,
                 ),
               ],
             ),

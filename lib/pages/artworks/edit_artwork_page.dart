@@ -8,6 +8,7 @@ import 'package:asesmen_paud/pages/learning_goals_page.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
 import 'package:asesmen_paud/widget/assessment/learning_goal_list.dart';
 import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
+import 'package:asesmen_paud/widget/button/submit_primary.dart';
 import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -256,28 +257,10 @@ class _EditArtworkPageState extends State<EditArtworkPage> {
               const SizedBox(height: 10),
 
               // Submit
-              ElevatedButton(
-                onPressed: () {
-                  _submit(artwork.studentId, artwork.id);
-                },
-                style: ElevatedButton.styleFrom(
-                    fixedSize: const Size(200, 40),
-                    backgroundColor: Colors.deepPurple),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      )
-                    : const Text(
-                        'Ubah Hasil Karya',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
+              SubmitPrimaryButton(
+                text: 'Ubah',
+                onPressed: () => _submit(artwork.studentId, artwork.id),
+                isLoading: _isLoading,
               ),
             ],
           ),

@@ -7,6 +7,7 @@ import 'package:asesmen_paud/enum/student_enum.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_dropdown.dart';
 import 'package:asesmen_paud/widget/assessment/expanded_text_field.dart';
 import 'package:asesmen_paud/widget/assessment/photo_manager.dart';
+import 'package:asesmen_paud/widget/button/submit_primary.dart';
 import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:asesmen_paud/widget/student/date_picker_text_field.dart';
 import 'package:flutter/material.dart';
@@ -413,29 +414,10 @@ class EditStudentPageState extends State<EditStudentPage> {
               const SizedBox(height: 10),
 
               // Submit
-              ElevatedButton(
-                onPressed: () {
-                  _submit(_studentId);
-                },
-                style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(200, 40),
-                  backgroundColor: Colors.deepPurple,
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      )
-                    : const Text(
-                        'Ubah Data Murid',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
+              SubmitPrimaryButton(
+                text: 'Ubah',
+                onPressed: () => _submit(_studentId),
+                isLoading: _isLoading,
               ),
             ],
           ),

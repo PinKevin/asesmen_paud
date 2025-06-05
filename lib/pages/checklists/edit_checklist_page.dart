@@ -6,6 +6,7 @@ import 'package:asesmen_paud/api/service/checklist_service.dart';
 import 'package:asesmen_paud/pages/checklists/create_checklist_point_page.dart';
 import 'package:asesmen_paud/pages/checklists/edit_checklist_point_page.dart';
 import 'package:asesmen_paud/pages/checklists/show_checklist_point_page.dart';
+import 'package:asesmen_paud/widget/button/submit_primary.dart';
 import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
 
@@ -229,28 +230,12 @@ class EditChecklistPageState extends State<EditChecklistPage> {
               ),
               if (_errorMessage.isNotEmpty)
                 Text(_errorMessage, style: const TextStyle(color: Colors.red)),
-              ElevatedButton(
-                onPressed: () {
-                  _submit(checklist.studentId, checklist.id);
-                },
-                style: ElevatedButton.styleFrom(
-                    fixedSize: const Size(280, 40),
-                    backgroundColor: Colors.deepPurple),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      )
-                    : const Text(
-                        'Ubah Penilaian Ceklis',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
+
+              // Submit
+              SubmitPrimaryButton(
+                text: 'Ubah',
+                onPressed: () => _submit(checklist.studentId, checklist.id),
+                isLoading: _isLoading,
               ),
             ],
           ),
