@@ -4,8 +4,8 @@ import 'package:asesmen_paud/api/payload/checklist_payload.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/checklist_service.dart';
 import 'package:asesmen_paud/pages/checklists/create_checklist_point_page.dart';
-import 'package:asesmen_paud/pages/checklists/edit_checklist_point_page.dart';
 import 'package:asesmen_paud/pages/checklists/show_checklist_point_page.dart';
+import 'package:asesmen_paud/widget/assessment/checklist/checklist_point_list.dart';
 import 'package:asesmen_paud/widget/button/submit_primary.dart';
 import 'package:asesmen_paud/widget/color_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -37,13 +37,13 @@ class EditChecklistPageState extends State<EditChecklistPage> {
     }
   }
 
-  void _goToEditChecklistPoint(ChecklistPointDto checklistPoint) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                EditChecklistPointPage(checklistPointDto: checklistPoint)));
-  }
+  // void _goToEditChecklistPoint(ChecklistPointDto checklistPoint) {
+  //   Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //           builder: (context) =>
+  //               EditChecklistPointPage(checklistPointDto: checklistPoint)));
+  // }
 
   Future<void> _showDeleteChecklistDialog(ChecklistPointDto checklistPoint) {
     return showDialog(
@@ -152,82 +152,26 @@ class EditChecklistPageState extends State<EditChecklistPage> {
                   'Poin Ceklis',
                 ),
               ),
+
               if (checklistPoints.isNotEmpty)
-                ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: checklistPoints.length,
-                    itemBuilder: (context, index) {
-                      final checklistPoint = checklistPoints[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.all(0),
-                              backgroundColor: Colors.deepPurple[100],
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              )),
-                          onPressed: () {
-                            _viewMoreChecklistPoint(checklistPoint);
-                          },
-                          child: Card(
-                            margin: EdgeInsets.zero,
-                            color: Colors.transparent,
-                            elevation: 0,
-                            child: ListTile(
-                              title: Text(
-                                checklistPoint.context,
-                                textAlign: TextAlign.justify,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                ),
-                              ),
-                              subtitle: Text(
-                                checklistPoint.hasAppeared == true
-                                    ? 'Sudah muncul'
-                                    : 'Belum muncul',
-                                textAlign: TextAlign.justify,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              trailing: PopupMenuButton(
-                                icon: const Icon(Icons.more_vert),
-                                onSelected: (value) {
-                                  switch (value) {
-                                    case 'edit':
-                                      _goToEditChecklistPoint(checklistPoint);
-                                      break;
-                                    case 'delete':
-                                      _showDeleteChecklistDialog(
-                                          checklistPoint);
-                                    default:
-                                  }
-                                },
-                                itemBuilder: (BuildContext context) {
-                                  return [
-                                    const PopupMenuItem<String>(
-                                      value: 'delete',
-                                      child: Text('Hapus'),
-                                    ),
-                                  ];
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
+                ChecklistPointList(
+                  checklistPoints: checklistPoints,
+                  onViewMore: _viewMoreChecklistPoint,
+                  onDelete: _showDeleteChecklistDialog,
+                ),
+
               const SizedBox(
                 height: 5,
               ),
+
               ElevatedButton(
                   onPressed: _goToAddChecklistPointPage,
                   child: const Text('Tambah Poin Ceklis')),
+
               const SizedBox(
                 height: 10,
               ),
+
               if (_errorMessage.isNotEmpty)
                 Text(_errorMessage, style: const TextStyle(color: Colors.red)),
 
