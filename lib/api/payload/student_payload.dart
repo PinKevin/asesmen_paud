@@ -15,20 +15,20 @@ class StudentsPaginated {
   }
 }
 
-class Class {
+class Classroom {
   final int id;
   final String name;
   final String? createdAt;
   final String? updatedAt;
 
-  Class(
+  Classroom(
       {required this.id,
       required this.name,
       required this.createdAt,
       required this.updatedAt});
 
-  factory Class.fromJson(Map<String, dynamic> json) {
-    return Class(
+  factory Classroom.fromJson(Map<String, dynamic> json) {
+    return Classroom(
         id: int.tryParse(json['id'].toString()) ?? 0,
         name: json['name'],
         createdAt: json['createdAt'],
@@ -45,33 +45,43 @@ class Student {
   final String? gender;
   final String? religion;
   final String? acceptanceDate;
+  final String? photoProfileLink;
   final String? createdAt;
   final String? updatedAt;
+  final String? className;
+  final int? classId;
 
-  Student(
-      {required this.id,
-      required this.name,
-      required this.nisn,
-      this.placeOfBirth,
-      this.dateOfBirth,
-      this.gender,
-      this.religion,
-      this.acceptanceDate,
-      this.createdAt,
-      this.updatedAt});
+  Student({
+    required this.id,
+    required this.name,
+    required this.nisn,
+    this.placeOfBirth,
+    this.dateOfBirth,
+    this.gender,
+    this.religion,
+    this.acceptanceDate,
+    this.photoProfileLink,
+    this.createdAt,
+    this.updatedAt,
+    this.className,
+    this.classId,
+  });
 
   factory Student.fromJson(Map<String, dynamic> json) {
     return Student(
       id: int.tryParse(json['id'].toString()) ?? 0,
       name: json['name'] as String,
       nisn: json['nisn'] as String,
-      placeOfBirth: json['place_of_birth'] as String?,
-      dateOfBirth: json['date_of_birth'] as String?,
+      placeOfBirth: json['placeOfBirth'] as String?,
+      dateOfBirth: json['dateOfBirth'] as String?,
       gender: json['gender'] as String?,
       religion: json['religion'] as String?,
-      acceptanceDate: json['acceptance_date'] as String?,
-      createdAt: json['created_at'] as String?,
-      updatedAt: json['updated_at'] as String?,
+      acceptanceDate: json['acceptanceDate'] as String?,
+      photoProfileLink: json['photoProfileLink'] as String?,
+      createdAt: json['createdAt'] as String?,
+      updatedAt: json['updatedAt'] as String?,
+      className: json['className'] as String?,
+      classId: int.tryParse(json['classId'].toString()) ?? 0,
     );
   }
 }

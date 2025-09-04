@@ -1,7 +1,11 @@
+import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/payload/student_report_payload.dart';
 import 'package:asesmen_paud/api/service/report_service.dart';
-import 'package:asesmen_paud/helper/month_list.dart';
-import 'package:asesmen_paud/widget/index_report_list_tile.dart';
+import 'package:asesmen_paud/widget/assessment/create_button.dart';
+import 'package:asesmen_paud/widget/assessment/index_list_view.dart';
+import 'package:asesmen_paud/widget/color_snackbar.dart';
+import 'package:asesmen_paud/widget/dropdown.dart';
+import 'package:asesmen_paud/widget/report/index_report_list_tile.dart';
 import 'package:asesmen_paud/widget/sort_button.dart';
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
@@ -15,36 +19,30 @@ class ReportsPage extends StatefulWidget {
 
 class _ReportsPageState extends State<ReportsPage> {
   final ScrollController _scrollController = ScrollController();
-
   final List<StudentReport> _studentReports = [];
-  bool _isLoading = false;
+
+  String _errorMessage = '';
+  String _sortOrder = 'desc';
   int _currentPage = 1;
+  bool _isLoading = false;
   bool _hasMoreData = true;
+
   late int studentId;
 
+  int _selectedYear = DateTime.now().year;
   String? _formattedStartDate;
   String? _formattedEndDate;
-
-  String _sortOrder = 'desc';
-
-  final List<Map<int, String>> _monthList = monthList;
-  final List<int> _yearList = [];
-  late int _startYear;
-  late int _endYear;
-
-  int? _selectedMonth;
-  int? _selectedYear;
+  List<int> years = List.generate(3, (i) => DateTime.now().year - i);
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _endYear = DateTime.now().year;
-    _startYear = _endYear - 2;
 
-    for (var i = _startYear; i <= _endYear; i++) {
-      _yearList.add(i);
-    }
+    _formattedStartDate =
+        DateTime(_selectedYear, 1, 1).toIso8601String().substring(0, 10);
+    _formattedEndDate =
+        DateTime(_selectedYear, 12, 31).toIso8601String().substring(0, 10);
   }
 
   @override
@@ -54,108 +52,77 @@ class _ReportsPageState extends State<ReportsPage> {
     _fetchReports();
   }
 
-  void _onFilter() {
-    if (_selectedMonth != null && _selectedYear != null) {
-      final startDate = DateTime(_selectedYear!, _selectedMonth!, 1);
-      final endDate = DateTime(_selectedYear!, _selectedMonth! + 1, 0);
-
-      setState(() {
-        _formattedStartDate = startDate.toIso8601String().substring(0, 10);
-        _formattedEndDate = endDate.toIso8601String().substring(0, 10);
-
-        _studentReports.clear();
-        _currentPage = 1;
-        _hasMoreData = true;
-      });
-
-      _fetchReports();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Pilih bulan dan tahun untuk mem-filter')));
-    }
+  void _resetStudentReports() {
+    setState(() {
+      _studentReports.clear();
+      _currentPage = 1;
+      _hasMoreData = true;
+    });
   }
 
   void _onSortSelected(String order) {
     setState(() {
       _sortOrder = order;
-      _studentReports.clear();
-      _currentPage = 1;
-      _hasMoreData = true;
+      _resetStudentReports();
     });
-    _fetchReports(sortBy: order);
+    _fetchReports();
   }
 
-  Future<void> _fetchReports({int page = 1, String sortBy = 'desc'}) async {
-    if (_isLoading || !_hasMoreData) return;
-
+  void _filterByYear(int selectedYear) {
     setState(() {
-      _isLoading = true;
+      _formattedStartDate =
+          DateTime(selectedYear, 1, 1).toIso8601String().substring(0, 10);
+      _formattedEndDate =
+          DateTime(selectedYear, 12, 31).toIso8601String().substring(0, 10);
+
+      _resetStudentReports();
     });
-
-    try {
-      final reportsResponse = await ReportService().getAllStudentReports(
-          studentId, page, _formattedStartDate, _formattedEndDate, sortBy);
-
-      final newReports = reportsResponse.payload!.data;
-      setState(() {
-        if (newReports.isEmpty || newReports.length < 10) {
-          _hasMoreData = false;
-        }
-
-        for (var report in newReports) {
-          if (!_studentReports.any((r) => r.id == report.id)) {
-            _studentReports.add(report);
-          }
-        }
-
-        _currentPage = page;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    _fetchReports();
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent &&
         !_isLoading) {
-      _fetchReports(page: _currentPage + 1, sortBy: _sortOrder);
+      _fetchReports(page: _currentPage + 1);
     }
   }
 
-  Future<void> _showDownloadConfirmDialog(StudentReport studentReport) {
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Peringatan'),
-            content: const Text('Ingin download laporan bulanan?'),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    'Kembali',
-                    style: TextStyle(color: Colors.black),
-                  )),
-              TextButton(
-                  onPressed: () {
-                    _downloadExistingReport(studentId, studentReport.id);
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    'Ya',
-                  )),
-            ],
-          );
-        });
+  void _updateStudentReports(List<StudentReport> newStudentReports, int page) {
+    setState(() {
+      _studentReports.addAll(newStudentReports.where((studentReport) =>
+          !_studentReports.any((existing) => existing.id == studentReport.id)));
+      _currentPage = page;
+      _hasMoreData = newStudentReports.length >= 10;
+    });
+  }
+
+  Future<void> _onRefresh() async {
+    _resetStudentReports();
+    await _fetchReports();
+  }
+
+  Future<void> _fetchReports({int page = 1}) async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await ReportService().getAllStudentReports(
+          studentId, page, _formattedStartDate, _formattedEndDate, _sortOrder);
+
+      _updateStudentReports(response.payload!.data, page);
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _downloadExistingReport(int studentId, int reportId) async {
@@ -164,8 +131,11 @@ class _ReportsPageState extends State<ReportsPage> {
         _isLoading = true;
       });
 
-      final String filePath =
-          await ReportService().downloadExistingReport(studentId, reportId);
+      final String filePath = await ReportService().downloadExistingReport(
+        context,
+        studentId,
+        reportId,
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -177,12 +147,45 @@ class _ReportsPageState extends State<ReportsPage> {
             }),
       ));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Terjadi masalah saat mengunduh laporan')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(ColorSnackbar.build(message: '$e', success: false));
     } finally {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _delete(
+    BuildContext context,
+    int studentId,
+    int reportId,
+  ) async {
+    try {
+      final response = await ReportService().deleteReport(studentId, reportId);
+
+      if (!context.mounted) return;
+      Navigator.popUntil(context, ModalRoute.withName('/reports'));
+      ScaffoldMessenger.of(context).showSnackBar(
+        ColorSnackbar.build(
+          message: response.message,
+          success: true,
+        ),
+      );
+    } on ErrorException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        ColorSnackbar.build(
+          message: e.message,
+          success: false,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        ColorSnackbar.build(
+          message: e.toString(),
+          success: false,
+        ),
+      );
     }
   }
 
@@ -197,58 +200,21 @@ class _ReportsPageState extends State<ReportsPage> {
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Flexible(
-                  child: DropdownButtonFormField<int>(
-                      decoration: const InputDecoration(
-                        labelText: 'Pilih bulan',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: _selectedMonth,
-                      items: _monthList.map((month) {
-                        final monthKey = month.keys.first;
-                        final monthValue = month.values.first;
-                        return DropdownMenuItem<int>(
-                            value: monthKey,
-                            child: Text(
-                              monthValue,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ));
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedMonth = value;
-                        });
-                      }),
-                ),
-                const SizedBox(
-                  width: 15,
-                ),
-                Flexible(
-                  child: DropdownButtonFormField<int>(
-                      decoration: const InputDecoration(
-                        labelText: 'Pilih tahun',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: _selectedYear,
-                      items: _yearList.map((year) {
-                        return DropdownMenuItem(
-                            value: year,
-                            child: Text(
-                              '$year',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ));
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedYear = value;
-                        });
-                      }),
+                Expanded(
+                  child: Dropdown<int>(
+                    labelText: 'Pilih tahun',
+                    value: _selectedYear,
+                    options: years,
+                    displayText: (year) => year.toString(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        _selectedYear = value;
+                        _filterByYear(_selectedYear);
+                      }
+                    },
+                  ),
                 )
               ],
             ),
@@ -256,85 +222,48 @@ class _ReportsPageState extends State<ReportsPage> {
               height: 10,
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                ElevatedButton(
-                    onPressed: () {
-                      _onFilter();
-                    },
-                    child: const Text('Filter')),
                 SortButton(
-                    label: 'Tanggal dibuat',
-                    sortOrder: _sortOrder,
-                    onSortChanged: _onSortSelected)
+                  label: 'Tanggal laporan',
+                  sortOrder: _sortOrder,
+                  onSortChanged: _onSortSelected,
+                )
               ],
             ),
             const SizedBox(
               height: 20,
             ),
             Expanded(
-                child: RefreshIndicator(
-              onRefresh: () async {
-                setState(() {
-                  _studentReports.clear();
-                  _currentPage = 1;
-                  _hasMoreData = true;
-                });
-                await _fetchReports();
-              },
-              child: _studentReports.isEmpty && _isLoading
-                  ? const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  : ListView.builder(
-                      controller: _scrollController,
-                      itemCount: _studentReports.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index < _studentReports.length) {
-                          final report = _studentReports[index];
-                          return IndexReportListTile(
-                              studentReport: report,
-                              onTap: (report) {
-                                _showDownloadConfirmDialog(report);
-                              });
-                        } else {
-                          return _hasMoreData
-                              ? const Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Center(
-                                    child: Text(_studentReports.isEmpty
-                                        ? 'Belum ada penilaian foto berseri. Buat baru dengan tekan tombol kanan bawah!'
-                                        : 'Anda sudah mencapai akhir halaman'),
-                                  ),
-                                );
-                        }
-                      },
-                    ),
-            ))
+              child: IndexListView<StudentReport>(
+                errorMessage: _errorMessage,
+                isLoading: _isLoading,
+                hasMoreData: _hasMoreData,
+                onRefresh: _onRefresh,
+                scrollController: _scrollController,
+                items: _studentReports,
+                itemBuilder: (context, report) => IndexReportListTile(
+                  studentReport: report,
+                  isLoading: _isLoading,
+                  onDownload: () {
+                    _downloadExistingReport(studentId, report.id);
+                  },
+                  onDelete: () {
+                    _delete(
+                      context,
+                      studentId,
+                      report.id,
+                    );
+                  },
+                ),
+              ),
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.pushNamed(context, '/create-report',
-              arguments: studentId);
-          if (result == true) {
-            _studentReports.clear();
-            _currentPage = 1;
-            _hasMoreData = true;
-            _fetchReports();
-          }
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: CreateButton(
+        mode: 'report',
+        studentId: studentId,
       ),
     );
   }

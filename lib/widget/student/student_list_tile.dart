@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class StudentListTile extends StatelessWidget {
   final Student student;
-  final Function(Student) onStudentTap;
+  final void Function() onStudentTap;
 
   const StudentListTile(
       {super.key, required this.student, required this.onStudentTap});
@@ -19,7 +19,7 @@ class StudentListTile extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               )),
-          onPressed: () => onStudentTap(student),
+          onPressed: onStudentTap,
           child: Card(
             margin: EdgeInsets.zero,
             color: Colors.transparent,

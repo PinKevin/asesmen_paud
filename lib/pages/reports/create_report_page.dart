@@ -1,6 +1,7 @@
 import 'package:asesmen_paud/api/exception.dart';
 import 'package:asesmen_paud/api/service/report_service.dart';
 import 'package:asesmen_paud/helper/month_list.dart';
+import 'package:asesmen_paud/widget/button/submit_primary.dart';
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 
@@ -44,8 +45,11 @@ class _CreateReportPageState extends State<CreateReportPage> {
         _isLoading = true;
       });
 
-      final String filePath = await ReportService()
-          .createAndDownloadReport(studentId, _selectedMonth!, _selectedYear!);
+      final String filePath = await ReportService().createAndDownloadReport(
+        studentId,
+        _selectedMonth!,
+        _selectedYear!,
+      );
 
       if (!mounted) return;
       Navigator.pop(context, true);
@@ -58,8 +62,13 @@ class _CreateReportPageState extends State<CreateReportPage> {
             }),
       ));
     } on ErrorException catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          e.message,
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.red[600],
+      ));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Terjadi masalah saat membuat laporan')));
@@ -133,28 +142,12 @@ class _CreateReportPageState extends State<CreateReportPage> {
                 const SizedBox(
                   height: 20,
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    _createReport(studentId);
-                  },
-                  style: ElevatedButton.styleFrom(
-                      fixedSize: const Size(200, 40),
-                      backgroundColor: Colors.deepPurple),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          ),
-                        )
-                      : const Text(
-                          'Buat Laporan',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
+
+                // Submit
+                SubmitPrimaryButton(
+                  text: 'Buat Laporan',
+                  onPressed: () => _createReport(studentId),
+                  isLoading: _isLoading,
                 ),
               ],
             ),

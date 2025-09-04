@@ -1,8 +1,10 @@
 import 'package:asesmen_paud/api/payload/artwork_payload.dart';
 import 'package:asesmen_paud/api/service/artwork_service.dart';
-import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:asesmen_paud/pages/artworks/show_artwork_page.dart';
-import 'package:asesmen_paud/widget/index_list_tile.dart';
+import 'package:asesmen_paud/widget/assessment/create_button.dart';
+import 'package:asesmen_paud/widget/assessment/date_range_picker_button.dart';
+import 'package:asesmen_paud/widget/assessment/index_list_tile.dart';
+import 'package:asesmen_paud/widget/assessment/index_list_view.dart';
 import 'package:asesmen_paud/widget/sort_button.dart';
 import 'package:flutter/material.dart';
 
@@ -15,18 +17,17 @@ class ArtworksPage extends StatefulWidget {
 
 class ArtworksPageState extends State<ArtworksPage> {
   final ScrollController _scrollController = ScrollController();
-
   final List<Artwork> _artworks = [];
-  bool _isLoading = false;
+
+  String _errorMessage = '';
+  String _sortOrder = 'desc';
   int _currentPage = 1;
+  bool _isLoading = false;
   bool _hasMoreData = true;
+
   late int studentId;
 
   DateTimeRange? _selectedDateRange;
-  String? _formattedStartDate;
-  String? _formattedEndDate;
-
-  String _sortOrder = 'desc';
 
   @override
   void initState() {
@@ -41,67 +42,81 @@ class ArtworksPageState extends State<ArtworksPage> {
     _fetchArtworks();
   }
 
-  Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-        context: context,
-        firstDate: DateTime(2024, 7),
-        lastDate: DateTime.now());
-
-    if (picked != null && picked != _selectedDateRange) {
-      setState(() {
-        _selectedDateRange = picked;
-        _formattedStartDate =
-            _selectedDateRange?.start.toIso8601String().substring(0, 10);
-        _formattedEndDate =
-            _selectedDateRange?.end.toIso8601String().substring(0, 10);
-        _artworks.clear();
-        _currentPage = 1;
-        _hasMoreData = true;
-      });
-      _fetchArtworks();
-    }
+  void _resetArtworks() {
+    setState(() {
+      _artworks.clear();
+      _currentPage = 1;
+      _hasMoreData = true;
+    });
   }
 
   void _onSortSelected(String order) {
     setState(() {
       _sortOrder = order;
-      _artworks.clear();
-      _currentPage = 1;
-      _hasMoreData = true;
+      _resetArtworks();
     });
-    _fetchArtworks(sortBy: order);
+    _fetchArtworks();
   }
 
-  Future<void> _fetchArtworks({int page = 1, String sortBy = 'desc'}) async {
-    if (_isLoading || !_hasMoreData) return;
+  void _onDateRangeSelected(DateTimeRange? picked) {
+    setState(() {
+      _selectedDateRange = picked;
+      _resetArtworks();
+    });
+    _fetchArtworks();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent &&
+        !_isLoading) {
+      _fetchArtworks(page: _currentPage + 1);
+    }
+  }
+
+  void _updateArtworks(List<Artwork> newArtworks, int page) {
+    setState(() {
+      _artworks.addAll(newArtworks.where((artwork) =>
+          !_artworks.any((existing) => existing.id == artwork.id)));
+      _currentPage = page;
+      _hasMoreData = newArtworks.length >= 10;
+    });
+  }
+
+  Future<void> _onRefresh() async {
+    _resetArtworks();
+    await _fetchArtworks();
+  }
+
+  void _onTileTap(BuildContext context, Artwork artwork) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ShowArtworkPage(artwork: artwork),
+      ),
+    );
+  }
+
+  Future<void> _fetchArtworks({int page = 1}) async {
+    if (_isLoading) return;
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final artworksResponse = await ArtworkService().getAllStudentArtworks(
-          studentId, page, _formattedStartDate, _formattedEndDate, sortBy);
+      final response = await ArtworkService().getAllStudentArtworks(
+          studentId,
+          page,
+          _selectedDateRange?.start.toIso8601String().substring(0, 10),
+          _selectedDateRange?.end.toIso8601String().substring(0, 10),
+          _sortOrder);
 
-      final newArtworks = artworksResponse.payload!.data;
-
-      setState(() {
-        if (newArtworks.isEmpty || newArtworks.length < 10) {
-          _hasMoreData = false;
-        }
-
-        for (var artwork in newArtworks) {
-          if (!_artworks.any((a) => a.id == artwork.id)) {
-            _artworks.add(artwork);
-          }
-        }
-
-        _currentPage = page;
-      });
+      _updateArtworks(response.payload!.data, page);
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      setState(() {
+        _errorMessage = e.toString();
+      });
     } finally {
       setState(() {
         _isLoading = false;
@@ -109,106 +124,53 @@ class ArtworksPageState extends State<ArtworksPage> {
     }
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent &&
-        !_isLoading) {
-      _fetchArtworks(page: _currentPage + 1, sortBy: _sortOrder);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hasil karya'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            ElevatedButton(
-                onPressed: () => _selectDateRange(context),
-                child: Text(_selectedDateRange == null
-                    ? 'Pilih rentang tanggal'
-                    : 'Rentang: $_formattedStartDate hingga $_formattedEndDate')),
-            const SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SortButton(
-                    label: 'Tanggal dibuat',
-                    sortOrder: _sortOrder,
-                    onSortChanged: _onSortSelected)
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Expanded(
-                child: _artworks.isEmpty && _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        itemCount: _artworks.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index < _artworks.length) {
-                            final artwork = _artworks[index];
-                            return IndexListTile<Artwork>(
-                                item: artwork,
-                                getCreateDate: (artwork) =>
-                                    DateTimeManipulator()
-                                        .formatDate(artwork.createdAt!),
-                                getUpdateDate: (artwork) =>
-                                    DateTimeManipulator()
-                                        .formatDate(artwork.updatedAt!),
-                                onTap: (artwork) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ShowArtworkPage(
-                                              artwork: artwork)));
-                                });
-                          } else {
-                            return _hasMoreData
-                                ? const Padding(
-                                    padding: EdgeInsets.all(16),
-                                    child: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  )
-                                : _artworks.isEmpty
-                                    ? const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(
-                                              'Belum ada hasil karya. Buat hasil karya baru dengan menekan tombol di kanan bawah!'),
-                                        ),
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Text(
-                                              'Anda sudah mencapai akhir halaman'),
-                                        ),
-                                      );
-                          }
-                        },
-                      ))
-          ],
+        appBar: AppBar(
+          title: const Text('Hasil karya'),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/create-artwork', arguments: studentId);
-        },
-        child: const Icon(Icons.add),
-      ),
-    );
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              DateRangePickerButton(
+                  selectedDateRange: _selectedDateRange,
+                  onDateRangeSelected: _onDateRangeSelected),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  SortButton(
+                      label: 'Tanggal dibuat',
+                      sortOrder: _sortOrder,
+                      onSortChanged: _onSortSelected)
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Expanded(
+                  child: IndexListView<Artwork>(
+                errorMessage: _errorMessage,
+                isLoading: _isLoading,
+                hasMoreData: _hasMoreData,
+                onRefresh: _onRefresh,
+                scrollController: _scrollController,
+                items: _artworks,
+                itemBuilder: (context, artwork) => IndexListTile<Artwork>(
+                    item: artwork,
+                    createDate: artwork.createdAt!,
+                    updateDate: artwork.updatedAt!,
+                    onTap: (a) => _onTileTap(context, a)),
+              ))
+            ],
+          ),
+        ),
+        floatingActionButton:
+            CreateButton(mode: 'artwork', studentId: studentId));
   }
 
   @override

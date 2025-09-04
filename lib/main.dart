@@ -1,4 +1,5 @@
 import 'package:asesmen_paud/api/service/auth_service.dart';
+import 'package:asesmen_paud/pages/about_page.dart';
 import 'package:asesmen_paud/pages/anecdotals/anecdotals_page.dart';
 import 'package:asesmen_paud/pages/anecdotals/create_anecdotal_page.dart';
 import 'package:asesmen_paud/pages/artworks/artworks_page.dart';
@@ -11,7 +12,8 @@ import 'package:asesmen_paud/pages/reports/create_report_page.dart';
 import 'package:asesmen_paud/pages/reports/reports_page.dart';
 import 'package:asesmen_paud/pages/series_photos/create_series_photo_page.dart';
 import 'package:asesmen_paud/pages/series_photos/series_photo_page.dart';
-import 'package:asesmen_paud/pages/students_page.dart';
+import 'package:asesmen_paud/pages/students/create_student_page.dart';
+import 'package:asesmen_paud/pages/students/students_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -25,6 +27,9 @@ void main() async {
 
   runApp(const MyApp());
 }
+
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -41,6 +46,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       initialRoute: '/',
       routes: {
         '/': (context) => FutureBuilder<bool>(
@@ -63,6 +69,7 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => const DashboardPage(),
         '/login': (context) => const LoginPage(),
         '/students': (context) => const StudentsPage(),
+        '/create-student': (context) => const CreateStudentPage(),
         '/anecdotals': (context) => const AnecdotalsPage(),
         '/create-anecdotal': (context) => const CreateAnecdotalPage(),
         '/artworks': (context) => const ArtworksPage(),
@@ -73,6 +80,7 @@ class MyApp extends StatelessWidget {
         '/create-series-photo': (context) => const CreateSeriesPhotoPage(),
         '/reports': (context) => const ReportsPage(),
         '/create-report': (context) => const CreateReportPage(),
+        '/about': (context) => const AboutPage(),
       },
     );
   }

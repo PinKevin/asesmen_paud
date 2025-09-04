@@ -19,4 +19,10 @@ class DateTimeManipulator {
     int year = DateTime.parse(dateString).year;
     return year;
   }
+
+  String convertIsoToDate(String dateStr) {
+    final dateTime = DateTime.parse(dateStr);
+    final newDateStr = DateFormat('dd MMMM yyyy', 'id_ID').format(dateTime);
+    return newDateStr;
+  }
 }

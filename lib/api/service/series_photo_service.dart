@@ -1,14 +1,15 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:asesmen_paud/api/dto/series_photo_dto.dart';
 import 'package:asesmen_paud/api/exception.dart';
+import 'package:asesmen_paud/api/payload/file_payload.dart';
 import 'package:asesmen_paud/api/payload/series_photo_payload.dart';
-import 'package:asesmen_paud/api/service/photo_service.dart';
+import 'package:asesmen_paud/api/service/file_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:asesmen_paud/api/base_url.dart';
 import 'package:asesmen_paud/api/response.dart';
 import 'package:asesmen_paud/api/service/auth_service.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SeriesPhotoService {
   Future<SuccessResponse<SeriesPhotoPaginated>> getAllStudentSeriesPhotos(
@@ -39,39 +40,54 @@ class SeriesPhotoService {
 
     if (response.statusCode == 200) {
       return SuccessResponse.fromJson(
-          jsonResponse, (json) => SeriesPhotoPaginated.fromJson(json));
+        jsonResponse,
+        (json) => SeriesPhotoPaginated.fromJson(json),
+      );
     } else {
       throw Exception('Terjadi error. ${response.body}');
     }
   }
 
   Future<SuccessResponse<SeriesPhoto>> createSeriesPhoto(
-      int studentId, CreateSeriesPhotoDto dto) async {
+    int studentId,
+    CreateSeriesPhotoDto dto,
+  ) async {
+    if (dto.photos.length < 3 || dto.photos.length > 5) {
+      throw ErrorException('Foto harus berjumlah 3-5');
+    }
+
+    List<Future<SuccessResponse<FilePayload>>> fileUploadFutures = dto.photos
+        .map(
+          (photo) => FileService().uploadPhoto(photo),
+        )
+        .toList();
+
+    List<SuccessResponse<FilePayload>> fileUploadResponses =
+        await Future.wait(fileUploadFutures);
+
+    List<String> photoLinks = fileUploadResponses
+        .map((response) => response.payload!.filePath)
+        .toList();
+
+    final Map<String, dynamic> requestBody = {
+      'description': dto.description,
+      'feedback': dto.feedback,
+      'photoLinks': photoLinks,
+      'learningGoals': dto.learningGoals,
+    };
+
     final Uri url = Uri.parse('$baseUrl/students/$studentId/series-photos');
     final authToken = await AuthService.getToken();
 
-    var request = http.MultipartRequest('POST', url);
-    request.fields['description'] = dto.description;
-    request.fields['feedback'] = dto.feedback;
-    for (int i = 0; i < dto.learningGoals.length; i++) {
-      request.fields['learningGoals[$i]'] = dto.learningGoals[i].toString();
-    }
-
-    for (int i = 0; i < dto.photos.length; i++) {
-      File compressedImage =
-          await PhotoService().compressImage(File(dto.photos[i].path));
-      request.files.add(await http.MultipartFile.fromPath(
-          'photos[$i]', compressedImage.path));
-    }
-
-    request.headers.addAll({
-      'Authorization': 'Bearer $authToken',
-      'Content-Type': 'multipart/form-data'
-    });
-
-    final response = await request.send();
-    final responseBody = await http.Response.fromStream(response);
-    final jsonResponse = json.decode(responseBody.body);
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(requestBody),
+    );
+    final jsonResponse = json.decode(response.body);
 
     if (response.statusCode == 201) {
       return SuccessResponse.fromJson(
@@ -80,8 +96,7 @@ class SeriesPhotoService {
       final failResponse = FailResponse.fromJson(jsonResponse);
       throw ValidationException(failResponse.errors ?? {});
     } else {
-      throw Exception(
-          'Tidak bisa menambahkan foto berseri. ${responseBody.body}');
+      throw Exception('Tidak bisa menambahkan foto berseri.');
     }
   }
 
@@ -111,49 +126,65 @@ class SeriesPhotoService {
     }
   }
 
-  // Future<SuccessResponse<SeriesPhoto>> editSeriesPhoto(
-  //     int studentId, int seriesPhotoId, EditSeriesPhotoDto dto) async {
-  //   final url = Uri.parse('$baseUrl/students/$studentId/series-photos/$seriesPhotoId');
-  //   final authToken = await AuthService.getToken();
+  Future<SuccessResponse<SeriesPhoto>> editSeriesPhoto(
+    int studentId,
+    int seriesPhotoId,
+    EditSeriesPhotoDto dto,
+  ) async {
+    if (dto.photos.length < 3 || dto.photos.length > 5) {
+      throw ErrorException('Foto harus berjumlah 3-5 dari service');
+    }
 
-  //   var request = http.MultipartRequest('PUT', url);
-  //   request.fields['description'] = dto.description!;
-  //   request.fields['feedback'] = dto.feedback!;
-  //   for (int i = 0; i < dto.learningGoals!.length; i++) {
-  //     request.fields['learningGoals[$i]'] = dto.learningGoals![i].toString();
-  //   }
+    List<Future<String>> photoProcessingFutures = dto.photos.map((photo) async {
+      if (photo is XFile) {
+        final response = await FileService().uploadPhoto(photo);
+        return response.payload!.filePath;
+      } else if (photo is String) {
+        return photo;
+      } else {
+        throw ErrorException('Tipe foto tidak valid');
+      }
+    }).toList();
 
-  //   if (dto.photo != null) {
-  //     final compressedImage = await _compressImage(File(dto.photo!.path));
-  //     request.files.add(
-  //         await http.MultipartFile.fromPath('photo', compressedImage.path));
-  //   }
+    List<String> processedPhotos = await Future.wait(photoProcessingFutures);
 
-  //   request.headers.addAll({
-  //     'Authorization': 'Bearer $authToken',
-  //     'Content-Type': 'multipart/form-data'
-  //   });
+    final Map<String, dynamic> requestBody = {
+      'description': dto.description,
+      'feedback': dto.feedback,
+      'photoLinks': processedPhotos,
+      'learningGoals': dto.learningGoals,
+    };
 
-  //   final response = await request.send();
-  //   final responseBody = await http.Response.fromStream(response);
-  //   final jsonResponse = json.decode(responseBody.body);
+    final Uri url =
+        Uri.parse('$baseUrl/students/$studentId/series-photos/$seriesPhotoId');
+    final authToken = await AuthService.getToken();
 
-  //   if (response.statusCode == 200) {
-  //     return SuccessResponse.fromJson(
-  //         jsonResponse, (json) => SeriesPhoto.fromJson(json));
-  //   } else if (response.statusCode == 404) {
-  //     String message =
-  //         jsonResponse['message'] ?? 'Foto berseri tidak dapat ditemukan';
-  //     throw ErrorException(message);
-  //   } else if (response.statusCode == 422) {
-  //     final failResponse = FailResponse.fromJson(jsonResponse);
-  //     throw ValidationException(failResponse.errors ?? {});
-  //   } else {
-  //     String message =
-  //         jsonResponse['message'] ?? 'Terjadi error saat mengambil foto berseri';
-  //     throw ErrorException(message);
-  //   }
-  // }
+    final response = await http.put(
+      url,
+      headers: {
+        'Authorization': 'Bearer $authToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(requestBody),
+    );
+    final jsonResponse = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return SuccessResponse.fromJson(
+        jsonResponse,
+        (data) => SeriesPhoto.fromJson(data),
+      );
+    } else if (response.statusCode == 404) {
+      String message =
+          jsonResponse['message'] ?? 'Foto berseri tidak dapat ditemukan';
+      throw ErrorException(message);
+    } else if (response.statusCode == 422) {
+      final failResponse = FailResponse.fromJson(jsonResponse);
+      throw ValidationException(failResponse.errors ?? {});
+    } else {
+      throw Exception('Tidak bisa menambahkan foto berseri.');
+    }
+  }
 
   Future<SuccessResponse<ApiResponse>> deleteSeriesPhoto(
       int studentId, int seriesPhotoId) async {

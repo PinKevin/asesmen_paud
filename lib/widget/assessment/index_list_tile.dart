@@ -1,32 +1,35 @@
+import 'package:asesmen_paud/helper/date_time_manipulator.dart';
 import 'package:flutter/material.dart';
 
 class IndexListTile<T> extends StatelessWidget {
   final T item;
-  final String Function(T) getCreateDate;
-  final String Function(T) getUpdateDate;
+  final String createDate;
+  final String updateDate;
   final Function(T) onTap;
 
   const IndexListTile(
       {super.key,
       required this.item,
-      required this.getCreateDate,
-      required this.getUpdateDate,
+      required this.createDate,
+      required this.updateDate,
       required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    String formattedCreateDate = getCreateDate(item);
-    String formattedUpdateDate = getUpdateDate(item);
+    DateTimeManipulator dateTimeManipulator = DateTimeManipulator();
+    String formattedCreateDate = dateTimeManipulator.formatDate(createDate);
+    String formattedUpdateDate = dateTimeManipulator.formatDate(updateDate);
 
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(0),
-              backgroundColor: Colors.deepPurple[100],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              )),
+            padding: const EdgeInsets.all(0),
+            backgroundColor: Colors.deepPurple[100],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
           onPressed: () => onTap(item),
           child: Card(
             margin: EdgeInsets.zero,
